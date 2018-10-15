@@ -99,13 +99,13 @@ export function signin(req, res, next) {
     return res.status(422).json({ errors: { password: "can't be blank" } });
   }
 
-  User.findOne({'email': req.body.user.email})
+  User.findOne({ email: 'veselin.mitrovic@outlook.com'})
   .then(user => {
     if(!user) {
       return res.status(422).json({errors: 'User does not exist'});
     }
     else {
-      if (user.validPassword(req.body.user.password)) {
+      if (!user.validPassword(req.body.user.password)) {
         return res.json({ errors: 'Email and Password does not match' });
       } else {
         user.token = user.generateJWT();
@@ -170,7 +170,7 @@ export function customerSignin(req, res, next) {
       }).catch(next);
     }
     else {
-      if (user.validPassword(req.body.user.password)) {
+      if (!user.validPassword(req.body.user.password)) {
         return res.json({ errors: 'Email and Password does not match' });
       } else {
         user.token = user.generateJWT();
