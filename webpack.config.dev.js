@@ -23,7 +23,6 @@ module.exports = {
   output: {
     path: __dirname,
     filename: 'app.js',
-    publicPath: 'http://0.0.0.0:8000/',
   },
 
   resolve: {
@@ -46,9 +45,6 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              localIdentName: '[name]__[local]__[hash:base64:5]',
-              modules: true,
-              importLoaders: 1,
               sourceMap: true,
             },
           },
@@ -71,7 +67,17 @@ module.exports = {
       {
         test: /\.css$/,
         include: /node_modules/,
-        use: ['style-loader', 'css-loader'],
+        
+        use: [{
+          loader: 'style-loader',
+        }, {
+            loader: 'css-loader?modules',
+            options: {
+              sourceMap: true,
+            },
+        }],
+        
+        // use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.jsx*$/,

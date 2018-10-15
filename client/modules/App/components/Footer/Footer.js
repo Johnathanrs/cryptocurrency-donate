@@ -1,17 +1,15 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 
 // Import Style
-import styles from './Footer.css';
+// import './Footer.css';
 
 // Import Images
-import bg from '../../header-bk.png';
 
 export function Footer() {
   return (
-    <div style={{ background: `#FFF url(${bg}) center` }} className={styles.footer}>
-      <p>&copy; 2016 &middot; Hashnode &middot; LinearBytes Inc.</p>
-      <p><FormattedMessage id="twitterMessage" /> : <a href="https://twitter.com/@mern_io" target="_Blank">@mern_io</a></p>
+    <div className="footer font-small teal pt-4">
+      <p className="footer-copyright text-center py-3">&copy; 2018 SmartProject.com</p>
     </div>
   );
 }

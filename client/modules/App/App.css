@@ -1,6 +1,808 @@
 .container {
-  max-width: 980px;
+  background-color: #fff !important;
+}
+
+.container-fluid {
+  background-color: rgba(254, 254, 254, 0.8);
+}
+
+.navbar.scrolling-navbar {
+  z-index: 100;
+}
+
+@media (max-width: 600px) {
+  .navbar.scrolling-navbar {
+    -webkit-transition: background 0.5s ease-in-out, padding 0.5s ease-in-out;
+    transition: background 0.5s ease-in-out, padding 0.5s ease-in-out;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .navbar.scrolling-navbar .navbar-nav > li {
+    -webkit-transition-duration: 1s;
+    transition-duration: 1s;
+  }
+
+  .navbar.scrolling-navbar.top-nav-collapse {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+@media (min-width: 992px) {
+  .right-pane {
+    position: fixed;
+    top: 100px;
+    right: 10px;
+  }
+}
+@media (min-width: 1200px) {
+  .right-pane {
+    position: fixed;
+    top: 100px;
+    right: 120px;
+  }
+}
+.cursor-point {
+  cursor: pointer;
+}
+
+.warning-color {
+  color: #f44336 !important;
+  background: none;
+}
+
+.black-color {
+  color: black !important;
+}
+
+.bg-black {
+  background-color: black !important;
+}
+
+.waves-circle {
+  width: 4.5em;
+  height: 4.5em;
+}
+
+.right-pane div[role=alert] div {
+  line-height: 1.25rem;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  text-transform: uppercase;
+}
+
+.titleText {
+  background-color: #2196f3;
+  align-items: center;
+  display: flex;
+  padding: 5px;
+}
+
+.remaining {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  background-color: #1769aa;
+}
+
+.projectContent {
+  height: 80%;
   width: 100%;
-  padding: 15px;
+}
+
+.ticket-background {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 120px;
+  background-position: center;
+}
+
+.gallery-ticket-background {
+  background-size: cover;
+  height: 60px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.card-bg {
+  background-color: rgba(250, 250, 250, 0.8);
+}
+
+.card-img {
+  height: 400px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.card-img-container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+.card-img-container .top-left {
+  position: absolute;
+  top: 8px;
+  left: 0px;
+}
+.card-img-container .top-left > span {
+  margin-right: 5px;
+}
+.card-img-container .top-left-detail {
+  position: absolute;
+  top: -30px;
+  left: 0px;
+}
+.card-img-container .top-left-detail > span {
+  margin-right: 5px;
+}
+.card-img-container > .gallery-top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.card-img-container > .top-right {
+  position: absolute;
+  top: -40px;
+  right: 16px;
+}
+.card-img-container > .top-right-detail {
+  position: absolute;
+  top: -30px;
+  right: 16px;
+}
+.card-img-container .bottom-left {
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+}
+
+.card-body .card-text {
+  color: black;
+}
+
+.card-title {
+  color: black;
+}
+.card-title > .title-wraper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1.71429em;
+}
+.card-title > .title-wraper > .main-title {
+  margin: 0;
+  display: block;
+}
+.card-title > .title-wraper > .sub-title {
+  flex: 1 1 auto;
+  color: rgba(0, 0, 0, 0.54);
+  text-transform: lowercase;
+  padding-top: 5px;
+}
+.card-title > .badge {
+  background-color: #f44336 !important;
+}
+
+.card-footer .btn-group input[type=radio] {
+  display: none;
+}
+
+.card-footer .btn-group label {
+  transition: 500ms all;
+}
+.card-footer .btn-group label:hover, .card-footer .btn-group label:active, .card-footer .btn-group label.active {
+  background: transparent !important;
+}
+.card-footer .btn-group label.active img, .card-footer .btn-group label > img:hover {
+  box-shadow: 1px 1px 1px 2px #f44336 !important;
+  border-radius: 25px;
+}
+
+.transparent-card {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  -moz-transition: box-shadow 0.4s ease;
+  -webkit-transition: box-shadow 0.4s ease;
+  -o-transition: box-shadow 0.4s ease;
+  -ms-transition: box-shadow 0.4s ease;
+  transition: box-shadow 0.4s ease;
+  -moz-box-shadow: 0 35px 30px -30px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 0 35px 30px -30px rgba(0, 0, 0, 0.4);
+  -o-box-shadow: 0 35px 30px -30px rgba(0, 0, 0, 0.4);
+  -ms-box-shadow: 0 35px 30px -30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 35px 30px -30px rgba(0, 0, 0, 0.4);
+}
+.transparent-card:hover {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.transform-on-hover:hover {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.short-desc {
+  line-height: 1.5rem;
+  padding: 0.5rem;
+}
+.short-desc p {
+  background-color: #FFFFFF;
+  position: relative;
+  margin-bottom: 0.2rem;
+  margin-right: 1rem;
+  color: black;
+  cursor: pointer;
+  text-align: left;
+}
+.short-desc p:before, .short-desc p:after {
+  z-index: -1;
+  position: absolute;
+  content: "";
+  bottom: 15px;
+  left: 10px;
+  width: 50%;
+  top: 80%;
+  max-width: 300px;
+  background: white;
+  -webkit-box-shadow: 0 15px 10px white;
+  -moz-box-shadow: 0 15px 10px white;
+  box-shadow: 0 15px 10px white;
+  -webkit-transform: rotate(-3deg);
+  -moz-transform: rotate(-3deg);
+  -o-transform: rotate(-3deg);
+  -ms-transform: rotate(-3deg);
+  transform: rotate(-3deg);
+}
+.short-desc p:after {
+  -webkit-transform: rotate(3deg);
+  -moz-transform: rotate(3deg);
+  -o-transform: rotate(3deg);
+  -ms-transform: rotate(3deg);
+  transform: rotate(3deg);
+  right: 10px;
+  left: auto;
+}
+.short-desc p:hover {
+  color: #ffc107 !important;
+}
+
+input.email {
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 0.7rem;
+  margin-bottom: 0.2rem;
+  font-weight: bold;
+  font-size: 1.25rem;
+  background-image: none;
+}
+
+.slider > .slider-control {
+  padding: 24px 16px 16px 8px;
+}
+.slider > .slider-ticks {
+  display: flex;
+  justify-content: space-between;
+}
+.slider button.MuiButtonBase-root-15.MuiSlider-thumb-6 {
+  background-color: black;
+  width: 17px;
+  height: 30px;
+  border-radius: 0;
+}
+.slider div.MuiSlider-track-3 {
+  background-color: black;
+  height: 8px;
+}
+
+.imgPreview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.imgPreview > div {
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.imgPreview > img {
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
+  border-top: 5px solid gray;
+  border-bottom: 5px solid gray;
+  width: 200px;
+  height: 200px;
+}
+
+.videoPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px 15px;
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
+  border-top: 5px solid gray;
+  border-bottom: 5px solid gray;
+}
+
+.table-root {
+  width: 100%;
+  margin-top: 10px;
+}
+.table-root > .table-title {
+  margin: 10px;
+}
+.table-root > .table-wrapper {
+  overflow-x: auto;
+}
+.table-root > .table-wrapper > .table {
+  min-width: 400px;
+}
+
+.btn-coin {
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  border-radius: 25px;
+  font-size: 24px;
+  line-height: 1.33;
+}
+
+.btn-rounded {
+  border-radius: 2.125rem !important;
+}
+
+.btn:hover {
+  color: #ffc107 !important;
+}
+
+.btn.active {
+  color: #f44336 !important;
+  background: none;
+}
+
+.btn-info:not(:disabled):not(.disabled).active, .btn-info:not(:disabled):not(.disabled):active, .show > .btn-info.dropdown-toggle {
+  background: none;
+}
+
+.textField {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+div.gallery {
+  margin: 5px;
+  border: 1px solid #ccc;
+  float: left;
+  width: 180px;
+}
+div.gallery > img {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+div.gallery > img.active {
+  border: 2px solid #f44336;
+}
+
+div.gallery:hover {
+  border: 1px solid #777;
+}
+
+.back-to-top {
+  background: none;
+  margin: 0;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 70px;
+  height: 70px;
+  z-index: 100;
+  display: none;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.back-to-top i {
+  font-size: 50px;
+  color: black;
+}
+
+.login {
+  width: 30%;
   margin: 0 auto;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mt-70 {
+  margin-top: 70px;
+}
+
+.mt-100 {
+  margin-top: 100px;
+}
+
+.plr-30 {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.fs-125 {
+  font-size: 1.25em !important;
+}
+
+.fs-11 {
+  font-size: 1.1em;
+}
+
+.fs-1 {
+  font-size: 1rem;
+}
+
+.fb {
+  font-weight: bold;
+}
+
+.fw-500 {
+  font-weight: 500 !important;
+}
+
+.w-15rem {
+  width: 15rem;
+}
+
+.w-20rem {
+  width: 20rem;
+}
+
+.w-40rem {
+  width: 40rem;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.selectErr {
+  border: 1px solid red;
+}
+
+/*editor error animate*/
+/*@import "~toastr/build/toastr.min.css";*/
+.react-bs-table-container .react-bs-table-search-form {
+  margin-bottom: 0;
+}
+
+.react-bs-table-bordered {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.react-bs-table table {
+  margin-bottom: 0;
+  table-layout: fixed;
+}
+
+.react-bs-table table td,
+.react-bs-table table th {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.react-bs-table-pagination {
+  margin-top: 10px;
+}
+
+.react-bs-table-tool-bar {
+  margin-bottom: 5px;
+}
+
+.react-bs-container-header,
+.react-bs-container-footer {
+  overflow: hidden;
+  width: 100%;
+}
+
+.react-bs-container-body {
+  /*height: 154px;*/
+  overflow: auto;
+  width: 100%;
+}
+
+.react-bootstrap-table-page-btns-ul {
+  float: right;
+  /* override the margin-top defined in .pagination class in bootstrap. */
+  margin-top: 0;
+}
+
+.react-bs-table .table-bordered {
+  border: 0;
+  outline: none !important;
+}
+
+.react-bs-table .table-bordered > thead > tr > th,
+.react-bs-table .table-bordered > thead > tr > td {
+  border-bottom-width: 2px;
+}
+
+.react-bs-table .table-bordered > tbody > tr > td {
+  outline: none !important;
+}
+
+.react-bs-table .table-bordered > tbody > tr > td.default-focus-cell {
+  outline: 3px solid cornflowerblue !important;
+  outline-offset: -1px;
+}
+
+.react-bs-table .table-bordered > tfoot > tr > th,
+.react-bs-table .table-bordered > tfoot > tr > td {
+  border-top-width: 2px;
+}
+
+.react-bs-table .table-bordered > tfoot > tr > th,
+.react-bs-table .table-bordered > tfoot > tr > td {
+  border-bottom-width: 0;
+}
+
+/*Esquerda*/
+.react-bs-table .table-bordered > thead > tr > th:first-child,
+.react-bs-table .table-bordered > tbody > tr > th:first-child,
+.react-bs-table .table-bordered > tfoot > tr > th:first-child,
+.react-bs-table .table-bordered > thead > tr > td:first-child,
+.react-bs-table .table-bordered > tbody > tr > td:first-child,
+.react-bs-table .table-bordered > tfoot > tr > td:first-child {
+  border-left-width: 0;
+}
+
+/*Direita*/
+.react-bs-table .table-bordered > thead > tr > th:last-child,
+.react-bs-table .table-bordered > tbody > tr > th:last-child,
+.react-bs-table .table-bordered > tfoot > tr > th:last-child,
+.react-bs-table .table-bordered > thead > tr > td:last-child,
+.react-bs-table .table-bordered > tbody > tr > td:last-child,
+.react-bs-table .table-bordered > tfoot > tr > td:last-child {
+  border-right-width: 0;
+}
+
+/*Topo*/
+.react-bs-table .table-bordered > thead > tr:first-child > th,
+.react-bs-table .table-bordered > thead > tr:first-child > td {
+  border-top-width: 0;
+}
+
+/*Baixo*/
+.react-bs-table .table-bordered > tfoot > tr:last-child > th,
+.react-bs-table .table-bordered > tfoot > tr:last-child > td {
+  border-bottom-width: 0;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th {
+  vertical-align: middle;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .filter,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .filter {
+  font-weight: normal;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .select-filter option[value=""],
+.react-bs-table .react-bs-container-header > table > thead > tr > th .select-filter.placeholder-selected,
+.react-bs-table .react-bs-container-header > table > thead > tr > th .filter::-webkit-input-placeholder,
+.react-bs-table .react-bs-container-header > table > thead > tr > th .number-filter-input::-webkit-input-placeholder {
+  color: lightgrey;
+  font-style: italic;
+}
+
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .select-filter option[value=""],
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .select-filter.placeholder-selected,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .filter::-webkit-input-placeholder,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .number-filter-input::-webkit-input-placeholder {
+  color: lightgrey;
+  font-style: italic;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .select-filter.placeholder-selected option:not([value=""]),
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .select-filter.placeholder-selected option:not([value=""]) {
+  color: initial;
+  font-style: initial;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .number-filter,
+.react-bs-table .react-bs-container-header > table > thead > tr > th .date-filter {
+  display: flex;
+}
+
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .number-filter,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .date-filter {
+  display: flex;
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .number-filter-input,
+.react-bs-table .react-bs-container-header > table > thead > tr > th .date-filter-input {
+  margin-left: 5px;
+  float: left;
+  width: calc(100% - 67px - 5px);
+}
+
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .number-filter-input,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .date-filter-input {
+  margin-left: 5px;
+  float: left;
+  width: calc(100% - 67px - 5px);
+}
+
+.react-bs-table .react-bs-container-header > table > thead > tr > th .number-filter-comparator,
+.react-bs-table .react-bs-container-header > table > thead > tr > th .date-filter-comparator {
+  width: 67px;
+  float: left;
+}
+
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .number-filter-comparator,
+.react-bs-table .react-bs-container-footer > table > thead > tr > th .date-filter-comparator {
+  width: 67px;
+  float: left;
+}
+
+.react-bs-table .react-bs-container-header .sort-column {
+  cursor: pointer;
+}
+
+/*inline editor default style*/
+.react-bs-container .form-control.editor {
+  /*width:100%;
+  top:0;
+  left:0;*/
+  /*height: 100%;
+  position: absolute;*/
+}
+
+.react-bs-container .textarea-save-btn {
+  position: absolute;
+  z-index: 100;
+  right: 0;
+  top: -21px;
+}
+
+.react-bs-table-no-data {
+  text-align: center;
+}
+
+.ReactModal__Overlay {
+  -webkit-perspective: 600;
+  perspective: 600;
+  opacity: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 101;
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+  transition: opacity 150ms ease-out;
+}
+
+.ReactModal__Content {
+  -webkit-transform: scale(0.5) rotateX(-30deg);
+  transform: scale(0.5) rotateX(-30deg);
+}
+
+.ReactModal__Content--after-open {
+  -webkit-transform: scale(1) rotateX(0deg);
+  transform: scale(1) rotateX(0deg);
+  transition: all 150ms ease-in;
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+}
+
+.ReactModal__Content--before-close {
+  -webkit-transform: scale(0.5) rotateX(30deg);
+  transform: scale(0.5) rotateX(30deg);
+  transition: all 150ms ease-in;
+}
+
+.ReactModal__Content.modal-dialog {
+  border: none;
+  background-color: transparent;
+}
+
+/*error tip style*/
+.animated {
+  animation-fill-mode: both;
+}
+
+.animated.bounceIn,
+.animated.bounceOut {
+  animation-duration: 0.75s;
+}
+
+.animated.shake {
+  animation-duration: 0.3s;
+}
+
+td.react-bs-table-expand-cell {
+  cursor: pointer;
+}
+
+th.react-bs-table-expand-cell > div {
+  cursor: pointer;
+}
+
+@keyframes shake {
+  from, to {
+    transform: translate3d(0, 0, 0);
+  }
+  10%, 50%, 90% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  30%, 70% {
+    transform: translate3d(10px, 0, 0);
+  }
+}
+.shake {
+  animation-name: shake;
+}
+
+@keyframes bounceIn {
+  from, 20%, 40%, 60%, 80%, to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  20% {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+  40% {
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: scale3d(1.03, 1.03, 1.03);
+  }
+  80% {
+    transform: scale3d(0.97, 0.97, 0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+}
+.bounceIn {
+  animation-name: bounceIn;
+}
+
+@keyframes bounceOut {
+  20% {
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+  50%, 55% {
+    opacity: 1;
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+  to {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+}
+.bounceOut {
+  animation-name: bounceOut;
 }

@@ -45,9 +45,7 @@ module.exports = {
             {
               loader: 'css-loader',
               options: {
-                localIdentName: '[hash:base64]',
-                modules: true,
-                importLoaders: 1,
+                sourceMap: true,
               },
             },
             {
@@ -112,10 +110,7 @@ module.exports = {
     new ManifestPlugin({
       basePath: '/',
     }),
-    new ChunkManifestPlugin({
-      filename: "chunk-manifest.json",
-      manifestVariable: "webpackManifest",
-    }),
+  
     new webpack.optimize.UglifyJsPlugin(),
   ],
 };

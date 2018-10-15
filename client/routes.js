@@ -2,6 +2,29 @@
 import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 import App from './modules/App/App';
+import Home from './modules/App/Home';
+import Dashboard from './modules/App/Admin/Dashboard';
+import Info from './modules/App/Info';
+import UserDashboard from './modules/App/AuthUser/UserDashboard';
+import ProjectDetailView from './modules/App/Admin/ProjectDetailView';
+import UserBrowseProjects from './modules/App/UserBrowseProjects';
+import UserGuide from './modules/App/UserGuide';
+import LiveChat from './modules/App/LiveChat';
+import MyTickets from './modules/App/AuthUser/MyTickets';
+import SignIn from './modules/App/Admin/SignIn';
+import CustomerSignIn from './modules/App/CustomerSignIn';
+import CustomerSignUp from './modules/App/CustomerSignUp';
+import ProjectDetail from './modules/App/Admin/ProjectDetail';
+import Project from './modules/App/Admin/Project';
+import Referral from './modules/App/AuthUser/Referral';
+import CheckTickets from './modules/App/AuthUser/CheckTickets';
+import ClaimBenefits from './modules/App/AuthUser/ClaimBenefits';
+import TransferTicket from './modules/App/AuthUser/TransferTicket';
+import Account from './modules/App/AuthUser/Account';
+import Statistics from './modules/App/Admin/Statistics';
+import Admin from './modules/App/Admin/Admin';
+import SignUp from './modules/App/Admin/SignUp';
+import User from './modules/App/Admin/User';
 
 // require.ensure polyfill for node
 if (typeof require.ensure !== 'function') {
@@ -10,34 +33,135 @@ if (typeof require.ensure !== 'function') {
   };
 }
 
+if (process.env.NODE_ENV !== 'production') {
+  // Require async routes only in development for react-hot-reloader to work.
+  // require('./modules/Post/pages/PostListPage/PostListPage');
+  // require('./modules/Post/pages/PostDetailPage/PostDetailPage');
+  require('./modules/App/Admin/EnhancedTableHead');
+  require('./modules/App/Admin/User');
+  require('./modules/App/Admin/Project');
+  require('./modules/App/Admin/Dashboard');
+  require('./modules/App/Admin/SignIn');
+  require('./modules/App/Home');
+  require('./modules/App/TicketControl');
+  require('./modules/App/Payment');
+  require('./modules/App/UserRegister');
+  require('./modules/App/Admin/ProjectDetail');
+  require('./modules/App/UserBrowseProjects');
+  require('./modules/App/AuthUser/UserDashboard');
+  require('./modules/App/Info');
+  require('./modules/App/UserGuide');
+  require('./modules/App/LiveChat');
+  require('./modules/App/AuthUser/MyTickets');
+  require('./modules/App/CustomerSignIn');
+  require('./modules/App/CustomerSignUp');
+  require('./modules/App/Admin/ProjectDetailView');
+}
+
 /* Workaround for async react routes to work with react-hot-reloader till
   https://github.com/reactjs/react-router/issues/2182 and
   https://github.com/gaearon/react-hot-loader/issues/288 is fixed.
  */
-if (process.env.NODE_ENV !== 'production') {
-  // Require async routes only in development for react-hot-reloader to work.
-  require('./modules/Post/pages/PostListPage/PostListPage');
-  require('./modules/Post/pages/PostDetailPage/PostDetailPage');
-}
 
 // react-router setup with code-splitting
 // More info: http://blog.mxstbr.com/2016/01/react-apps-with-pages/
 export default (
   <Route path="/" component={App}>
-    <IndexRoute
-      getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require('./modules/Post/pages/PostListPage/PostListPage').default);
-        });
-      }}
+    <IndexRoute component={Home} />
+    <Route
+      path="/:id"
+      component={Home}
     />
     <Route
-      path="/posts/:slug-:cuid"
-      getComponent={(nextState, cb) => {
-        require.ensure([], require => {
-          cb(null, require('./modules/Post/pages/PostDetailPage/PostDetailPage').default);
-        });
-      }}
+      path="/admin/signup"
+      component={SignUp}
+    />
+    <Route
+      path="/admin/"
+      component={Admin}
+    >
+      <Route
+        path="statistics"
+        component={Statistics}
+      />
+      <Route
+        path="dashboard"
+        component={Dashboard}
+      />
+      <Route
+        path="user"
+        component={User}
+      />
+      <Route
+        path="project"
+        component={Project}
+      />
+      <Route
+        path="project/:id"
+        component={ProjectDetail}
+      />
+      <Route
+        path="projectdetail/:id"
+        component={ProjectDetailView}
+      />
+    </Route>
+    <Route
+      path="/user/browseprojects"
+      component={UserBrowseProjects}
+    />
+    <Route
+      path="/user/info"
+      component={Info}
+    />
+    <Route
+      path="/user/userguide"
+      component={UserGuide}
+    />
+    <Route
+      path="/user/livechat"
+      component={LiveChat}
+    />
+    <Route
+      path="/user/dashboard"
+      component={UserDashboard}
+    />
+    <Route
+      path="/user/mytickets"
+      component={MyTickets}
+    />
+    <Route
+      path="/user/referral"
+      component={Referral}
+    />
+    <Route
+      path="/user/checktickets"
+      component={CheckTickets}
+    />
+    <Route
+      path="/user/claimbenefits"
+      component={ClaimBenefits}
+    />
+    <Route
+      path="/user/transferticket"
+      component={TransferTicket}
+    />
+    <Route
+      path="/user/account"
+      component={Account}
+    />
+    <Route
+      path="/admin/signin"
+      component={SignIn}
+    />
+    <Route
+      path="/user/signin"
+      component={CustomerSignIn}
+    />
+    <Route
+      path="/user/signup"
+      component={CustomerSignUp}
     />
   </Route>
-);
+
+  );
+

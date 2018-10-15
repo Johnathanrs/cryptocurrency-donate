@@ -3,16 +3,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 // Import Style
-import styles from './App.css';
+import './App.css';
 
 // Import Components
 import Helmet from 'react-helmet';
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
 
 // Import Actions
-import { toggleAddPost } from './AppActions';
-import { switchLanguage } from '../../modules/Intl/IntlActions';
+import { toggleAddPost, registerAuth } from './AppActions';
+// import { switchLanguage } from '../../modules/Intl/IntlActions';
+import BACKGROUND from '../../assets/img/background.png';
 
 let DevTools;
 if (process.env.NODE_ENV === 'development') {
@@ -20,10 +19,18 @@ if (process.env.NODE_ENV === 'development') {
   DevTools = require('./components/DevTools').default;
 }
 
-export class App extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = { isMounted: false };
+  }
+
+  componentWillMount() {
+    // let token = localStorage.getItem('smartproject');
+    // if (token == null) {
+    //   token = '';
+    // }
+    // this.props.dispatch(registerAuth(token));
   }
 
   componentDidMount() {
@@ -37,11 +44,9 @@ export class App extends Component {
   render() {
     return (
       <div>
-        {this.state.isMounted && !window.devToolsExtension && process.env.NODE_ENV === 'development' && <DevTools />}
-        <div>
+        <div style={{ backgroundColor: '#fff' }}>
           <Helmet
-            title="MERN Starter - Blog App"
-            titleTemplate="%s - Blog App"
+            title="SmartProject"
             meta={[
               { charset: 'utf-8' },
               {
@@ -54,15 +59,13 @@ export class App extends Component {
               },
             ]}
           />
-          <Header
-            switchLanguage={lang => this.props.dispatch(switchLanguage(lang))}
-            intl={this.props.intl}
-            toggleAddPost={this.toggleAddPostSection}
-          />
-          <div className={styles.container}>
+          {/* <a href="#" className="back-to-top d-inline">
+            <i className="fa fa-arrow-circle-up"></i>
+          </a> */}
+
+          <div >
             {this.props.children}
           </div>
-          <Footer />
         </div>
       </div>
     );
@@ -72,7 +75,7 @@ export class App extends Component {
 App.propTypes = {
   children: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
-  intl: PropTypes.object.isRequired,
+  // intl: PropTypes.object.isRequired,
 };
 
 // Retrieve data from store as props
