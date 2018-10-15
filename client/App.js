@@ -102,7 +102,7 @@ class App extends React.Component {
       callback();
       return;
     }
-    callApi('users/authcheckAdmin', 'POST', {}).then(res => {
+    callApi('users/authcheckAdmin', 'POST', {}, token).then(res => {
       if (res.status == 'authorized') {
         callback();
       } else {

@@ -42,12 +42,12 @@ export function balanceChecker() {
         project.donatedLTC = parseFloat(data[2]);
         project.save((err, saved) => {
           if (err) {
-            console.log(err.message);
+            console.log(err);
           }
           // console.log(saved);
         });
       }).catch(err => {
-        console.log(err.message);
+        console.log(err);
       });
     });
   });

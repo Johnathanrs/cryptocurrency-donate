@@ -5,7 +5,7 @@ export const API_URL = (typeof window === 'undefined' || process.env.NODE_ENV ==
   process.env.BASE_URL || (`http://localhost:${process.env.PORT || Config.port}/api`) :
   '/api';
 
-export function fetchAPI(endpoint, method = 'get', body) {
+export function fetchAPI(endpoint, method = 'get', body, auth) {
   let token = '';
   try {
     if (typeof(window) !== "undefined") {
@@ -14,6 +14,9 @@ export function fetchAPI(endpoint, method = 'get', body) {
     }
   } catch (err) {
     token = '';
+  }
+  if (auth) {
+    token = auth;
   }
   return fetch(endpoint, {
     headers: {
