@@ -40,7 +40,7 @@ class SignIn extends Component {
             if  (res.errors) {
                 message = res.errors;
             } else {
-                window.localStorage.setItem('smartprojectadmin', token: res.user.token,);
+                window.localStorage.setItem('smartprojectadmin', res.user.token);
                 this.props.dispatch(saveToken(res.user.token));
                 browserHistory.goBack();
             }
