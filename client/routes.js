@@ -91,7 +91,7 @@ export default (
         component={Dashboard}
       />
       <Route
-        path="user"
+        path="users"
         component={User}
       />
       <Route

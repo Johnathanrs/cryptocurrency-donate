@@ -294,15 +294,6 @@ class ProjectDetail extends Component {
         this.props.dispatch(fetchProject(id));
     }
 
-    componentWillMount(){
-        if (typeof(window) !== "undefined") {
-            const token = window.localStorage.getItem('smartproject');
-            if (token == null) {
-                browserHistory.push('/signin');
-            } 
-        }
-    }
-
     componentWillReceiveProps(nextProps) {
         if (this.props.project !== nextProps.project && nextProps.project) {
             this.setState({ 

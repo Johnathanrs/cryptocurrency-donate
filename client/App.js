@@ -148,7 +148,7 @@ class App extends React.Component {
                   component={Dashboard}
                 />
                 <Route
-                  path="user"
+                  path="users"
                   component={User}
                 />
                 <Route

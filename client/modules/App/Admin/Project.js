@@ -63,15 +63,6 @@ class Project extends React.Component {
         this.createProject = this.createProject.bind(this);
     }
 
-    componentWillMount() {
-        if (typeof(window) !== "undefined") {
-            const token = window.localStorage.getItem('smartproject');
-            if (!token) {
-                browserHistory.push('/signin');
-            } 
-        }
-    }
-
     handleKeyFactsChange = (idx) => (evt) => {
         const newKeyFacts = this.state.key_facts.map((key_fact, sidx) => {
           if (idx !== sidx) return key_fact;
@@ -497,7 +488,7 @@ class Project extends React.Component {
                                     required
                                     id="maximum_available_tickets_per_person"
                                     error={this.state.maximum_available_tickets_per_personErr}
-                                    label="Maximum Avaliable Tickets per Person"
+                                    label="Max Avaliable Tickets / Person"
                                     className="textField"
                                     helperText="Up to 10 tickets"
                                     type="number"
@@ -506,7 +497,7 @@ class Project extends React.Component {
                                     margin="normal"
                                     onChange={this.handleChange('maximum_available_tickets_per_person')}
                                 />
-                                <div className="row d-flex mx-1">
+                                <div className="row d-flex mx-1" style={{ height: '36px' }}>
                                     <CountryDropdown
                                     defaultOptionLabel="Choose a country"
                                     value={this.state.country}
