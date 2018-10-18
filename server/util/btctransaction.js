@@ -266,12 +266,15 @@ function pushTxOmni(hexTrans) {
 function doTransaction(options) {
 	const amount = Math.floor(options.amount * BITCOIN_SAT_MULT);
 	let tx = null;
-	tx = new bitcore.Transaction()
+	try {
+		tx = new bitcore.Transaction()
 				.from(options.utxos)          // Feed information about what unspent outputs one can use
 				.to(options.to, (amount - options.fee))
 				.sign(options.privateKey)
 				.toString()
-				.catch(err => { return { err: err }; });
+	} catch (err) { 
+		return { err: 'Something wrong with signing contract' };
+	}
 
 	console.log('----amount', amount, ' ', fee);
 	pushTx(tx).then((err, res) => {
