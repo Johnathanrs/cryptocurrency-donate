@@ -73,7 +73,7 @@ export function broadcastTX(rawtx, network) {
 }
 
 export function sendTransaction(utxos, to, amount, fee, privateKeyWIF) {
-	amount = amount * BITCOIN_SAT_MULT;
+	amount = Math.floor(amount * BITCOIN_SAT_MULT);
 	fee = fee * BITCOIN_SAT_MULT;
 	var tx = new litecore.Transaction() //use litecore-lib to create a transaction
 						.from(utxos)
