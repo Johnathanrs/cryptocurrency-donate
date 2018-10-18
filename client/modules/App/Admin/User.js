@@ -49,12 +49,12 @@ class User extends Component {
                     {this.state.loading && <div>loading...</div>}
                     {!this.state.loading && <div>
                         <BootstrapTable 
-                            data={data}
+                            data={users}
                             striped={true}
                             hover={true}
                             pagination>
                             <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
-                            <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
+                            <TableHeaderColumn dataField="email" dataSort={true}>Email</TableHeaderColumn>
                             <TableHeaderColumn dataField="totalTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
                             <TableHeaderColumn dataField="selectedTickets" dataFormat={this.priceFormatter}>Purchased Tickets</TableHeaderColumn>
                             <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>

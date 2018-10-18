@@ -1,5 +1,5 @@
 import Post from '../models/post';
-import Project, { Address, Wallet, Coin} from '../models/project';
+import Project, { Address, Wallet, Coin } from '../models/project';
 import User, { SubProject } from '../models/user';
 import Guide from '../models/guide';
 import Order from '../models/order';
@@ -9,17 +9,11 @@ import slug from 'limax';
 import sanitizeHtml from 'sanitize-html';
 var uniqueFilename = require('unique-filename');
 const generator = require('generate-password');
-const fileUpload = require('express-fileupload');
 const sgMail = require('@sendgrid/mail');
 import sensitive from '../sensitive';
 const bitcoinTransaction = require('../util/btctransaction');
 const ltcTransaction = require('../util/ltctransaction');
 const ethTransaction = require('../util/ethtransaction');
-
-import { Router } from 'express';
-const router = new Router();
-
-import passport from '../passport';
 
 function projectBalance(project) {
   const ethAddr = project.wallet.ETH.address;
@@ -103,7 +97,7 @@ export function getOrders(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad Request' });
   }
-  Order.find().sort('-dateAdded').populate('projectID').exec((errors, orders) => {
+  Order.find().sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
     }
@@ -163,7 +157,7 @@ export function signin(req, res, next) {
     }
   })
   .catch(err => {
-      return done(err);
+      return res.send(err);
   });
 }
 
@@ -206,7 +200,7 @@ export function customerSignin(req, res, next) {
     return res.json({ user: user.toAuthJSON() });
   })
   .catch(err => {
-      return done({ errors: err.message });
+      return res.send({ errors: err.message });
   });
 }
 
@@ -365,8 +359,20 @@ export function getTicketInfo(req, res) {
   }
 }
 
-function sendEmail(to, text, html) {
-
+function sendEmail(options) {
+  return new Promise((resolve, reject) => {
+    sgMail.setApiKey(sensitive.sendgrid);
+    const msg = {
+      to: options.to,
+      from: 'info@smartprojects.tech',
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    };
+    sgMail.send(msg).then((statusMessage) => {
+      resolve('OK');
+    });
+  }).catch(err => { console.log('err', err); return { err: err }; });
 }
 
 export function userSignup(req, res) {
@@ -378,19 +384,21 @@ export function userSignup(req, res) {
     if (user) {
       return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
     }
-    sgMail.setApiKey(sensitive.sendgrid);
     const newPassword = generator.generate({
       length: 10,
       numbers: true,
     });
-    const msg = {
+    const text = `Congratulation! You successfully signed up. Your password is ${newPassword}`;
+    const html = `<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ${newPassword}</p></div>`;
+    sendEmail({
       to: req.body.user.email,
-      from: 'info@smartprojects.tech',
       subject: 'Authentication',
-      text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
-      html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
-    };
-    sgMail.send(msg).then((statusMessage) => {
+      text: text,
+      html: html,
+    }).then(msg => {
+      if (msg.err) {
+        return console.log(msg);
+      }
       const newUser = new User();
       newUser.email = req.body.user.email;
       newUser.role = 'Customer';
@@ -543,52 +551,54 @@ export function createProject(req, res) {
     res.status(403).send({ errors: 'something wrong happened' });
     return;
   }
+  try {
+    const project = req.body.project;
+    const newObject = new Project(project);
+    const wallet = new Wallet();
+    const coin = new Coin();
+    coin.address = project.coin_BTC;
+    wallet.BTC = coin;
+    coin.address = project.coin_ETH;
+    wallet.ETH = coin;
+    coin.address = project.coin_LTC;
+    wallet.LTC = coin;
+    const address = new Address();
+    address.country = project.country;
+    address.city = project.city;
+    address.postalCode = project.postal_code;
 
-  const project = req.body.project;
-  const newObject = new Project(project);
-  const wallet = new Wallet(project);
-  const coin = new Coin(project);
-  coin.address = project.coin_BTC;
-  wallet.BTC = coin;
-  coin.address = project.coin_ETH;
-  wallet.ETH = coin;
-  coin.address = project.coin_LTC;
-  wallet.LTC = coin;
-  const address = new Address(project);
-  address.country = project.country;
-  address.city = project.city;
-  address.postalCode = project.postal_code;
-
-  // Let's sanitize inputs
-  newObject.title = project.title;
-  newObject.subTitle = project.sub_title;
-  newObject.ticketPriceInBTC = project.ticket_price_BTC;
-  newObject.ticketPriceInETH = project.ticket_price_ETH;
-  newObject.ticketPriceInLTC = project.ticket_price_LTC;
-  newObject.ticketPriceInUSD = project.ticket_price_USD;
-  newObject.maximumAvailableTickets = project.total_tickets;
-  newObject.maximumAvailableTicketsPerPerson = project.maximum_available_tickets_per_person;
-  newObject.fundingDuration = project.funding_duration;
-  newObject.projectThumbnail = project.projectThumbnail;
-  newObject.images = project.images;
-  newObject.address = address;
-  newObject.video = project.video;
-  newObject.keyfacts = project.key_facts;
-  newObject.wallet = wallet;
-  newObject.totalMoneyInBTC = project.total_money_in_BTC;
-  newObject.totalMoneyInUSD = project.total_money_in_USD;
-  newObject.totalTickets = project.total_tickets;
-  newObject.donors = [];
-  newObject.shortDescription = project.short_description;
-  newObject.fullDescription = project.long_description;
-  // newObject.location = project.location;
-  newObject.save((errors, saved) => {
-    if (errors) {
-      res.status(500).send({errors});
-    } else {
-      res.json({ project: saved });
-    }
-  });
+    // Let's sanitize inputs
+    newObject.title = project.title;
+    newObject.subTitle = project.sub_title;
+    newObject.ticketPriceInBTC = project.ticket_price_BTC;
+    newObject.ticketPriceInETH = project.ticket_price_ETH;
+    newObject.ticketPriceInLTC = project.ticket_price_LTC;
+    newObject.ticketPriceInUSD = project.ticket_price_USD;
+    newObject.maximumAvailableTickets = project.total_tickets;
+    newObject.maximumAvailableTicketsPerPerson = project.maximum_available_tickets_per_person;
+    newObject.fundingDuration = project.funding_duration;
+    newObject.projectThumbnail = project.projectThumbnail;
+    newObject.images = project.images;
+    newObject.address = address;
+    newObject.video = project.video;
+    newObject.keyfacts = project.key_facts;
+    newObject.wallet = wallet;
+    newObject.totalMoneyInBTC = project.total_money_in_BTC;
+    newObject.totalMoneyInUSD = project.total_money_in_USD;
+    newObject.totalTickets = project.total_tickets;
+    newObject.donors = [];
+    newObject.shortDescription = project.short_description;
+    newObject.fullDescription = project.long_description;
+    // newObject.location = project.location;
+    newObject.save((errors, saved) => {
+      if (errors) {
+        return res.status(500).send({errors});
+      } 
+      return res.json({ project: saved });
+    });
+  } catch (err) {
+    return res.send({errors: err.message});
+  }
 }
 
 export function updateProject(req, res) {

@@ -180,6 +180,8 @@ class Project extends React.Component {
             short_descriptionErr: !this.state.short_description ? true : false,
             long_descriptionErr: !this.state.long_description ? true : false,
             ticket_price_BTCErr: !this.state.ticket_price_BTC || this.state.ticket_price_BTC == '0' ? true : false,
+            ticket_price_ETHErr: !this.state.ticket_price_ETH || this.state.ticket_price_ETH == '0' ? true : false,
+            ticket_price_LTCErr: !this.state.ticket_price_LTC || this.state.ticket_price_LTC == '0' ? true : false,
             total_ticketsErr: !this.state.total_tickets  || this.state.total_tickets == '0' ? true : false,
             funding_durationErr: moment(this.state.funding_duration, 'YYYY-MM-DD').isBefore(moment()) ? true : false,
             maximum_available_tickets_per_personErr: !this.state.maximum_available_tickets_per_person ||  this.state.maximum_available_tickets_per_person == '0' || this.state.maximum_available_tickets_per_person > 10 ? true : false,
@@ -196,6 +198,8 @@ class Project extends React.Component {
                 this.state.short_descriptionErr ||
                 this.state.long_descriptionErr ||
                 this.state.ticket_price_BTCErr ||
+                this.state.ticket_price_ETHErr ||
+                this.state.ticket_price_LTCErr ||
                 this.state.total_ticketsErr ||
                 this.state.maximum_available_tickets_per_personErr ||
                 this.state.countryErr ||
@@ -203,7 +207,9 @@ class Project extends React.Component {
                 this.state.coin_BTCErr ||
                 this.state.coin_ETHErr ||
                 this.state.coin_LTCErr) {
-                    return;
+                   this.setState({ ...this.state,
+                    errOnCreate: 'Please fix the errors'
+                   });
             } else {
                 this.setState({ ...this.state,
                     isCreate: true,
@@ -423,6 +429,7 @@ class Project extends React.Component {
                                 <TextField
                                     required
                                     disabled
+                                    error={this.state.ticket_price_ETHErr}
                                     id="ticket_price_ETH"
                                     label="Ticket Price in ETH"
                                     className="textField"
@@ -438,6 +445,7 @@ class Project extends React.Component {
                                     disabled
                                     id="ticket_price_LTC"
                                     label="Ticket Price in LTC"
+                                    error={this.state.ticket_price_LTCErr}
                                     className="textField"
                                     margin="normal"
                                     type="number"
@@ -497,37 +505,38 @@ class Project extends React.Component {
                                     margin="normal"
                                     onChange={this.handleChange('maximum_available_tickets_per_person')}
                                 />
-                                <div className="row d-flex mx-1" style={{ height: '36px' }}>
-                                    <CountryDropdown
-                                    defaultOptionLabel="Choose a country"
-                                    value={this.state.country}
-                                    onChange={(val) => this.selectCountry(val)}
-                                    classes={this.state.countryErr ? 'selectErr' : ''}
-                                    style={{
-                                        fontSize: '1.25rem',
-                                        padding: '0.25rem',
-                                        marginLeft: '0.5rem' }} />
-                                    <RegionDropdown
-                                        country={this.state.country}
-                                        value={this.state.city}
-                                        defaultOptionLabel="Select a region"
-                                        classes={this.state.cityErr ? 'selectErr' : ''}
+                                <div className="row d-flex align-items-baseline mx-1">
+                                    <div className="mb-sm-2" style={{ height: '36px' }}>
+                                        <CountryDropdown
+                                        defaultOptionLabel="Choose a country"
+                                        value={this.state.country}
+                                        onChange={(val) => this.selectCountry(val)}
+                                        classes={this.state.countryErr ? 'selectErr' : ''}
                                         style={{
                                             fontSize: '1.25rem',
                                             padding: '0.25rem',
-                                            marginRight: '0.5rem' }}
-                                        onChange={(val) => this.selectCity(val)} />
+                                            marginLeft: '0.5rem' }} />
+                                        <RegionDropdown
+                                            country={this.state.country}
+                                            value={this.state.city}
+                                            defaultOptionLabel="Select a region"
+                                            classes={this.state.cityErr ? 'selectErr' : ''}
+                                            style={{
+                                                fontSize: '1.25rem',
+                                                padding: '0.25rem',
+                                                marginRight: '0.5rem' }}
+                                            onChange={(val) => this.selectCity(val)} />
+                                    </div>
                                     <TextField
-                                        id="postal_code"
-                                        label="Postal Code"
-                                        className=""
-                                        style={{ margin: 8 }}
-                                        value={this.state.postal_code}
-                                        margin="normal"
-                                        onChange={this.handleChange('postal_code')}
-                                    />
+                                            id="postal_code"
+                                            label="Postal Code"
+                                            className=""
+                                            style={{ margin: 8 }}
+                                            value={this.state.postal_code}
+                                            margin="normal"
+                                            onChange={this.handleChange('postal_code')}
+                                        />
                                 </div>
-                                
                             </div>
                         
                             <div className="row card-body">

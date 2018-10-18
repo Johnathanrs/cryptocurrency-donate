@@ -71,7 +71,7 @@ class UserBrowseProjects extends Component {
         const keyword = this.state.search.toLowerCase();
         for (const idx in this.props.projects) {
             const val = this.props.projects[idx];
-            if (val._id.toLowerCase().includes(keyword) || val.title.toLowerCase().includes(keyword) || val.subTitle.toLowerCase().includes(keyword) || val.shortDescription.includes(keyword) || val.address.country.includes(keyword) || val.address.city.includes(keyword)) {
+            if (val._id.toLowerCase().includes(keyword) || val.title.toLowerCase().includes(keyword) || val.subTitle.toLowerCase().includes(keyword) || val.shortDescription.toLowerCase().includes(keyword) || val.address.country.toLowerCase().includes(keyword) || val.address.city.toLowerCase().includes(keyword)) {
                 if (this.state.country) {
                     if ( val.address.country == this.state.country) {
                       if (this.state.city) {
@@ -102,7 +102,7 @@ class UserBrowseProjects extends Component {
 
         return (
             <section className="gallery-block cards-gallery">
-                <div className=" mt-5" style={{ paddingTop: '70px' }}>
+                <div className="container-fluid mt-5">
                     <Header activePage={this.state.activePage} token={this.state.token}/>
                     {this.state.loading && <div>...loading</div>}
                     <div className="heading text-center">

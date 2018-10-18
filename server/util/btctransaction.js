@@ -247,19 +247,21 @@ function pushTx(hexTrans) {
 	  url = 'https://api.blockcypher.com/v1/btc/test3/txs/push';
 	}
 	console.log(hexTrans, url);
-	return request_1.post({url: url, form: {tx: hexTrans}}, (err, response, body) => {
-		console.log(response, ' ', body, err);
-	});
+	return new Promise((resolve, reject) => {
+		request_1.post({url: url, form: {tx: hexTrans}}, (err, response, body) => {
+			if (err) reject(err);
+			resolve({ statusCode: response.statusCode, body: body});
+		});
+	}).catch(err => { return { err: err }; });
 }
 
 function pushTxOmni(hexTrans) {
-	return request_1.post({url: 'https://api.omniwallet.org/v1/transaction/pushtx/', form: {signedTransaction: hexTrans}}, (err, response, body) => {
-		console.log(response, body);
-	  
-	  if (err) {
-		return {err: err};
-	  }
-	  return { res: response };
+	return new Promise((resolve, reject) => {
+		request_1.post({url: 'https://api.omniwallet.org/v1/transaction/pushtx/', form: {signedTransaction: hexTrans}}, (err, response, body) => {
+			console.log(response, body);
+			if (err)  reject(err);
+			resolve(response);
+		});
 	});
 }
 
@@ -277,14 +279,7 @@ function doTransaction(options) {
 	}
 
 	console.log('----amount', amount, ' ', options.fee);
-	pushTx(tx).then((err, res) => {
-		console.log(err, '---------', res);
-		if (err) { 
-			return { err: err }
-		} else {
-			return { status: res.statusCode }
-		}
-	}).catch(err => { console.log(err.body); return { err: err.body }; });
+	return pushTx(tx);
 }
 
 function sendTransaction (options) {

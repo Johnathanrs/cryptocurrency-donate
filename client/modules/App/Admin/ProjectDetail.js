@@ -538,26 +538,28 @@ class ProjectDetail extends Component {
                                         margin="normal"
                                         onChange={this.handleChange('maximum_available_tickets_per_person')}
                                     />
-                                    <div className="row d-flex mx-1">
-                                        <CountryDropdown
-                                        defaultOptionLabel="Choose a country"
-                                        value={this.state.country}
-                                        onChange={(val) => this.selectCountry(val)}
-                                        classes={this.state.countryErr ? 'selectErr' : ''}
-                                        style={{
-                                            fontSize: '1.25rem',
-                                            padding: '0.25rem',
-                                            marginLeft: '0.5rem' }} />
-                                        <RegionDropdown
-                                            country={this.state.country}
-                                            value={this.state.city}
-                                            defaultOptionLabel="Select a region"
-                                            classes={this.state.cityErr ? 'selectErr' : ''}
+                                    <div className="row d-flex align-items-baseline mx-1">
+                                        <div className="mb-sm-2" style={{ height: '36px' }}>
+                                            <CountryDropdown
+                                            defaultOptionLabel="Choose a country"
+                                            value={this.state.country}
+                                            onChange={(val) => this.selectCountry(val)}
+                                            classes={this.state.countryErr ? 'selectErr' : ''}
                                             style={{
                                                 fontSize: '1.25rem',
                                                 padding: '0.25rem',
-                                                marginRight: '0.5rem' }}
-                                            onChange={(val) => this.selectCity(val)} />
+                                                marginLeft: '0.5rem' }} />
+                                            <RegionDropdown
+                                                country={this.state.country}
+                                                value={this.state.city}
+                                                defaultOptionLabel="Select a region"
+                                                classes={this.state.cityErr ? 'selectErr' : ''}
+                                                style={{
+                                                    fontSize: '1.25rem',
+                                                    padding: '0.25rem',
+                                                    marginRight: '0.5rem' }}
+                                                onChange={(val) => this.selectCity(val)} />
+                                        </div>
                                         <TextField
                                             id="postal_code"
                                             label="Postal Code"

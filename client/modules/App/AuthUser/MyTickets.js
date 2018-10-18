@@ -66,10 +66,6 @@ class MyTickets extends Component {
         browserHistory.push(`/home/${id}`);
     }
 
-    priceFormatter = (cell, row) => {
-        return '<i class="glyphicon glyphicon-usd"></i> ' + cell;
-    }
-
     actionFormatter = (cell, row) => {
         return <button className="btn btn-info" onClick={()=> this.gotoHome(row.projectID)}>Purchase</button>;
     }
@@ -134,10 +130,10 @@ class MyTickets extends Component {
                         <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
                         <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
                         <TableHeaderColumn dataField="totalTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
-                        <TableHeaderColumn dataField="selectedTickets" dataFormat={this.priceFormatter}>Purchased Tickets</TableHeaderColumn>
+                        <TableHeaderColumn dataField="selectedTickets" >Purchased Tickets</TableHeaderColumn>
                         <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>
                         <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
-                        <TableHeaderColumn dataField="pID" dataFormat={ this.actionFormatter } export={ false } ></TableHeaderColumn>
+                        <TableHeaderColumn dataField="pID" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
                     </BootstrapTable>
                 </div>}
                 <Footer />
