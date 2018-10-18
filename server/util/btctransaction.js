@@ -242,17 +242,7 @@ function createUserBitcoinAddress() {
   };
 
 function pushTx(hexTrans) {
-	let url = 'https://blockchain.info/pushtx';
-	if (process.env.BTCNET == 'testnet') {
-	  url = 'https://api.blockcypher.com/v1/btc/test3/txs/push';
-	}
-	console.log(hexTrans, url);
-	return new Promise((resolve, reject) => {
-		request_1.post({url: url, form: {tx: hexTrans}}, (err, response, body) => {
-			if (err) reject(err);
-			resolve({ statusCode: response.statusCode, body: body});
-		});
-	}).catch(err => { return { err: err }; });
+	
 }
 
 function pushTxOmni(hexTrans) {
@@ -266,20 +256,22 @@ function pushTxOmni(hexTrans) {
 }
 
 function doTransaction(options) {
-	const amount = Math.floor(options.amount * BITCOIN_SAT_MULT);
-	let tx = null;
-	try {
-		tx = new bitcore.Transaction()
-				.from(options.utxos)          // Feed information about what unspent outputs one can use
-				.to(options.to, (amount - options.fee))
-				.sign(options.privateKey)
-				.toString();
-	} catch (err) { 
-		return { err: 'Something wrong with signing contract' };
+	console.log('----amount', options.amount, ' ', options.fee);
+	let url = 'https://blockchain.info/pushtx';
+	if (process.env.BTCNET == 'testnet') {
+	  url = 'https://api.blockcypher.com/v1/btc/test3/txs/push';
 	}
-
-	console.log('----amount', amount, ' ', options.fee);
-	return pushTx(tx);
+	return new Promise((resolve, reject) => {
+		let tx = new bitcore.Transaction()
+		.from(options.utxos)          // Feed information about what unspent outputs one can use
+		.to(options.to, (options.amount - options.fee))
+		.sign(options.privateKey)
+		.toString();
+		request_1.post({url: url, form: {tx: tx}}, (err, response, body) => {
+			if (err) reject(err);
+			resolve({ statusCode: response.statusCode, body: body});
+		});
+	}).catch(err => { return { err: err }; });
 }
 
 function sendTransaction (options) {

@@ -492,7 +492,7 @@ function promiseCheck(order) {
               utxos: btcUtxos,
               to: project.wallet.BTC.address,
               privateKey: order.btcPrivateAddress,
-              amount: order.btcAmount,
+              amount: btcAmount,
               fee: fee,
             }).then(msg => {
               isBTCSending = false;
@@ -510,19 +510,19 @@ function promiseCheck(order) {
       // LTC transaction
       if (order.ltcAmount) {
         paidTickets += Math.round((order.ltcAmount) / order.ltcTicketPrice);
-        const feeLTC = 0.00077; //fee for the tx
+        const feeLTC = 0.00077 * bitcoinTransaction.BITCOIN_SAT_MULT;
         if (order.ltcAddress < feeLTC) {
           console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
         } else {
           let isLTCSending = false;
           if (!isLTCSending) {
             isLTCSending = true;
-            ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (order.ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
+            ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
             .then(msg => {
               isLTCSending = false;
               if (msg) {
                 console.log(msg);
-              }
+              } 
               updateOrderAndProject(paidTickets, order, project, '', 'LTC');
             }).catch(err => { console.log('ltc transaction', err.message); isLTCSending = false;});
           }

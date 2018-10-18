@@ -46,54 +46,44 @@ export function getUTXOs(address, network) {
         resolve(body)
       }
     )
-  }).catch(err => { return { err: err }; });
+  })
 }
 
 //manually hit an insight api to broadcast your tx
-export function broadcastTX(rawtx, network) {
-	let uri = 'https://insight.litecore.io/api/tx/send';
-	if (network == 'testnet') {
-		uri = 'https://testnet.litecore.io/api/tx/send';
-	}
-  return new Promise((resolve, reject) => {
-    request({
-      uri: uri,
-      method: 'POST',
-      json: {
-        rawtx,
-      }
-    },
-      (error, response, body) => {
-				if(error) reject(error);
-				// if (response.statusCode != 200) reject({ message: 'something is wrong'});
-        resolve(body.txid);
-      }
-    );
-  });
+export  function broadcastTX(rawtx, network) {
+	
 }
 
-export function sendTransaction(utxos, to, amount, fee, privateKeyWIF) {
-	amount = Math.floor(amount * BITCOIN_SAT_MULT);
-	fee = fee * BITCOIN_SAT_MULT;
-	var tx = new litecore.Transaction() //use litecore-lib to create a transaction
-						.from(utxos)
-						.to(to, amount) //note: you are sending all your balance AKA sweeping
-						.fee(fee)
-						.sign(privateKeyWIF)
-						.serialize();
-		
-	return broadcastTX(tx, process.env.LTCNET); //broadcast the serialized tx
-
-
-		// return litecoinjs.newTransaction({
-		// 		network: process.env.LTCNET,
-		// 		address: privateKeyWIF,
-		// 		utxo: utxos,
-		// 		output: [{
-		// 			 address: to,
-		// 			 amount: amount 
-		// 		}],
-		// 		fee: fee, // transaction fee 
-		// });
-}
-
+ export function sendTransaction(utxos, to, amount, fee, privateKeyWIF) {
+		let uri = 'https://insight.litecore.io/api/tx/send';
+		if (process.env.LTCNET == 'testnet') {
+			uri = 'https://testnet.litecore.io/api/tx/send';
+		}
+		return new Promise((resolve, reject) => {
+			var tx = null;
+			try {
+				tx = new litecore.Transaction() //use litecore-lib to create a transaction
+				.from(utxos)
+				.to(to, amount) //note: you are sending all your balance AKA sweeping
+				.fee(fee)
+				.sign(privateKeyWIF)
+				.serialize();
+			} catch(err) {
+				reject(err);
+			}
+			
+			request({
+				uri: uri,
+				method: 'POST',
+				json: {
+					tx,
+				}
+			},
+				(error, response, body) => {
+					if(error) reject(error);
+					// if (response.statusCode != 200) reject({ message: 'something is wrong'});
+					resolve(body);
+				}
+			);
+		}).catch(err => { return err;});
+ }
