@@ -163,11 +163,7 @@ class ProjectDetail extends Component {
     }
 
     navigate = (url) => {
-        if (url.includes('admin') && !this.state.isAuth) {
-          browserHistory.push('/signin');
-        } else {
-          browserHistory.push(url);
-        }
+        browserHistory.push(url);
       }
 
     updateProject = () => {

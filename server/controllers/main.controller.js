@@ -460,12 +460,17 @@ function promiseCheck(order) {
       let paidTickets = 0;
       if (order.ethAmount) {
         paidTickets += Math.round((order.ethAmount) / order.ethTicketPrice);
-        ethTransaction.sendTransaction(order.ethAddress, order.ethPrivateAddress, project.wallet.ETH.address, order.ethAmount).then(txid => {
-          if (txid) {
-            console.log(txid);
-          }
-          updateOrderAndProject(paidTickets, order, project, txid, 'ETH');
-        }).catch(err => {console.log('eth transaction', err.message); });
+        let isSending = false;
+        if (!isSending) {
+          isSending = true;
+          ethTransaction.sendTransaction(order.ethAddress, order.ethPrivateAddress, project.wallet.ETH.address, order.ethAmount).then(txid => {
+            isSending = false;
+            if (txid) {
+              console.log(txid);
+            }
+            updateOrderAndProject(paidTickets, order, project, txid, 'ETH');
+          }).catch(err => {console.log('eth transaction', err.message); isSending = false;});
+        }
       }
 
       // BTC transaction
@@ -476,20 +481,25 @@ function promiseCheck(order) {
         if (amount <= fee) {
           console.log('error balance is less than fee ---- btcAmount ', order.btcAmount, ' --- fee ', fee);
         } else {
-          bitcoinTransaction.doTransaction({
-            utxos: btcUtxos,
-            to: project.wallet.BTC.address,
-            privateKey: order.btcPrivateAddress,
-            amount: order.btcAmount,
-            fee: fee,
-          }).then(msg => {
-            console.log(msg);
-            if (msg.err) {
-              console.log(msg.err);
-            } else if (msg.statusCode == 200 || msg.status == 'OK') { // 200 for blockchain  'OK' for Omni
-              updateOrderAndProject(paidTickets, order, project, '', 'BTC');
-            }
-          }).catch(err => { console.log('btc transaction ', err.message); });
+          let isSending = false;
+          if (!isSending) {
+            isSending = true;
+            bitcoinTransaction.doTransaction({
+              utxos: btcUtxos,
+              to: project.wallet.BTC.address,
+              privateKey: order.btcPrivateAddress,
+              amount: order.btcAmount,
+              fee: fee,
+            }).then(msg => {
+              isSending = false;
+              console.log(msg);
+              if (msg.err) {
+                console.log(msg.err);
+              } else if (msg.statusCode == 200 || msg.status == 'OK') { // 200 for blockchain  'OK' for Omni
+                updateOrderAndProject(paidTickets, order, project, '', 'BTC');
+              }
+            }).catch(err => { console.log('btc transaction ', err.message); isSending = false; });
+          }
         }
       }
 
@@ -500,13 +510,18 @@ function promiseCheck(order) {
         if (order.ltcAddress < feeLTC) {
           console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
         } else {
-          ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (order.ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
-          .then(msg => {
-            if (msg) {
-              console.log(msg);
-            }
-            updateOrderAndProject(paidTickets, order, project, '', 'LTC');
-          }).catch(err => { console.log('ltc transaction', err.message); });
+          let isSending = false;
+          if (!isSending) {
+            isSending = true;
+            ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (order.ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
+            .then(msg => {
+              isSending = false;
+              if (msg) {
+                console.log(msg);
+              }
+              updateOrderAndProject(paidTickets, order, project, '', 'LTC');
+            }).catch(err => { console.log('ltc transaction', err.message); isSending = false;});
+          }
         }
       }
     });

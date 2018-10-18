@@ -143,8 +143,8 @@ class EnhancedTable extends React.Component {
       const val = data[i];
       if (val.title.toLowerCase().includes(keyword) ||
        val.subTitle.toLowerCase().includes(keyword) ||
-       val.address.country.includes(keyword) ||
-       val.address.city.includes(keyword)) {
+       val.address.country.toLowerCase().includes(keyword) ||
+       val.address.city.toLowerCase().includes(keyword)) {
           if (this.state.country) {
             if ( val.address.country == this.state.country) {
               if (this.state.city) {
