@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
-
-import { fetchProjects } from '../AppActions';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import { fetchUsers } from '../AppActions';
 
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
@@ -13,10 +13,9 @@ import '../App.css';
 class User extends Component {
     constructor(props) {
         super(props);
-    }
-
-    componentDidMount() {
-        this.props.dispatch(fetchProjects());
+        this.state = {
+            loading: true,
+        }
     }
 
     componentWillMount(){
@@ -28,15 +27,41 @@ class User extends Component {
         }
     }
 
+    componentDidMount() {
+        this.props.dispatch(fetchUsers());
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.props.users !== nextProps.users) {
+            this.setState({ ...this.state, loading: false });
+        }
+    }
+
     render() {
-        const { projects } = this.props;
-        console.log('projects', projects);
+        const { users } = this.props;
+        console.log('users', users);
 
         return (
             <div>
                 <AdminHeader />
                 <div className="container-fluid mt-100">
                     <h1>Users Page</h1>
+                    {this.state.loading && <div>loading...</div>}
+                    {!this.state.loading && <div>
+                        <BootstrapTable 
+                            data={data}
+                            striped={true}
+                            hover={true}
+                            pagination>
+                            <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
+                            <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
+                            <TableHeaderColumn dataField="totalTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
+                            <TableHeaderColumn dataField="selectedTickets" dataFormat={this.priceFormatter}>Purchased Tickets</TableHeaderColumn>
+                            <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>
+                            <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
+                            <TableHeaderColumn dataField="pID" dataFormat={ this.actionFormatter } export={ false } ></TableHeaderColumn>
+                        </BootstrapTable>
+                    </div>}
                 </div>
                 <Footer />
             </div>
@@ -52,7 +77,7 @@ User.propTypes = {
 // Retrieve data from store as props
 function mapStateToProps(state) {
   return {
-    projects: state.app.projects,
+    users: state.app.users,
   };
 }
 

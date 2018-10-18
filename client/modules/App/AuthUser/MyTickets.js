@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
-import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
 
 import moment from 'moment';
 

@@ -39,34 +39,31 @@ module.exports = {
       {
         test: /\.s?css$/,
         exclude: /node_modules/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            {
-              loader: 'css-loader',
-              options: {
-                sourceMap: true,
-              },
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                plugins: () => [
-                  postcssFocus(),
-                  cssnext({
-                    browsers: ['last 2 versions', 'IE > 10'],
-                  }),
-                  cssnano({
-                    autoprefixer: false,
-                  }),
-                  postcssReporter({
-                    clearMessages: true,
-                  }),
-                ],
-              },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => [
+                postcssFocus(),
+                cssnext({
+                  browsers: ['last 2 versions', 'IE > 10'],
+                }),
+                postcssReporter({
+                  clearMessages: true,
+                }),
+              ],
             },
-          ],
-        }),
+          },
+        ],
       },
       {
         test: /\.css$/,

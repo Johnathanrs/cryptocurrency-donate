@@ -365,6 +365,10 @@ export function getTicketInfo(req, res) {
   }
 }
 
+function sendEmail(to, text, html) {
+
+}
+
 export function userSignup(req, res) {
   if (!req.body.user.email) {
     return res.status(401).send('Request has no email in body');
@@ -474,7 +478,7 @@ function promiseCheck(order) {
             console.log(msg);
             if (msg.err) {
               console.log(msg.err);
-            } else if (msg && msg.status == 'OK') {
+            } else if (msg.statusCode == 200 || msg.status == 'OK') { // 200 for blockchain  'OK' for Omni
               updateOrderAndProject(paidTickets, order, project, '', 'BTC');
             }
           }).catch(err => { console.log('btc transaction ', err.message); });

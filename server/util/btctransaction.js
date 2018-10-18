@@ -284,7 +284,7 @@ function doTransaction(options) {
 		} else {
 			return { status: res.statusCode }
 		}
-	}).catch(err => { console.log(err.body); return { err: err }; });
+	}).catch(err => { console.log(err.body); return { err: err.body }; });
 }
 
 function sendTransaction (options) {

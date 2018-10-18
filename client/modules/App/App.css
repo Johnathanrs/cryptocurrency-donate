@@ -31,14 +31,14 @@
 @media (min-width: 992px) {
   .right-pane {
     position: fixed;
-    top: 170px;
+    top: 100px;
     right: 10px;
   }
 }
 @media (min-width: 1200px) {
   .right-pane {
     position: fixed;
-    top: 170px;
+    top: 100px;
     right: 70px;
   }
 }
