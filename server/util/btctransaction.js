@@ -271,18 +271,18 @@ function doTransaction(options) {
 				.from(options.utxos)          // Feed information about what unspent outputs one can use
 				.to(options.to, (amount - options.fee))
 				.sign(options.privateKey)
-				.toString()
+				.toString();
 	} catch (err) { 
 		return { err: 'Something wrong with signing contract' };
 	}
 
-	console.log('----amount', amount, ' ', fee);
+	console.log('----amount', amount, ' ', options.fee);
 	pushTx(tx).then((err, res) => {
 		console.log(err, '---------', res);
 		if (err) { 
 			return { err: err }
 		} else {
-			return { status: res.statusCode}
+			return { status: res.statusCode }
 		}
 	}).catch(err => { console.log(err.body); return { err: err }; });
 }
