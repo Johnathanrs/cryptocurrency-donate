@@ -71,19 +71,14 @@ export  function broadcastTX(rawtx, network) {
 			} catch(err) {
 				reject(err);
 			}
-			
-			request({
-				uri: uri,
-				method: 'POST',
-				json: {
-					tx,
-				}
-			},
-				(error, response, body) => {
-					if(error) reject(error);
-					// if (response.statusCode != 200) reject({ message: 'something is wrong'});
-					resolve(body);
-				}
-			);
+			request.post({url: url, form: {tx: tx}}, (err, response, body) => {
+				if (err) reject(err);
+				// if (response.statusCode != 200) reject({ message: 'something is wrong'});
+				if (body.txid) {
+					resolve(body.txid);
+				} else {
+					reject(body);
+				} 
+			});
 		}).catch(err => { return err;});
  }
