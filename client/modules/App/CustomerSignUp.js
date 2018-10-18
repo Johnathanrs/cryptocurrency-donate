@@ -7,6 +7,8 @@ import { browserHistory } from 'react-router';
 import './App.css';
 import callApi from '../../util/apiCaller';
 
+import { saveToken } from '../App/AuthActions';
+
 class CustomerSignUp extends React.Component {
     constructor(props) {
         super(props);
@@ -39,7 +41,7 @@ class CustomerSignUp extends React.Component {
                 message = res.errors;
                 self.setState({ ...self.state, isCreate: false, errOnCreate: message });
             } else {
-                window.localStorage.setItem('smartproject', JSON.stringify({ token: res.user.token, isSignIn: true }));
+                window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
                 browserHistory.push('/');
             }

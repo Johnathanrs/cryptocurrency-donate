@@ -25,6 +25,7 @@ import Statistics from './modules/App/Admin/Statistics';
 import Admin from './modules/App/Admin/Admin';
 import SignUp from './modules/App/Admin/SignUp';
 import User from './modules/App/Admin/User';
+import UserGuideManager from './modules/App/Admin/UserGuideManager';
 
 // require.ensure polyfill for node
 if (typeof require.ensure !== 'function') {
@@ -56,6 +57,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/CustomerSignIn');
   require('./modules/App/CustomerSignUp');
   require('./modules/App/Admin/ProjectDetailView');
+  require('./modules/App/Admin/UserGuideManager');
 }
 
 /* Workaround for async react routes to work with react-hot-reloader till
@@ -91,6 +93,10 @@ export default (
       <Route
         path="user"
         component={User}
+      />
+      <Route
+        path="userguidemanager"
+        component={UserGuideManager}
       />
       <Route
         path="project"

@@ -52,7 +52,7 @@ import routes from '../client/routes';
 import { fetchComponentData } from './util/fetchData';
 import main from './routes/main.routes';
 import * as MainController from './controllers/main.controller';
-import dummyData from './dummyData';
+import dummyGuide from './dummyGuide';
 import serverConfig from './config';
 
 // Set native promises as mongoose promise
@@ -67,7 +67,7 @@ if (process.env.NODE_ENV !== 'test') {
     }
 
     // feed some dummy data in DB.
-    dummyData();
+    dummyGuide();
   });
 }
 
@@ -188,6 +188,8 @@ app.listen(serverConfig.port, (error) => {
   }
 });
 
-const balanceInterval = setInterval(() => { MainController.balanceChecker(); }, 60000);
+setInterval(() => { MainController.projectCoinBalanceChecker(); }, 200000);
+
+setInterval(() => { MainController.userCoinBalanceChecker(); }, 15000);
 
 export default app;

@@ -10,6 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import EnhancedTableToolbar from './EnhancedTableToolbar';
 import EnhancedTableHead from './EnhancedTableHead';
 import TextField from '@material-ui/core/TextField';
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 import { browserHistory } from 'react-router';
 import moment from 'moment';
 import '../App.css';
@@ -35,6 +36,8 @@ class EnhancedTable extends React.Component {
             data: [],
             page: 0,
             rowsPerPage: 5,
+            country: '',
+            city: '',
         };
 
         this.handleRequestSort = this.handleRequestSort.bind(props);
@@ -124,14 +127,37 @@ class EnhancedTable extends React.Component {
 
   isSelected = id => this.state.selected.indexOf(id) !== -1;
 
+  selectCountry(val) {
+    this.setState({ ...this.state, country: val });
+  }
+
+  selectRegion(val) {
+      this.setState({ ...this.state, city: val });
+  }
+
   filterData(data) {
     let keyword = this.state.search;
     const newData = [];
     for (let i = 0; i < data.length; i++) {
       keyword = keyword.toLowerCase();
       const val = data[i];
-      if (val.title.toLowerCase().includes(keyword) || val.subTitle.toLowerCase().includes(keyword) || val.address.country.includes(keyword) || val.address.city.includes(keyword)) {
-        newData.push(val);
+      if (val.title.toLowerCase().includes(keyword) ||
+       val.subTitle.toLowerCase().includes(keyword) ||
+       val.address.country.includes(keyword) ||
+       val.address.city.includes(keyword)) {
+          if (this.state.country) {
+            if ( val.address.country == this.state.country) {
+              if (this.state.city) {
+                if (val.address.city == this.state.city) {
+                  newData.push(val);
+                }
+              } else {
+                newData.push(val);
+              }
+            }
+          } else {
+            newData.push(val);
+          }
       }
     }
 
@@ -145,7 +171,7 @@ class EnhancedTable extends React.Component {
     data = this.filterData(data);
     return (
       <Paper className="table-root p-4">
-        <div className="d-flex flex-row">
+        <div className="row">
           <div className="fs-125 fb" style={{ flex: '1 1 auto' }}>
             Browser Projects
           </div>
@@ -157,6 +183,25 @@ class EnhancedTable extends React.Component {
             onChange={this.searchProject('')}
             margin="normal"
           />
+          <div className="mb-sm-2" style={{ height: '36px' }}>
+            <CountryDropdown
+                defaultOptionLabel="Choose a country"
+                value={this.state.country}
+                onChange={(val) => this.selectCountry(val)}
+                style={{
+                    fontSize: '1.25rem',
+                    padding: '0.25rem',
+                    marginLeft: '1rem' }} />
+            <RegionDropdown
+                country={this.state.country}
+                value={this.state.city}
+                blankOptionLabel="No country selected."
+                defaultOptionLabel="Now select a region"
+                style={{
+                    fontSize: '1.25rem',
+                    padding: '0.25rem' }}
+                onChange={(val) => this.selectRegion(val)} />
+        </div>
         </div>
         
         <div className="table-wrapper">

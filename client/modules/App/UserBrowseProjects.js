@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import TextField from '@material-ui/core/TextField';
-import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
@@ -73,12 +73,14 @@ class UserBrowseProjects extends Component {
             const val = this.props.projects[idx];
             if (val._id.toLowerCase().includes(keyword) || val.title.toLowerCase().includes(keyword) || val.subTitle.toLowerCase().includes(keyword) || val.shortDescription.includes(keyword) || val.address.country.includes(keyword) || val.address.city.includes(keyword)) {
                 if (this.state.country) {
-                    if (this.state.country == val.address.country) {
+                    if ( val.address.country == this.state.country) {
+                      if (this.state.city) {
+                        if (val.address.city == this.state.city) {
+                          newData.push(val);
+                        }
+                      } else {
                         newData.push(val);
-                    }
-                } else if (this.state.city) {
-                    if (this.state.city == val.address.city) {
-                        newData.push(val);
+                      }
                     }
                 } else {
                     newData.push(val);

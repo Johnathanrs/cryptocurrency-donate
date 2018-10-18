@@ -57,7 +57,7 @@ class Payment extends React.Component {
     }
 
     render() {
-        const {tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project, handleCoinType, crypto } = this.props;
+        const { email, tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project, handleCoinType, crypto } = this.props;
 
         let BTC = null;
         let LTC = null;
@@ -77,6 +77,7 @@ class Payment extends React.Component {
 
         return(
             <div className="col-xl-4 col-lg-5 col-md-5 col-sm-12 right-pane">
+                <div className="text-right fb mb-1">{email()}</div>
                 <div className="card px-2 card-bg">
                     <div className="d-flex flex-column align-items-center justify-content-center mt-2 px-1 ">
                         <h5 className="fb">SCAN THE TAG BELOW TO PAY</h5>

@@ -16,10 +16,11 @@ class Thankyou extends React.Component {
     }
     
     render() {
-        const {tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project } = this.props;
+        const { email, tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project } = this.props;
 
         return(
             <div className="col-xl-4 col-lg-5 col-md-5 col-sm-12 right-pane">
+                <div className="text-right fb mb-1">{email()}</div>
                 <div className="card px-3 card-bg">
                     <div className="d-flex flex-column align-items-center justify-content-center mt-3 px-1 fb">
                         <h5 className="fb">THANK YOU!</h5>
@@ -36,7 +37,7 @@ class Thankyou extends React.Component {
                         </div>
                     </div>
                     <div className="mt-2">
-                        <span className="fb fs-11 warning-color mb-1" >Only {project.maximumAvailableTickets - tickets} out of {project.totalTickets} left</span>
+                        <span className="fb fs-11 warning-color mb-1" >Only {project.maximumAvailableTickets} out of {project.totalTickets} left</span>
                         <div className="float-right mt-sm-2">
                             <button onClick={this.gotoDashboard} className="btn btn-lg bg-dark text-white" >Goto Dashboard</button>
                         </div>

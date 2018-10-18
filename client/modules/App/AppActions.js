@@ -7,9 +7,10 @@ export const FETCH_PROJECTS = 'FETCH_PROJECTS';
 export const FETCH_PROJECT = 'FETCH_PROJECT';
 export const FETCH_USERS = 'FETCH_USERS';
 export const FETCH_USER = 'FETCH_USER';
-
+export const FETCH_USER_GUIDE = 'FETCH_USER_GUIDE';
 export const GET_TICKET = 'GET_TICKET';
 export const GET_CRYPTO = 'GET_CRYPTO';
+export const ADD_ORDERS = 'ADD_ORDERS';
 
 // Export Actions
 export function toggleAddPost() {
@@ -46,6 +47,13 @@ export function addUser(res) {
   };
 }
 
+export function addGuide(guide) {
+  return {
+    type: FETCH_USER_GUIDE,
+    guide,
+  };
+}
+
 export function getProject(project) {
   return {
     type: FETCH_PROJECT,
@@ -57,6 +65,13 @@ export function getCryptoAddr(crypto) {
   return {
     type: GET_CRYPTO,
     crypto,
+  }
+}
+
+export function addOrders(orders) {
+  return {
+    type: ADD_ORDERS,
+    orders,
   }
 }
 
@@ -87,6 +102,15 @@ export function fetchUser() {
   };
 }
 
+export function fetchOrders() {
+  return (dispatch) => {
+    return callApi('orders').then(res => {
+      dispatch(addOrders(res.orders));
+      return res.orders;
+    });
+  };
+}
+
 export function fetchProject(id) {
   return (dispatch) => {
     return callApi(`project/${id}`).then(res => {
@@ -102,6 +126,14 @@ export function fetchCryptoAddr(email, projectID) {
     return callApi(`users/getCryptoAddr/${email}/${projectID}`).then(res => {
       dispatch(getCryptoAddr(res.crypto));
       return res.crypto;
+    });
+  };
+}
+
+export function fetchUserGuide() {
+  return (dispatch) => {
+    return callApi('user/guide').then(res => {
+      dispatch(addGuide(res.guide));
     });
   };
 }

@@ -27,16 +27,16 @@ class Header extends React.Component {
   }
 
   componentWillMount() {
-    // if (typeof(window) !== "undefined") {
-    //   const tokenData = window.localStorage.getItem('smartproject');
-    //   let token = '';
-    //   try {
-    //     token = JSON.parse(tokenData).token;
-    //   } catch (err) {
-    //     token = '';
-    //   }
-    //   this.setState({ isUnAuth: !token, token });
-    // }
+    if (typeof(window) !== "undefined") {
+      const tokenData = window.localStorage.getItem('smartproject');
+      let token = '';
+      try {
+        token = JSON.parse(tokenData).token;
+      } catch (err) {
+        token = '';
+      }
+      this.setState({ isUnAuth: !token, token });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -94,7 +94,7 @@ class Header extends React.Component {
                 />
               </li>
               {!this.state.isUnAuth && <li className="nav-item">
-                <button onClick={() => this.navigate('/user/dashboard')} className="btn btn-lg btn-link" type="button">Dashboard</button>
+                <button onClick={() => this.navigate('/user/mytickets')} className="btn btn-lg btn-link" type="button">Dashboard</button>
               </li>}
             </ul>
             {

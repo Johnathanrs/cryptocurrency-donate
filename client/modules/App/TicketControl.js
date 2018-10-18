@@ -10,7 +10,7 @@ import TICKET_BACKGROUND from '../../assets/img/Ticket_Black_Clean.png';
 class TicketControl extends React.Component {
 
     render() {
-        const { tickets, totalPrice, ticketPrice, coinTypeArray, coinType, donationShare, donationPower, handlePower, handleCoinType, handleTickets, getNow, project } = this.props;
+        const { email, tickets, totalPrice, ticketPrice, coinTypeArray, coinType, donationShare, donationPower, handlePower, handleCoinType, handleTickets, getNow, project } = this.props;
 
         let ticketsArray = [];
         if (project.maximumAvailableTicketsPerPerson) {
@@ -21,8 +21,9 @@ class TicketControl extends React.Component {
 
         return (
             <div className="col-xl-4 col-lg-5 col-md-5 col-sm-12 right-pane">
+                <div className="text-right fb mb-1">{email()}</div>
                 <div className="card plr-30 card-bg">
-                <div className="d-flex flex-column justify-content-center pt-4 pb-4 ticket-background" role="alert" style={{backgroundImage: `url(${TICKET_BACKGROUND})` }}>
+                    <div className="d-flex flex-column justify-content-center pt-4 pb-4 ticket-background" role="alert" style={{backgroundImage: `url(${TICKET_BACKGROUND})` }}>
                         <h5 className="card-title text-center fw-500 text-white fs-125 mb-0 mt-1"><div>You have selected</div> <strong className="fs-11 text-white">{tickets}</strong> tickets</h5>
                         <div className="text-center">
                             <span className="card-text mr-1 fs-1 text-white"> {totalPrice[coinType]}</span><img src={coinTypeArray[coinType]} alt="BTC" width="30" height="30" />

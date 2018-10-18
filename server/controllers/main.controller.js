@@ -1,6 +1,8 @@
 import Post from '../models/post';
-import Project from '../models/project';
+import Project, { Address, Wallet, Coin} from '../models/project';
 import User, { SubProject } from '../models/user';
+import Guide from '../models/guide';
+import Order from '../models/order';
 
 import cuid from 'cuid';
 import slug from 'limax';
@@ -19,36 +21,43 @@ const router = new Router();
 
 import passport from '../passport';
 
-export function balanceChecker() {
-  Project.Project.find().sort('-dateAdded').exec((errors, projects) => {
+function projectBalance(project) {
+  const ethAddr = project.wallet.ETH.address;
+  const btcAddr = project.wallet.BTC.address;
+  const ltcAddr = project.wallet.LTC.address;
+  Promise.all([
+    ethTransaction.getBalance(ethAddr),
+    bitcoinTransaction.getBalance(btcAddr, { network: process.env.BTCNET }),
+    ltcTransaction.getUTXOs(ltcAddr, process.env.LTCNET),
+  ]).then(data => {
+    project.donatedETH = parseFloat(data[0]);
+    project.donatedBTC = parseFloat(data[1]);
+    let donatedLTC = 0;
+    const utxos = data[2];
+    for (let i = 0; i < utxos.length; i++) {
+      if (utxos[i].confirmations > 0) {
+        donatedLTC += utxos[i]['satoshis'];
+      }
+    }
+    project.donatedLTC = parseFloat(donatedLTC);
+    project.save((err, saved) => {
+      if (err) {
+        console.log(err);
+      }
+      // console.log(saved);
+    });
+  }).catch(err => {
+    console.log('project address collector', err);
+  });
+}
+
+export function projectCoinBalanceChecker() {
+  Project.find().sort('-dateAdded').exec((errors, projects) => {
     if (errors) {
       return console.log(errors);
     }
     projects.map(project => {
-      const ethAddr = project.wallet.ETH.address;
-      const btcAddr = project.wallet.BTC.address;
-      const ltcAddr = project.wallet.LTC.address;
-      let ltcNetwork = 'LTCTEST';
-      if (process.env.LTCNET == 'mainnet') {
-        ltcNetwork = 'LTC';
-      }
-      Promise.all([
-        ethTransaction.getBalance(ethAddr),
-        bitcoinTransaction.getBalance(btcAddr, { network: process.env.BTCNET }),
-        ltcTransaction.getBalance(ltcAddr, ltcNetwork),
-      ]).then(data => {
-        project.donatedETH = parseFloat(data[0]);
-        project.donatedBTC = parseFloat(data[1]);
-        project.donatedLTC = parseFloat(data[2]);
-        project.save((err, saved) => {
-          if (err) {
-            console.log(err);
-          }
-          // console.log(saved);
-        });
-      }).catch(err => {
-        console.log(err);
-      });
+      setTimeout(() => { projectBalance(project); }, 3000);
     });
   });
 }
@@ -62,10 +71,50 @@ export function getUsers(req, res) {
   });
 }
 
+export function getUserGuide(req, res) {
+  Guide.find().sort('-dateAdded').exec((errors, guide) => {
+    if (errors) {
+      res.status(500).send({ errors });
+    }
+    res.json({ guide });
+  });
+}
+
+export function saveUserGuide(req, res) {
+  req.body.guide.map(faq => {
+    if (faq._id) {
+      Guide.findOneAndUpdate({ _id: faq._id }, { upsert: true }).then((err, saved) => {
+        if (err) {
+          return res.status(500).send({ errors: err.message });
+        }
+      });
+    } else {
+      const newFAQ = new Guide(faq);
+      newFAQ.save((err, saved) => {
+        if (err) {
+          return res.status(500).send({ errors: err.message });
+        }
+      });
+    }
+  });
+}
+
+export function getOrders(req, res) {
+  if (!req.decoded) {
+    return res.status(400).send({ errors: 'Bad Request' });
+  }
+  Order.find().sort('-dateAdded').populate('projectID').exec((errors, orders) => {
+    if (errors) {
+      res.status(500).send({ errors });
+    }
+    res.json({ orders });
+  });
+}
+
 export function getUser(req, res) {
   Promise.all([
     User.findById( req.decoded),
-    Project.Project.find(),
+    Project.find(),
   ]).then(data => {
     if (!data[0]) { return res.send({ errors: 'Unauthorized user' }); }
     return res.json({ user: data[0], projects: data[1] });
@@ -148,38 +197,16 @@ export function customerSignin(req, res, next) {
   User.findOne({'email': req.body.user.email})
   .then(user => {
     if(!user) {
-      const newUser = new User();
-
-      newUser.email = req.body.user.email;
-      newUser.role = 'Customer';
-      const newPassword = req.body.user.password;
-      newUser.setPassword(newPassword);
-    
-      newUser.save((err, saved) => {
-        sgMail.setApiKey(sensitive.sendgrid);
-        const msg = {
-          to: saved.email,
-          from: 'info@smartprojects.tech',
-          subject: 'Authentication',
-          text: `Congratulation! You successfully signed up. Your password is ${newPassword}`,
-          html: `<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ${newPassword} <p></div>`,
-        };
-        sgMail.send(msg).then((statusMessage) => {
-          return res.json({ user: saved.toAuthJSON(), isNewUser: true });
-        });
-      }).catch(next);
+      return res.status(404).send({ errors: 'User with that email does not exist' });
     }
-    else {
-      if (!user.validPassword(req.body.user.password)) {
-        return res.json({ errors: 'Email and Password does not match' });
-      } else {
-        user.token = user.generateJWT();
-        return res.json({ user: user.toAuthJSON() });
-      }
+    if (!user.validPassword(req.body.user.password)) {
+      return res.json({ errors: 'Email and Password does not match' });
     }
+    user.token = user.generateJWT();
+    return res.json({ user: user.toAuthJSON() });
   })
   .catch(err => {
-      return done(err);
+      return done({ errors: err.message });
   });
 }
 
@@ -188,31 +215,29 @@ export function customerSignup(req, res) {
   .then(user => {
     if (user) {
       return res.status(422).json({ errors: 'User width this email already exists' });
-    } else {
-      const newUser = new User();
-
-      newUser.email = req.body.user.email;
-      newUser.role = 'Customer';
-      const newPassword = generator.generate({
-        length: 10,
-        numbers: true,
-      });
-      newUser.setPassword(newPassword);
-    
-      return newUser.save((err, saved) => {
-        sgMail.setApiKey(sensitive.sendgrid);
-        const msg = {
-          to: saved.email,
-          from: 'info@smartprojects.tech',
-          subject: 'Authentication',
-          text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
-          html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
-        };
-        sgMail.send(msg).then((statusMessage) => {
-          return res.json({ user: newUser.toAuthJSON() });
-        });
-      });
     }
+    const newUser = new User();
+    newUser.email = req.body.user.email;
+    newUser.role = 'Customer';
+    const newPassword = generator.generate({
+      length: 10,
+      numbers: true,
+    });
+    newUser.setPassword(newPassword);
+  
+    return newUser.save((err, saved) => {
+      sgMail.setApiKey(sensitive.sendgrid);
+      const msg = {
+        to: saved.email,
+        from: 'info@smartprojects.tech',
+        subject: 'Authentication',
+        text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
+        html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
+      };
+      sgMail.send(msg).then((statusMessage) => {
+        return res.json({ user: newUser.toAuthJSON() });
+      });
+    });
   }).catch(err => { return res.send({ errors: err.message }); });
 }
 
@@ -246,6 +271,71 @@ export function authCheckAdmin(req, res) {
   });
 }
 
+function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, ethTicketPrice, ltcTicketPrice, btcTotalPrice, ethTotalPrice, ltcTotalPrice) {
+  if (!user.subProjects) {
+    user.subProjects = [];
+  }
+  let subProject = user.subProjects.find(sub => sub.projectID == projectID);
+  if (!subProject) {
+    const btcAddress = bitcoinTransaction.createUserBitcoinAddress();
+    const ltcAddress = ltcTransaction.createUserLitecoinAddress();
+    const ethAddress = ethTransaction.createUserEthereumAddress();
+    const _newSubProject = new SubProject();
+    _newSubProject.projectID = projectID;
+    _newSubProject.btcAddress = btcAddress;
+    _newSubProject.ethAddress = ethAddress;
+    _newSubProject.ltcAddress = ltcAddress;
+    _newSubProject.totalTickets = totalTickets;
+    user.subProjects.push(_newSubProject);
+    subProject = _newSubProject;
+  }
+  user.save((err, savedUser) => {
+    if (err) {
+      return res.send({ errors: err.message });
+    }
+    const order = new Order();
+    order.userID = user._id;
+    order.projectID = subProject.projectID;
+    order.selectedTickets = totalTickets;
+    order.btcAddress = subProject.btcAddress.publicKey;
+    order.ethAddress = subProject.ethAddress.publicKey;
+    order.ltcAddress = subProject.ltcAddress.publicKey;
+    order.btcPrivateAddress = subProject.btcAddress.privateKey;
+    order.ethPrivateAddress = subProject.ethAddress.privateKey;
+    order.ltcPrivateAddress = subProject.ltcAddress.privateKey;
+    order.btcTicketPrice = btcTicketPrice;
+    order.ethTicketPrice = ethTicketPrice;
+    order.ltcTicketPrice = ltcTicketPrice;
+    order.network = process.env.BTCNET;
+    order.status = 'pending';
+    order.save((err, savedOrder) => {
+      return res.send({
+        status: 'authorized',
+        id: savedOrder.id,
+        email: savedUser.email,
+        token: savedUser.generateJWT(),
+        crypto: {
+          BTC: {
+            address: subProject.btcAddress,
+            amount: btcTotalPrice,
+            message: btcTotalPrice + ' BTC Donation to ',
+          },
+          ETH: {
+            address: subProject.ethAddress,
+            amount: ethTotalPrice,
+            message: ethTotalPrice + ' ETH Donation to ',
+          },
+          LTC: {
+            address: subProject.ltcAddress,
+            amount: ltcTotalPrice,
+            message: ltcTotalPrice + ' LTC Donation to ',
+          },
+        },
+      });
+    });
+  });
+}
+
 export function getNow(req, res) {
   if (!req.decoded) {
     return res.send({ status: 'unauthorized' });
@@ -257,56 +347,11 @@ export function getNow(req, res) {
 
   // req.decoded = user.id
   User.findOne({ _id: req.decoded })
-  .then(user => {
+  .then((user) => {
     if (user) { // User exists
-      const btcAddress = bitcoinTransaction.createUserBitcoinAddress();
-      const ltcAddress = ltcTransaction.createUserLitecoinAddress();
-      const ethAddress = ethTransaction.createUserEthereumAddress();
-      const _newSubProject = new SubProject();
-      _newSubProject.projectID = req.body.ticket.projectID;
-      _newSubProject.totalTickets = req.body.ticket.totalTickets;
-      _newSubProject.totalPrice = req.body.ticket.totalPrice;
-      _newSubProject.btcAddress = btcAddress;
-      _newSubProject.ethAddress = ethAddress;
-      _newSubProject.ltcAddress = ltcAddress;
-      _newSubProject.paidAmountBTC = 0;
-      _newSubProject.paidAmountLTC = 0;
-      _newSubProject.paidAmountETH = 0;
-      if (!user.subProjects) {
-        user.subProjects = [];
-      }
-      user.subProjects.push(_newSubProject);
-      user.save((err, saved) => {
-        if (err) {
-          return res.send({ errors: err.message });
-        } else {
-          return res.send({
-            status: 'authorized',
-            id: _newSubProject.id,
-            token: saved.generateJWT(),
-            crypto: {
-              BTC: {
-                address: btcAddress,
-                amount: _newSubProject.totalPrice['BTC'],
-                message: _newSubProject.totalPrice['BTC'] + ' BTC Donation to ',
-              },
-              ETH: {
-                address: ethAddress,
-                amount: _newSubProject.totalPrice['ETH'],
-                message: _newSubProject.totalPrice['ETH'] + ' ETH Donation to ',
-              },
-              LTC: {
-                address: ltcAddress,
-                amount: _newSubProject.totalPrice['LTC'],
-                message: _newSubProject.totalPrice['LTC'] + ' LTC Donation to ',
-              },
-            },
-          });
-        }
-      });
-    } else { // Something is wrong
-      return res.send({ status: 'unauthorized' });
+      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
     }
+    return res.send({ status: 'unauthorized' });
   });
 }
 
@@ -325,415 +370,168 @@ export function userSignup(req, res) {
     return res.status(401).send('Request has no email in body');
   }
   User.findOne({ email: req.body.user.email })
-  .then(user => {
-    const btcAddress = bitcoinTransaction.createUserBitcoinAddress();
-    const ethAddress = ethTransaction.createUserEthereumAddress();
-    const ltcAddress = ltcTransaction.createUserLitecoinAddress();
-    const _newSubProject = new SubProject();
-    _newSubProject.projectID = req.body.ticket.projectID;
-    _newSubProject.totalTickets = req.body.ticket.totalTickets;
-    _newSubProject.totalPrice = req.body.ticket.totalPrice;
-    _newSubProject.btcAddress = btcAddress;
-    _newSubProject.ltcAddress = ltcAddress;
-    _newSubProject.ethAddress = ethAddress;
-    _newSubProject.paidAmountBTC = 0;
-    _newSubProject.paidAmountLTC = 0;
-    _newSubProject.paidAmountETH = 0;
-    if (user) { // User already signed up
-      if (!user.subProjects) {
-        user.subProjects = [];
-      } 
-      user.subProjects.push(_newSubProject);
-      user.save((err, saved) => {
-        if (err) {
-          return res.send({ errors: err.message });
-        } else {
-          return res.send({
-            isNewUser: false,
-            isMsgSent: false,
-            token: saved.generateJWT(),
-            id: _newSubProject.id,
-            crypto: {
-              BTC: {
-                address: btcAddress,
-                amount: _newSubProject.totalPrice.BTC,
-                message: _newSubProject.totalPrice.BTC + ' BTC Donation to ',
-              },
-              ETH: {
-                address: ethAddress,
-                amount: _newSubProject.totalPrice.ETH,
-                message: _newSubProject.totalPrice.ETH + ' ETH Donation to ',
-              },
-              LTC: {
-                address: ltcAddress,
-                amount: _newSubProject.totalPrice.LTC,
-                message: _newSubProject.totalPrice.LTC + ' LTC Donation to ',
-              },
-            },
-          });
-        }
-      });
-    } else { // New user signed up and send an email with password
+  .then((user) => {
+    if (user) {
+      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
+    }
+    sgMail.setApiKey(sensitive.sendgrid);
+    const newPassword = generator.generate({
+      length: 10,
+      numbers: true,
+    });
+    const msg = {
+      to: req.body.user.email,
+      from: 'info@smartprojects.tech',
+      subject: 'Authentication',
+      text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
+      html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
+    };
+    sgMail.send(msg).then((statusMessage) => {
       const newUser = new User();
-
       newUser.email = req.body.user.email;
       newUser.role = 'Customer';
-      newUser.subProjects = [_newSubProject];
-      const newPassword = generator.generate({
-        length: 10,
-        numbers: true,
-      });
       newUser.setPassword(newPassword);
-    
-      newUser.save((err, saved) => {
-        sgMail.setApiKey(sensitive.sendgrid);
-        const msg = {
-          to: saved.email,
-          from: 'info@smartprojects.tech',
-          subject: 'Authentication',
-          text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
-          html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
-        };
-        sgMail.send(msg).then((statusMessage) => {
-          return res.send({
-            isNewUser: true,
-            isMsgSent: true,
-            token: saved.generateJWT(),
-            id: _newSubProject.id,
-            crypto: {
-              BTC: {
-                address: btcAddress,
-                amount: _newSubProject.totalPrice['BTC'],
-                message: _newSubProject.totalPrice['BTC'] + ' BTC Donation to ',
-              },
-              ETH: {
-                address: ethAddress,
-                amount: _newSubProject.totalPrice['ETH'],
-                message: _newSubProject.totalPrice['ETH'] + ' ETH Donation to ',
-              },
-              LTC: {
-                address: ltcAddress,
-                amount: _newSubProject.totalPrice['LTC'],
-                message: _newSubProject.totalPrice['LTC'] + ' LTC Donation to ',
-              },
-            },
-          });
-        }).catch((err) => {
-          return res.send({ errors: 'Fail to authenticate the user with this email' });
-        });
-      });
-    }
-  }).catch(err => { return res.send({ errors: err.message }); });
-}
-
-export function checkETHBalance(req, res) {
-  if (!req.body.crypto) {
-    return res.status(400).send({ errors: 'Address is missing' });
-  }
-
-  ethTransaction.getBalance(req.body.crypto.ETH.address.publicKey).then(balance => {
-    if (balance) {
-      const paidTickets = Math.round((balance) / req.body.ticketPrice.ETH);
-        if (paidTickets < 1) {
-          return res.send({ status: 'less', paidTickets: paidTickets, amount: balance / req.body.ticketPrice.ETH });
-        } else {
-          // Update paidAmount field of sub project of user collection
-          User.findOne({ _id: req.decoded })
-          .then(user => {
-            if (user) {
-              const subProject = user.subProjects.find(sub => sub._id == req.body.subID);
-              if (!subProject) {
-                return res.status(404).send({ errors: `Project with ID ${req.body.projectID} does not exist` });
-              }
-              subProject.paidAmountETH = balance;
-              subProject.datePaid = new Date();
-              subProject.paidTickets = paidTickets;
-              user.save((err, saved) => {
-                if (err) {
-                  return res.status(503).send({ errors: err.message });
-                }
-                // Creat transaction to the Project address.
-                Project.Project.findOne({ _id: req.body.projectID }).then(project => {
-                  if (!project) {
-                    return res.status(404).send({ errors: res.message });
-                  }
-                  project.maximumAvailableTickets = project.maximumAvailableTickets - paidTickets;
-                  project.donors.push(saved._id);
-                  project.save((err, saved) => {
-                    if (err) { return res.status(400).send({ errors: err.message }); }
-                    return res.send({ status: 'ok', paidTickets: paidTickets, paidAmount: subProject.paidAmountETH, availableTickets: saved.maximumAvailableTickets });
-                  });
-                  const privateKeyWIF = subProject.ethAddress.privateKey;
-                  const from = subProject.ethAddress.publicKey;
-                  ethTransaction.sendTransaction(from, privateKeyWIF, project.wallet.ETH.address, balance).then(txid => {
-                    if (txid) {
-                      console.log(txid);
-                    }
-                  }).catch(err => { console.log(err); });
-                });
-              });
-            }
-          });
-        }
-    } else {
-      return res.send({ status: 'again' });
-    }
-  }).catch(err => { return res.send({ errors: err.message }); });
-}
-
-export function checkLTCBalance(req, res) {
-  if (!req.body.crypto) {
-    return res.status(400).send({ errors: 'Address is missing' });
-  }
-  ltcTransaction.getUTXOs(req.body.crypto.LTC.address.publicKey, process.env.LTCNET)
-    .then((utxos) => {
-      let balance = 0;
-      var fee = bitcoinTransaction.BITCOIN_SAT_MULT * 0.00077; //fee for the tx
-      for (let i = 0; i < utxos.length; i++) {
-        if (utxos[i].confirmations > 0) {
-          balance += utxos[i]['satoshis'];
-        }
-      } //add up the balance in satoshi format from all utxos
-      if (balance > 0) {
-        const paidTickets = Math.round((balance) / req.body.ticketPrice.LTC / bitcoinTransaction.BITCOIN_SAT_MULT);
-        if (paidTickets < 1) {
-          return res.send({ status: 'less', paidTickets: paidTickets, amount: balance / req.body.ticketPrice.LTC });
-        } else {
-          // Update paidAmount field of sub project of user collection
-          User.findOne({ _id: req.decoded })
-          .then(user => {
-            if (user) {
-              const subProject = user.subProjects.find(sub => sub._id == req.body.subID);
-              if (!subProject) {
-                return res.status(404).send({ errors: `Project with ID ${req.body.projectID} does not exist` });
-              }
-              subProject.paidAmountLTC = balance / bitcoinTransaction.BITCOIN_SAT_MULT;
-              subProject.datePaid = new Date();
-              subProject.paidTickets = paidTickets;
-              user.save((err, saved) => {
-                if (err) {
-                  return res.status(503).send({ errors: err.message });
-                }
-                // Creat transaction to the Project address.
-                Project.Project.findOne({ _id: req.body.projectID }).then(project => {
-                  if (!project) {
-                    return res.status(404).send({ errors: res.message });
-                  }
-                  project.maximumAvailableTickets = project.maximumAvailableTickets - paidTickets;
-                  project.donors.push(saved._id);
-                  project.save((err, saved) => {
-                    if (err) { return res.status(400).send({ errors: err.message }); }
-                    return res.send({ status: 'ok', paidTickets: paidTickets, paidAmount: subProject.paidAmountLTC, availableTickets: saved.maximumAvailableTickets });
-                  });
-                  const privateKeyWIF = subProject.ltcAddress.privateKey;
-                  try {
-                    ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (balance - fee), fee, privateKeyWIF)
-                    .then(msg => {
-                      if (msg) {
-                        console.log(msg);
-                      }
-                    }).catch(err => { console.log(err); });
-                  } catch (err) { 
-                    console.log('err while transfering LTC', err.message);
-                  };
-                });
-              });
-            }
-          });
-        }
-      } else {
-        return res.send({ status: 'again' });
-      }
-    })
-    .catch((err) => {
-      return res.send({ errors: err.message });
+      return updateUserAndOrder(res, newUser, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
     });
+  }).catch(err => { return res.send({ errors: err.message }); });
 }
 
-export function checkBTCBalance(req, res) {
-  if (!req.body.crypto) {
-    return res.status(400).send({ errors: 'Address is missing' });
-  }
+function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
+  if (paidTickets > 0) {
+    order.paidTickets = paidTickets;
+    console.log(order.ltcAmount, '--', order.btcAmount, ' ---', order.ethAmount);
+    order.datePaid = new Date();
+    order.status = 'paid';
+    order.paidCoin = paidCoin;
 
-  Promise.all([
-    bitcoinTransaction.getBalance(req.body.crypto.BTC.address.publicKey, { network: process.env.BTCNET }),
-    bitcoinTransaction.getFees(bitcoinTransaction.providers.fees[process.env.BTCNET].default, 'fastest')
-  ])
-  .then((data) => {
-    const balanceInBTC = data[0];
-    const feeBTC = data[1] / bitcoinTransaction.BITCOIN_SAT_MULT;
-    // const feeBTC = 300;
-    if (balanceInBTC) {
-      const paidTickets = Math.round((balanceInBTC) / req.body.ticketPrice.BTC);
-      if (paidTickets < 1) {
-        return res.send({ status: 'less', paidTickets: paidTickets, amount: balanceInBTC });
-      } else {
-        // Update paidAmount field of sub project of user collection
-        User.findOne({ _id: req.decoded })
-        .then(user => {
-          if (user) {
-            const subProject = user.subProjects.find(sub => sub._id == req.body.subID);
-            if (!subProject) {
-              return res.status(404).send({ errors: `Project with ID ${req.body.projectID} does not exist` });
-            }
-            subProject.paidAmountBTC = balanceInBTC;
-            subProject.datePaid = new Date();
-            subProject.paidTickets = paidTickets;
-            user.save((err, saved) => {
-              if (err) {
-                return res.status(503).send({ errors: err.message });
-              }
-              // Creat transaction to the Project address.
-              Project.Project.findOne({ _id: req.body.projectID }).then(project => {
-                if (!project) {
-                  return res.status(404).send({ errors: res.message });
-                }
-                try {
-                  bitcoinTransaction.sendTransaction({
-                    from: subProject.btcAddress.publicKey,
-                    to: project.wallet.BTC.address,
-                    privKeyWIF: subProject.btcAddress.privateKey,
-                    btc: subProject.paidAmountBTC - feeBTC,
-                    network: process.env.BTCNET,
-                    pushtxProvider: bitcoinTransaction.providers.pushtx[process.env.BTCNET].omni,
-                  }).then(msg => {
-                    console.log(msg);
-                    project.maximumAvailableTickets = project.maximumAvailableTickets - paidTickets;
-                    project.donors.push(saved._id);
-                    project.save((err, saved) => {
-                      if (err) { return res.status(400).send({ errors: err.message }); }
-                      return res.send({ status: 'ok', paidTickets: paidTickets, paidAmount: subProject.paidAmountBTC, availableTickets: saved.maximumAvailableTickets });
-                    });
-                  });
-                } catch(err) { 
-                  return res.status(503).send({ errors: err.message }); 
-                };
-              });
-            });
-          } else {
-            res.status(400).send({ errors: 'Bad Request' });
+    project.maximumAvailableTickets = project.maximumAvailableTickets - paidTickets;
+
+    return Promise.all([
+      order.save(),
+      project.save(),
+    ]).then((err, data) => {
+      console.log(err, data);
+    });
+  }
+}
+
+function promiseCheck(order) {
+  return Promise.all([
+    bitcoinTransaction.getBTCUTxos(order.btcAddress),
+    ethTransaction.getBalance(order.ethAddress),
+    ltcTransaction.getUTXOs(order.ltcAddress, process.env.LTCNET),
+  ]).then(data => {
+    order.ethAmount = parseFloat(data[1]);
+    let ltcAmount = 0;
+    const utxos = data[2];
+    for (let i = 0; i < utxos.length; i++) {
+      if (utxos[i].confirmations > 0) {
+        ltcAmount += utxos[i]['satoshis'];
+      }
+    }
+    order.ltcAmount = parseFloat(ltcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
+
+    let btcAmount = 0;
+    let ninputs = 0;
+    const btcUtxos = data[0];
+    for (let i = 0; i < btcUtxos.length; i++) {
+      if (btcUtxos[i].confirmations > 0) {
+        btcAmount += btcUtxos[i]['satoshis'];
+        ninputs++;
+      }
+    }
+    order.btcAmount = parseFloat(btcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
+
+    Project.findOne({ _id: order.projectID }).then((project) => {
+      project.donors.push(order.userID);
+
+      let paidTickets = 0;
+      if (order.ethAmount) {
+        paidTickets += Math.round((order.ethAmount) / order.ethTicketPrice);
+        ethTransaction.sendTransaction(order.ethAddress, order.ethPrivateAddress, project.wallet.ETH.address, order.ethAmount).then(txid => {
+          if (txid) {
+            console.log(txid);
           }
-        });
+          updateOrderAndProject(paidTickets, order, project, txid, 'ETH');
+        }).catch(err => {console.log('eth transaction', err.message); });
       }
-    } else {
-      return res.send({ status: 'again' });
-    }
-  }).catch(err => { 
-    return res.status(503).send({ errors: err.message });
-  });
-}
 
-export function checkBalance(req, res) {
-  if (!req.body.crypto) {
-    return res.status(400).send({ errors: 'Address is missing' });
-  }
-  // checkBTCBalance(req, res);
-  // checkLTCBalance(req, res);
-}
-
-export function getCryptoAddr(req, res) {
-  if (!req.params.email) {
-    return res.status(401).send({ errors: 'You are not authorized to do this action' });
-  }
-  User.findOne({ email: req.params.email })
-    .then(user => {
-      user.subProjects.map(subProject => {
-        if (subProject.projectID == req.params.projectID) {
-          // const btcKeyPair = bitcoin.ECPair.makeRandom();
-          // const { btcAddress } = bitcoin.payments.p2pkh(({ pubkey: btcKeyPair.publicKey }));
-          // return res.send({
-          //   crypto: {
-          //     ticket: {
-          //       subProject,
-          //     },
-          //     btc: {
-          //       publicKey: btcAddress,
-          //     },
-          //   },
-          // });
+      // BTC transaction
+      if (order.btcAmount) {
+        paidTickets += Math.round((order.btcAmount) / order.btcTicketPrice);
+        const fee = bitcoinTransaction.getTransactionSize(ninputs, 1);
+        const amount = order.btcAmount * bitcoinTransaction.BITCOIN_SAT_MULT;
+        if (amount <= fee) {
+          console.log('error balance is less than fee ---- btcAmount ', order.btcAmount, ' --- fee ', fee);
+        } else {
+          bitcoinTransaction.doTransaction({
+            utxos: btcUtxos,
+            to: project.wallet.BTC.address,
+            privateKey: order.btcPrivateAddress,
+            amount: order.btcAmount,
+            fee: fee,
+          }).then(msg => {
+            console.log(msg);
+            if (msg.err) {
+              console.log(msg.err);
+            } else if (msg && msg.status == 'OK') {
+              updateOrderAndProject(paidTickets, order, project, '', 'BTC');
+            }
+          }).catch(err => { console.log('btc transaction ', err.message); });
         }
-      });
+      }
+
+      // LTC transaction
+      if (order.ltcAmount) {
+        paidTickets += Math.round((order.ltcAmount) / order.ltcTicketPrice);
+        const feeLTC = 0.00077; //fee for the tx
+        if (order.ltcAddress < feeLTC) {
+          console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
+        } else {
+          ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (order.ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
+          .then(msg => {
+            if (msg) {
+              console.log(msg);
+            }
+            updateOrderAndProject(paidTickets, order, project, '', 'LTC');
+          }).catch(err => { console.log('ltc transaction', err.message); });
+        }
+      }
     });
+  }).catch(err => { console.log('balance check for user address', err.message); });
 }
 
-/**
- * Get all posts
- * @param req
- * @param res
- * @returns void
- */
-export function getPosts(req, res) {
-  Post.find().sort('-dateAdded').exec((err, posts) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-    res.json({ posts });
-  });
-}
-
-/**
- * Save a post
- * @param req
- * @param res
- * @returns void
- */
-export function addPost(req, res) {
-  if (!req.body.post.name || !req.body.post.title || !req.body.post.content) {
-    res.status(403).end();
+export function checkBalanceFromFront(req, res) {
+  if (!req.decoded) {
+    return res.status(400).send({ errors: 'Bad request' });
   }
-
-  const newPost = new Post(req.body.post);
-
-  // Let's sanitize inputs
-  newPost.title = sanitizeHtml(newPost.title);
-  newPost.name = sanitizeHtml(newPost.name);
-  newPost.content = sanitizeHtml(newPost.content);
-
-  newPost.slug = slug(newPost.title.toLowerCase(), { lowercase: true });
-  newPost.cuid = cuid();
-  newPost.save((err, saved) => {
+  Order.findOne({ _id: req.body.orderID }).exec((err, order) => {
     if (err) {
-      res.status(500).send(err);
+      return res.status(500).send(err);
     }
-    res.json({ post: saved });
+    if (order.status == 'paid') {
+      if (order.totalTickets > order.paidTickets) {
+        return res.send({ status: 'less', paidTickets: order.paidTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
+      }
+      return res.send({ status: 'ok', paidTickets: order.paidTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
+    }
+    return res.send({ status: 'again' });
   });
 }
 
-/**
- * Get a single post
- * @param req
- * @param res
- * @returns void
- */
-export function getPost(req, res) {
-  Post.findOne({ cuid: req.params.cuid }).exec((err, post) => {
-    if (err) {
-      res.status(500).send(err);
-    }
-    res.json({ post });
-  });
-}
-
-/**
- * Delete a post
- * @param req
- * @param res
- * @returns void
- */
-export function deletePost(req, res) {
-  Post.findOne({ cuid: req.params.cuid }).exec((errors, post) => {
+export async function userCoinBalanceChecker(req, res) {
+  Order.find({ status: 'pending', network: process.env.BTCNET }).exec((errors, orders) => {
     if (errors) {
-      res.status(500).send({errors});
+      return console.log('error in check balance', errors.message);
     }
-
-    post.remove(() => {
-      res.status(200).end();
+    orders.map(order => {
+      setTimeout(() => { promiseCheck(order); }, 3000);
     });
   });
 }
 
 /**
- * Get the help
+ * Create Project
  */
 
 export function createProject(req, res) {
@@ -743,16 +541,16 @@ export function createProject(req, res) {
   }
 
   const project = req.body.project;
-  const newObject = new Project.Project(project);
-  const wallet = new Project.Wallet(project);
-  const coin = new Project.Coin(project);
+  const newObject = new Project(project);
+  const wallet = new Wallet(project);
+  const coin = new Coin(project);
   coin.address = project.coin_BTC;
   wallet.BTC = coin;
   coin.address = project.coin_ETH;
   wallet.ETH = coin;
   coin.address = project.coin_LTC;
   wallet.LTC = coin;
-  const address = new Project.Address(project);
+  const address = new Address(project);
   address.country = project.country;
   address.city = project.city;
   address.postalCode = project.postal_code;
@@ -793,7 +591,7 @@ export function updateProject(req, res) {
   if (!req.body.project._id) {
     res.status(403).end();
   } else {
-    Project.Project.findOne({ _id: req.body.project._id }).exec((errors, newObject) => {
+    Project.findOne({ _id: req.body.project._id }).exec((errors, newObject) => {
       if (errors) {
         res.status(500).send({ errors: errors });
       } else {
@@ -838,16 +636,14 @@ export function deleteProject(req, res) {
   if (!req.body._id) {
     res.status(403).send({errors: 'something wrong happened'});
   } else {
-    Project.Project.deleteOne({ _id: req.body._id }).exec((err, obj) => {
+    Project.deleteOne({ _id: req.body._id }).exec((err, obj) => {
       res.json({ obj });
     });
   }
 }
 
-
-
 export function getProjects(req, res) {
-  Project.Project.find().sort('-dateAdded').populate('donors').exec((errors, projects) => {
+  Project.find().sort('-dateAdded').populate('donors').exec((errors, projects) => {
     if (errors) {
       return res.status(500).send({errors});
     }
@@ -857,14 +653,14 @@ export function getProjects(req, res) {
 
 export function getProject(req, res) {
   if (req.params.id == 'undefined' || req.params.id == 'null') {
-    Project.Project.findOne().sort('-dateAdded').populate('donors').exec((errors, project) => {
+    Project.findOne().sort('-dateAdded').populate('donors').exec((errors, project) => {
       if (errors) {
         return res.status(500).send({errors});
       }
       res.json({ project });
     });
   } else {
-    Project.Project.findOne({ _id: req.params.id }).exec((errors, project) => {
+    Project.findOne({ _id: req.params.id }).exec((errors, project) => {
       if (errors) {
         return res.status(500).send({ errors });
       }

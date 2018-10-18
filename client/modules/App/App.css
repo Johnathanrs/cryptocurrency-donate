@@ -31,15 +31,15 @@
 @media (min-width: 992px) {
   .right-pane {
     position: fixed;
-    top: 100px;
+    top: 170px;
     right: 10px;
   }
 }
 @media (min-width: 1200px) {
   .right-pane {
     position: fixed;
-    top: 100px;
-    right: 120px;
+    top: 170px;
+    right: 70px;
   }
 }
 .cursor-point {

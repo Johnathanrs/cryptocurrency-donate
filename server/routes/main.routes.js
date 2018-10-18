@@ -3,21 +3,6 @@ import * as MainController from '../controllers/main.controller';
 import { checkToken, checkTokenAdmin } from './auth';
 const router = new Router();
 
-
-
-// Get all Posts
-router.route('/posts').get(MainController.getPosts);
-
-// Get one post by cuid
-router.route('/posts/:cuid').get(MainController.getPost);
-
-// Add a new Post
-router.route('/posts').post(MainController.addPost);
-
-// Delete a post by cuid
-router.route('/posts/:cuid').delete(MainController.deletePost);
-
-// Get help content
 router.route('/projects').post(MainController.createProject);
 
 router.route('/updateProjects').post(MainController.updateProject);
@@ -46,15 +31,13 @@ router.use('/users/getNow', checkToken, MainController.getNow);
 
 router.route('/users/userSignup').post(MainController.userSignup);
 
-router.route('/users/getCryptoAddr/:email/:projectID').post(MainController.getCryptoAddr);
+router.use('/users/checkBalance', checkToken, MainController.checkBalanceFromFront);
 
-router.use('/users/checkBTCBalance', checkToken, MainController.checkBTCBalance);
-
-router.use('/users/checkLTCBalance', checkToken, MainController.checkLTCBalance);
-
-router.use('/users/checkETHBalance', checkToken, MainController.checkETHBalance);
+router.route('/user/guide').get(MainController.getUserGuide);
 
 router.use('/user', checkToken, MainController.getUser);
+
+router.use('/orders', checkToken, MainController.getOrders);
 
 router.route('/user').put(MainController.updateUser);
 

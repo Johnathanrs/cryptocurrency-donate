@@ -32,6 +32,7 @@ import Statistics from './modules/App/Admin/Statistics';
 import Admin from './modules/App/Admin/Admin';
 import SignUp from './modules/App/Admin/SignUp';
 import User from './modules/App/Admin/User';
+import UserGuideManager from './modules/App/Admin/UserGuideManager';
 // Import Routes
 // import Routes from './routes';
 
@@ -63,6 +64,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/CustomerSignUp');
   require('./modules/App/Admin/ProjectDetailView');
   require('./modules/App/Admin/SignUp');
+  require('./modules/App/Admin/UserGuideManager');
 }
 
 
@@ -79,7 +81,12 @@ class App extends React.Component {
 
   requireAuth(nextState, replace, callback) {
     const tokenData = window.localStorage.getItem('smartproject');
-    const isSignIn = JSON.parse(tokenData).isSignIn;
+    let isSignIn = '';
+    try {
+      isSignIn = JSON.parse(tokenData).isSignIn
+    } catch(err) {
+      console.log(err);
+    }
     if (!tokenData || !isSignIn) {
       replace('/user/signin');
       callback();
@@ -143,6 +150,10 @@ class App extends React.Component {
                 <Route
                   path="user"
                   component={User}
+                />
+                <Route
+                  path="userguidemanager"
+                  component={UserGuideManager}
                 />
                 <Route
                   path="project"

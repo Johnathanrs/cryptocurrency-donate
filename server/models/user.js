@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const Schema = mongoose.Schema;
 
 const subProjectSchema = new Schema({
-  projectID: { type: Schema.ObjectId, ref: 'Project.Project' },
+  projectID: { type: Schema.ObjectId, ref: 'Project' },
   totalTickets: { type: Number, required: true },
   totalPrice: { type: Object, required: false },
   paidAmountBTC: { type: Number, default: 0.0, required: false },

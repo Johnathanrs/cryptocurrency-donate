@@ -89,6 +89,15 @@ class Home extends Component {
             }
             this.setState({ ...this.state, project: project, ticketPrice: ticketPrice, totalPrice: totalPrice, remainingDays:days, donationShare: donationShare.toString(), loading: false });
         }
+
+        if (this.props.token !== nextProps.token && !nextProps.token) {
+            this.setState({
+                ...this.state,
+                snackOpen: true,
+                message: 'Log out',
+                activePage: 'home',
+            });
+        }
     }
 
     componentDidMount() {
@@ -134,6 +143,7 @@ class Home extends Component {
                 projectID: this.state.project._id,
                 totalTickets: this.state.tickets,
                 totalPrice: this.state.totalPrice,
+                ticketPrice: this.state.ticketPrice,
             },
         };
         callApi('users/getNow', 'POST', body).then(res => {
@@ -143,7 +153,7 @@ class Home extends Component {
                 console.log(res);
                 if (res.status == 'authorized') {
                     this.setState({ ...this.state,
-                        subID: res.id,
+                        orderID: res.id,
                         crypto: res.crypto,
                         isRegistering: false,
                         snackOpen: false,
@@ -189,6 +199,7 @@ class Home extends Component {
                 projectID: this.state.project._id,
                 totalTickets: this.state.tickets,
                 totalPrice: this.state.totalPrice,
+                ticketPrice: this.state.ticketPrice,
             },
         };
 
@@ -202,7 +213,7 @@ class Home extends Component {
                     snackOpen: true,
                 });
             } else {
-                localStorage.setItem('smartproject', JSON.stringify({ token: res.token, isSignIn: false }));
+                localStorage.setItem('smartproject', JSON.stringify({ email: res.email, token: res.token, isSignIn: false }));
                 if (res.isNewUser && res.isMsgSent) {
                     message = 'Successfully sent your personal credential!';
                 } else {
@@ -211,7 +222,7 @@ class Home extends Component {
                 this.setState({ ...this.state,
                     message,
                     crypto: res.crypto,
-                    subID: res.id,
+                    orderID: res.id,
                     snackOpen: true,
                     activePage: 'payment',
                     token: res.token,
@@ -275,6 +286,7 @@ class Home extends Component {
                 message: message,
                 paidAmount: res.paidAmount,
                 paidTickets: res.paidTickets,
+                coinType: res.paidCoin,
             });
             clearInterval(this.balanceBTCInterval);
             clearInterval(this.balanceLTCInterval);
@@ -295,63 +307,27 @@ class Home extends Component {
 
     balanceBody = () => {
         return {
-            email: this.state.email,
-            projectID: this.state.project._id,
-            ticketPrice: this.state.ticketPrice,
-            tickets: this.state.tickets,
-            coinType: this.state.coinType,
-            subID: this.state.subID,
-            crypto: this.state.crypto,
+            orderID: this.state.orderID,
         };
     }
 
     startBalanceInterval = () => {
-        this.btcBalanceInterval =  setInterval( () => { this.checkBTCBalance(); }, 15000);
-        this.ltcBalanceInterval =  setInterval( () => { this.checkLTCBalance(); }, 10000);
-        this.ethBalanceInterval =  setInterval( () => { this.checkETHBalance(); }, 8000);
+        this.balanceInterval =  setInterval( () => { this.checkBalance(); }, 30000);
     }
 
     clearBalanceInterval = () => {
-        clearInterval(this.btcBalanceInterval);
-        clearInterval(this.ltcBalanceInterval);
-        clearInterval(this.ethBalanceInterval);
+        clearInterval(this.balanceInterval);
     }
 
-    checkLTCBalance = () => {
+    checkBalance = () => {
         if (!this.state.crypto || this.state.activePage != 'payment') {
             // console.log('clearInterval ', addr);
             this.clearBalanceInterval();
             return;
         }
-        console.log('timer LTC');
+        console.log('timer Balance');
         const body = this.balanceBody();
-        callApi('users/checkLTCBalance', 'POST', body).then((res, err) => {
-            this.manageBalanceResponse(res);
-        });
-    }
-
-    checkBTCBalance = () => {
-        if (!this.state.crypto || this.state.activePage != 'payment') {
-            // console.log('clearInterval ', addr);
-            this.clearBalanceInterval();
-            return;
-        }
-        console.log('timer BTC');
-        const body = this.balanceBody();
-        callApi('users/checkBTCBalance', 'POST', body).then((res, err) => {
-            this.manageBalanceResponse(res);
-        });
-    }
-
-    checkETHBalance = () => {
-        if (!this.state.crypto || this.state.activePage != 'payment') {
-            // console.log('clearInterval ', addr);
-            this.clearBalanceInterval();
-            return;
-        }
-        console.log('timer ETH');
-        const body = this.balanceBody();
-        callApi('users/checkETHBalance', 'POST', body).then((res, err) => {
+        callApi('users/checkBalance', 'POST', body).then((res, err) => {
             this.manageBalanceResponse(res);
         });
     }
@@ -361,6 +337,19 @@ class Home extends Component {
             ...this.state,
             activePane: this.state.activePane == type ? 'Thumb' : type,
         });
+    }
+
+    getEmail = () => {
+        const tokenData = localStorage.getItem('smartproject');
+        let email = '';
+        if (tokenData) {
+            try {
+                email = JSON.parse(tokenData).email;
+            } catch(err) {
+                console.log(err);
+            }
+        }
+        return email;
     }
 
     render() {
@@ -384,6 +373,7 @@ class Home extends Component {
                                 toggleDetail={this.toggleDetail} />
                             {
                                 activePage == 'home' && <TicketControl 
+                                                        email={this.getEmail}
                                                         coinTypeArray={coinTypeArray}
                                                         coinType={this.state.coinType}
                                                         tickets={this.state.tickets}
@@ -418,6 +408,7 @@ class Home extends Component {
                             }
                             {
                                 activePage == 'payment' && <Payment
+                                                        email={this.getEmail}
                                                         coinTypeArray={coinTypeArray}
                                                         coinType={this.state.coinType}
                                                         tickets={this.state.tickets}
@@ -431,6 +422,7 @@ class Home extends Component {
 
                             {
                                 activePage == 'thankyou' && <Thankyou
+                                                        email={this.getEmail}
                                                         coinTypeArray={coinTypeArray}
                                                         coinType={this.state.coinType}
                                                         tickets={this.state.paidTickets}

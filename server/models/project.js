@@ -49,9 +49,15 @@ const projectSchema = new Schema({
   dateAdded: { type: Date, default: Date.now, required: true },
 });
 
-module.exports = {
-  Project: mongoose.model('Project', projectSchema),
-  Address: mongoose.model('Address', addressSchema),
-  Wallet: mongoose.model('Wallet', walletSchema),
-  Coin: mongoose.model('Coin', coinSchema),
-};
+// module.exports = {
+//   Project: mongoose.model('Project', projectSchema),
+//   Address: mongoose.model('Address', addressSchema),
+//   Wallet: mongoose.model('Wallet', walletSchema),
+//   Coin: mongoose.model('Coin', coinSchema),
+// };
+
+export default mongoose.model('Project', projectSchema);
+exports.SubProject = mongoose.model('Address', addressSchema);
+exports.SubProject = mongoose.model('Wallet', walletSchema);
+exports.SubProject = mongoose.model('Coin', coinSchema);
+

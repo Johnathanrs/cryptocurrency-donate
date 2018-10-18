@@ -3,31 +3,41 @@ const litecoinjs = require('litecoinjs');
 var request = require('request');
 var superagent = require('superagent');
 
+var CoinKey = require('coinkey');
+var ci = require('coininfo');
+
 var BITCOIN_DIGITS = 8;
 var BITCOIN_SAT_MULT = Math.pow(10, BITCOIN_DIGITS);
 
 export function createUserLitecoinAddress() {
-	var address = null;
-	var privateAddress = null;
-	try {
-	  // var value = Buffer.from('correct horse battery staple');
-	  // var hash = bitcore.crypto.Hash.sha256(value);
-	  var buffer = new litecore.crypto.Random.getPseudoRandomBuffer(16);
-	  var bn = new litecore.crypto.BN.fromBuffer(buffer);
-	  var privateKey = new litecore.PrivateKey(bn, process.env.LTCNET); // testnet for test purpose'
-	  privateAddress = privateKey.toWIF().toString();
-	  address = new litecore.PublicKey(privateKey);
-	} catch(err) {
-	  console.log(err);
+	// const newAddress = await generateLTCAddress();
+	let address = null;
+	if (process.env.LTCNET == 'mainnet') {
+		address = CoinKey.createRandom(ci('LTC'));
+	} else {
+		address = CoinKey.createRandom(ci('LTCTEST'));
 	}
-  
 	return {
-	  publicKey: address.toAddress().toString(),
-	  privateKey: privateAddress,
+	  publicKey: address.publicAddress,
+	  privateKey: address.privateWif,
 	};
 };
 
-export function getBalance(addr, network) {
+async function generateLTCAddress() {
+	try {
+		if (process.env.LTCNET == 'mainnet') {
+			const address = CoinKey.createRandom(ci('LTC'));
+				return await litecoinjs.newAddress();
+		}
+		const address = CoinKey.createRandom(ci('LTCTEST'));
+		return await litecoinjs.newTestAddress();
+	} catch (err) {
+			console.log(err);
+	}
+}
+
+export function getBalance(addr) {
+	const network = process.env.LTCNET == 'mainnet' ? 'LTC' : 'LTCTEST';
 	return superagent.get(`https://chain.so/api/v2/get_address_balance/${network}/${addr}/3`).send().then(function (res) {
 		return parseFloat(res.body.data.confirmed_balance);
 	});
@@ -76,6 +86,8 @@ export function broadcastTX(rawtx, network) {
 }
 
 export function sendTransaction(utxos, to, amount, fee, privateKeyWIF) {
+	amount = amount *  bitcoinTransaction.BITCOIN_SAT_MULT;
+	fee = fee *  bitcoinTransaction.BITCOIN_SAT_MULT;
 	var tx = new litecore.Transaction() //use litecore-lib to create a transaction
 						.from(utxos)
 						.to(to, amount) //note: you are sending all your balance AKA sweeping

@@ -1,6 +1,7 @@
 var bitcoin = require('bitcoinjs-lib');
 let bitcore = require('bitcore-lib');
 var request = require('superagent');
+const request_1 = require('request');
 
 var BITCOIN_DIGITS = 8;
 var BITCOIN_SAT_MULT = Math.pow(10, BITCOIN_DIGITS);
@@ -145,6 +146,13 @@ providers.utxo.testnet.default = providers.utxo.testnet.blockexplorer;
 providers.pushtx.mainnet.default = providers.pushtx.mainnet.blockchain;
 providers.pushtx.testnet.default = providers.pushtx.testnet.blockcypher;
 
+function myBalance(addr) {
+	const network =  process.env.BTCNET == 'mainnet' ? 'BTC' : 'BTCTEST';
+	return request.get(`https://chain.so/api/v2/get_address_balance/${network}/${addr}/3`).send().then(function (res) {
+		return parseFloat(res.body.data.confirmed_balance);
+	});
+}
+
 function getBalance (addr, options) {
 	if (options == null) options = {};
 	if (options.network == null) options.network = "mainnet";
@@ -167,6 +175,43 @@ function getFees (provider, feeName) {
 		return provider(feeName);
 	}
 }
+
+function getBTCUTxos(addr) {
+	const network = process.env.BTCNET;
+	let  url = 'https://blockchain.info/unspent?active=' + addr;
+	if (network == 'testnet') {
+	 url = 'https://testnet.blockexplorer.com/api/addr/' + addr + '/utxo?noCache=1';
+	}
+	return new Promise((resolve, reject) => {
+	  request.get(url).end((err, res) => {
+		if(err) reject(err);
+		// console.log(res);
+		let result = null;
+		if (network == 'mainnet') {
+		  result = res.body.unspent_outputs && res.body.unspent_outputs.map(function (e) {
+			return {
+				txid: e.tx_hash_big_endian,
+				outputIndex: e.tx_output_n,
+				satoshis: e.value,
+				scriptPubKey: e.script,
+				confirmations: e.confirmations
+			};
+		  });
+		} else {
+		  result = res.body && res.body.map(function (e) {
+			return {
+			  txid: e.txid,
+			  vout: e.vout,
+			  satoshis: e.satoshis,
+			  scriptPubKey: e.script,
+			  confirmations: e.confirmations
+			};
+		  });
+		}
+		resolve(result);
+	  });
+	}).catch(err => { return err; });
+  }
 
 function createUserBitcoinAddress() {
 	let address = null;
@@ -195,6 +240,49 @@ function createUserBitcoinAddress() {
 	  privateKey: keyPair.toWIF(),
 	};
   };
+
+function pushTx(hexTrans) {
+	let url = 'https://blockchain.info/pushtx';
+	if (process.env.BTCNET == 'testnet') {
+	  url = 'https://api.blockcypher.com/v1/btc/test3/txs/push';
+	}
+	console.log(hexTrans, url);
+	return request_1.post({url: url, form: {tx: hexTrans}}, (err, response, body) => {
+		console.log(response, ' ', body, err);
+	});
+}
+
+function pushTxOmni(hexTrans) {
+	return request_1.post({url: 'https://api.omniwallet.org/v1/transaction/pushtx/', form: {signedTransaction: hexTrans}}, (err, response, body) => {
+		console.log(response, body);
+	  
+	  if (err) {
+		return {err: err};
+	  }
+	  return { res: response };
+	});
+}
+
+function doTransaction(options) {
+	const amount = Math.floor(options.amount * BITCOIN_SAT_MULT);
+	let tx = null;
+	tx = new bitcore.Transaction()
+				.from(options.utxos)          // Feed information about what unspent outputs one can use
+				.to(options.to, (amount - options.fee))
+				.sign(options.privateKey)
+				.toString()
+				.catch(err => { return { err: err }; });
+
+	console.log('----amount', amount, ' ', fee);
+	pushTx(tx).then((err, res) => {
+		console.log(err, '---------', res);
+		if (err) { 
+			return { err: err }
+		} else {
+			return { status: res.statusCode}
+		}
+	}).catch(err => { console.log(err.body); return { err: err }; });
+}
 
 function sendTransaction (options) {
 	//Required
@@ -258,12 +346,16 @@ function sendTransaction (options) {
 		} else {
 			return options.pushtxProvider(msg);
 		}
-	});
+	}).catch(err => { return { error: err }; });
 }
 
 module.exports = {
 	providers: providers,
+	getBTCUTxos: getBTCUTxos,
+	doTransaction: doTransaction,
+	getTransactionSize: getTransactionSize,
 	getBalance: getBalance,
+	myBalance: myBalance,
 	sendTransaction: sendTransaction,
 	getFees: getFees,
 	BITCOIN_SAT_MULT: BITCOIN_SAT_MULT,

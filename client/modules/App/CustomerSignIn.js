@@ -39,7 +39,7 @@ class CustomerSignIn extends Component {
             if  (res.errors) {
                 message = res.errors;
             } else {
-                window.localStorage.setItem('smartproject', JSON.stringify({ token: res.user.token, isSignIn: true }));
+                window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
                 browserHistory.goBack();
             }
