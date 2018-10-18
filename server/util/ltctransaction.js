@@ -59,7 +59,7 @@ export function getUTXOs(address, network) {
         resolve(body)
       }
     )
-  })
+  }).catch(err => { return { err: err }; });
 }
 
 //manually hit an insight api to broadcast your tx

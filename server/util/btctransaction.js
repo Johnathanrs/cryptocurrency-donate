@@ -161,7 +161,7 @@ function getBalance (addr, options) {
 
 	return options.balanceProvider(addr).then(function (balSat) {
 		return balSat/BITCOIN_SAT_MULT;
-	});
+	}).catch(err => { return { err: err }; });
 }
 
 function getTransactionSize (numInputs, numOutputs) {
