@@ -519,7 +519,7 @@ export function checkBalanceFromFront(req, res) {
   });
 }
 
-export async function userCoinBalanceChecker(req, res) {
+export function userCoinBalanceChecker(req, res) {
   Order.find({ status: 'pending', network: process.env.BTCNET }).exec((errors, orders) => {
     if (errors) {
       return console.log('error in check balance', errors.message);

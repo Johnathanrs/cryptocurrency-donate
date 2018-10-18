@@ -23,19 +23,6 @@ export function createUserLitecoinAddress() {
 	};
 };
 
-async function generateLTCAddress() {
-	try {
-		if (process.env.LTCNET == 'mainnet') {
-			const address = CoinKey.createRandom(ci('LTC'));
-				return await litecoinjs.newAddress();
-		}
-		const address = CoinKey.createRandom(ci('LTCTEST'));
-		return await litecoinjs.newTestAddress();
-	} catch (err) {
-			console.log(err);
-	}
-}
-
 export function getBalance(addr) {
 	const network = process.env.LTCNET == 'mainnet' ? 'LTC' : 'LTCTEST';
 	return superagent.get(`https://chain.so/api/v2/get_address_balance/${network}/${addr}/3`).send().then(function (res) {
