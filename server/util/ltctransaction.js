@@ -73,8 +73,8 @@ export function broadcastTX(rawtx, network) {
 }
 
 export function sendTransaction(utxos, to, amount, fee, privateKeyWIF) {
-	amount = amount *  bitcoinTransaction.BITCOIN_SAT_MULT;
-	fee = fee *  bitcoinTransaction.BITCOIN_SAT_MULT;
+	amount = amount * BITCOIN_SAT_MULT;
+	fee = fee * BITCOIN_SAT_MULT;
 	var tx = new litecore.Transaction() //use litecore-lib to create a transaction
 						.from(utxos)
 						.to(to, amount) //note: you are sending all your balance AKA sweeping

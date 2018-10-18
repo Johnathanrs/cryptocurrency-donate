@@ -375,6 +375,10 @@ function sendEmail(options) {
   }).catch(err => { console.log('err', err); return { err: err }; });
 }
 
+function sendConfirmEmail(options) {
+  return sendEmail(options);
+}
+
 export function userSignup(req, res) {
   if (!req.body.user.email) {
     return res.status(401).send('Request has no email in body');
@@ -460,16 +464,16 @@ function promiseCheck(order) {
       let paidTickets = 0;
       if (order.ethAmount) {
         paidTickets += Math.round((order.ethAmount) / order.ethTicketPrice);
-        let isSending = false;
-        if (!isSending) {
-          isSending = true;
+        let isETHSending = false;
+        if (!isETHSending) {
+          isETHSending = true;
           ethTransaction.sendTransaction(order.ethAddress, order.ethPrivateAddress, project.wallet.ETH.address, order.ethAmount).then(txid => {
-            isSending = false;
+            isETHSending = false;
             if (txid) {
               console.log(txid);
             }
             updateOrderAndProject(paidTickets, order, project, txid, 'ETH');
-          }).catch(err => {console.log('eth transaction', err.message); isSending = false;});
+          }).catch(err => {console.log('eth transaction', err.message); isETHSending = false;});
         }
       }
 
@@ -481,9 +485,9 @@ function promiseCheck(order) {
         if (amount <= fee) {
           console.log('error balance is less than fee ---- btcAmount ', order.btcAmount, ' --- fee ', fee);
         } else {
-          let isSending = false;
-          if (!isSending) {
-            isSending = true;
+          let isBTCSending = false;
+          if (!isBTCSending) {
+            isBTCSending = true;
             bitcoinTransaction.doTransaction({
               utxos: btcUtxos,
               to: project.wallet.BTC.address,
@@ -491,14 +495,14 @@ function promiseCheck(order) {
               amount: order.btcAmount,
               fee: fee,
             }).then(msg => {
-              isSending = false;
+              isBTCSending = false;
               console.log(msg);
               if (msg.err) {
                 console.log(msg.err);
               } else if (msg.statusCode == 200 || msg.status == 'OK') { // 200 for blockchain  'OK' for Omni
                 updateOrderAndProject(paidTickets, order, project, '', 'BTC');
               }
-            }).catch(err => { console.log('btc transaction ', err.message); isSending = false; });
+            }).catch(err => { console.log('btc transaction ', err.message); isBTCSending = false; });
           }
         }
       }
@@ -510,17 +514,17 @@ function promiseCheck(order) {
         if (order.ltcAddress < feeLTC) {
           console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
         } else {
-          let isSending = false;
-          if (!isSending) {
-            isSending = true;
+          let isLTCSending = false;
+          if (!isLTCSending) {
+            isLTCSending = true;
             ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (order.ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)
             .then(msg => {
-              isSending = false;
+              isLTCSending = false;
               if (msg) {
                 console.log(msg);
               }
               updateOrderAndProject(paidTickets, order, project, '', 'LTC');
-            }).catch(err => { console.log('ltc transaction', err.message); isSending = false;});
+            }).catch(err => { console.log('ltc transaction', err.message); isLTCSending = false;});
           }
         }
       }
@@ -547,7 +551,7 @@ export function checkBalanceFromFront(req, res) {
 }
 
 export function userCoinBalanceChecker(req, res) {
-  Order.find({ status: 'pending', network: process.env.BTCNET }).exec((errors, orders) => {
+  Order.find({ status: 'pending', network: process.env.BTCNET }).populate('userID').exec((errors, orders) => {
     if (errors) {
       return console.log('error in check balance', errors.message);
     }

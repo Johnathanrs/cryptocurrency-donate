@@ -27,16 +27,6 @@ class MyTickets extends Component {
         this.searchProject = this.searchProject.bind(this);
     }
 
-    componentWillMount() {
-        if (typeof(window) !== "undefined") {
-            const token = window.localStorage.getItem('smartproject');
-            if (token == null || token == 'null') {
-                browserHistory.push('/signin');
-            }
-            this.setState({ ...this.state, token })
-        }
-    }
-
     componentDidMount() {
         this.props.dispatch(fetchOrders());
     }
@@ -129,8 +119,8 @@ class MyTickets extends Component {
                         pagination>
                         <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
                         <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
-                        <TableHeaderColumn dataField="totalTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
-                        <TableHeaderColumn dataField="selectedTickets" >Purchased Tickets</TableHeaderColumn>
+                        <TableHeaderColumn dataField="selectedTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
+                        <TableHeaderColumn dataField="paidTickets" >Purchased Tickets</TableHeaderColumn>
                         <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>
                         <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
                         <TableHeaderColumn dataField="pID" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
