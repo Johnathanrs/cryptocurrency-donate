@@ -71,6 +71,7 @@ class Home extends Component {
     componentWillReceiveProps(nextProps) {
         if (this.props.project !== nextProps.project) {
             const project = nextProps.project;
+            if (!project) return;
             let a = moment(project.fundingDuration, 'YYYY-MM-DD');
             let b = moment().format('YYYY-MM-DD');
             var days = a.diff(b, 'days');
