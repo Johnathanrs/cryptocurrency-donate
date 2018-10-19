@@ -11,7 +11,6 @@ import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
 import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
 import LTC_ROUNDED from '../../../assets/img/LTC_yellow.png';
 
-import '../App.css';
 import '../../../assets/css/cards_gallery.css';
 
 import { fetchProject } from '../AppActions';

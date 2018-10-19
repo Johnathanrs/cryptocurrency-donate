@@ -2,16 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
-import TextField from '@material-ui/core/TextField';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
-import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
 
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import ProjectItem from './ProjectItem';
 
-import './App.css';
-import { fetchUser, fetchProjects } from './AppActions';
+import { fetchUser } from './AppActions';
 
 class Donors extends Component {
     constructor(props) {

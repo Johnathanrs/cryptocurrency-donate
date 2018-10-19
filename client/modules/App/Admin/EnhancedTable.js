@@ -13,7 +13,6 @@ import TextField from '@material-ui/core/TextField';
 import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 import { browserHistory } from 'react-router';
 import moment from 'moment';
-import '../App.css';
 
 const headerRows = [
   { id: 'title', numeric: false, disablePadding: true, label: 'Title' },

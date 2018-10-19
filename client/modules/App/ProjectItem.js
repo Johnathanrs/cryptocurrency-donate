@@ -3,7 +3,6 @@ import React from 'react';
 import moment from 'moment';
 import TICKET_BACKGROUND from '../../assets/img/Ticket_Black_Clean.png';
 
-import './App.css';
 import '../../assets/css/cards_gallery.css';
 
 function ProjectItem(props) {

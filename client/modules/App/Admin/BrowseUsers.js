@@ -3,8 +3,6 @@ import React from 'react';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
 
-import '../App.css';
-
 class BrowseUsers extends React.Component {
     constructor(props) {
         super(props);

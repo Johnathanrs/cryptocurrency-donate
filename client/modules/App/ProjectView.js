@@ -2,7 +2,6 @@ import React from 'react';
 import { Player } from 'video-react';
 
 import '../../assets/css/cards_gallery.css';
-import './App.css';
 
 function ProjectView(props) {
     const { project, remainingDays, activePane, toggleDetail } = props;

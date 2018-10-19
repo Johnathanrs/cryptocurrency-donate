@@ -5,7 +5,6 @@ import { browserHistory } from 'react-router';
 
 import { fetchProjects } from '../AppActions';
 
-import '../App.css';
 import EnhancedTable from './EnhancedTable';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';

@@ -12,7 +12,6 @@ import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-countr
 
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
-import '../App.css';
 import { fetchProject } from '../AppActions';
 import callApi from '../../../util/apiCaller';
 

@@ -6,8 +6,6 @@ import Divider from '@material-ui/core/Divider';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
 
-import '../App.css';
-
 import { fetchUserGuide } from '../AppActions';
 
 class UserGuideManager extends React.Component {

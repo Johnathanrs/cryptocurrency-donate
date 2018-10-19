@@ -3,10 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import { browserHistory } from 'react-router';
-import Paper from '@material-ui/core/Paper';
 
-import '../App.css';
-import { Button } from '@material-ui/core';
 import callApi from '../../../util/apiCaller';
 
 import { saveToken } from '../AuthActions';

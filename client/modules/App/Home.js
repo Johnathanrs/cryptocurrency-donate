@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
-import ReactTimeout from 'react-timeout'
 
 import moment from 'moment';
-import { fetchProjects, fetchProject } from './AppActions';
+import { fetchProject } from './AppActions';
 import { saveToken } from './AuthActions';
 import callApi from '../../util/apiCaller';
 
@@ -20,7 +19,6 @@ import UserRegister from './UserRegister';
 import Payment from './Payment';
 import Thankyou from './Thankyou';
 import CustomizedSnackbars from './components/SnackBar/CustomizedSnackbars';
-
 
 const coinTypeArray = {
     BTC: BTC_ROUNDED,

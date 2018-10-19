@@ -8,8 +8,6 @@ import { fetchUsers } from '../AppActions';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
 
-import '../App.css';
-
 class User extends Component {
     constructor(props) {
         super(props);

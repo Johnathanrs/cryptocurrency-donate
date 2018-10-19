@@ -14,9 +14,6 @@ import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-countr
 
 import callApi, {fetchFxCryptoRate} from '../../../util/apiCaller';
 
-import '../App.css';
-// import 'video-react/dist/video-react.css';
-
 class Project extends React.Component {
     constructor(props) {
         super(props);

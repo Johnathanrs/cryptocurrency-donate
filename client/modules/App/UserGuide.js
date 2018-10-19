@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 
-import './App.css';
 import { fetchUserGuide } from './AppActions';
 
 import FAQItem from './components/FAQItem/FAQItem';

@@ -6,8 +6,6 @@ import EthereumQRPlugin from 'ethereum-qr-code';
 import Clipboard from 'react-clipboard.js';
 const web3 = require('web3');
 
-import './App.css';
-
 import BTC_ROUNDED from '../../assets/img/BTC_yellow.png';
 import ETH_ROUNDED from '../../assets/img/ETH_color.png';
 import LTC_ROUNDED from '../../assets/img/LTC_yellow.png';

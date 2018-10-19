@@ -9,7 +9,6 @@ import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import ProjectItem from './ProjectItem';
 
-import './App.css';
 import '../../assets/css/cards_gallery.css';
 import { fetchProjects } from './AppActions';
 
