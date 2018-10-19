@@ -3,8 +3,6 @@ import React from 'react';
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
 
-import '../App.css';
-
 class ClaimBenefits extends React.Component {
     constructor(props) {
         super(props);
