@@ -33,7 +33,7 @@ function projectBalance(project) {
         donatedLTC += utxos[i]['satoshis'];
       }
     }
-    project.donatedLTC = parseFloat(donatedLTC);
+    project.donatedLTC = parseFloat(donatedLTC) / bitcoinTransaction.BITCOIN_SAT_MULT;
     project.save((err, saved) => {
       if (err) {
         console.log(err);
@@ -220,15 +220,14 @@ export function customerSignup(req, res) {
     newUser.setPassword(newPassword);
   
     return newUser.save((err, saved) => {
-      sgMail.setApiKey(sensitive.sendgrid);
-      const msg = {
+      const text = `Congratulation! You successfully signed up. Your password is ${newPassword}`;
+      const html = `<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ${newPassword}</p></div>`;
+      sendEmail({
         to: saved.email,
-        from: 'info@smartprojects.tech',
         subject: 'Authentication',
-        text: 'Congratulation! You successfully signed up. Your password is ' + newPassword,
-        html: '<div><strong>Congratulation</strong><p>You successfully signed up. Your password is ' + newPassword + '<p></div>',
-      };
-      sgMail.send(msg).then((statusMessage) => {
+        text: text,
+        html: html,
+      }).then(msg => {
         return res.json({ user: newUser.toAuthJSON() });
       });
     });
@@ -373,10 +372,6 @@ function sendEmail(options) {
       resolve('OK');
     });
   }).catch(err => { console.log('err', err); return { err: err }; });
-}
-
-function sendConfirmEmail(options) {
-  return sendEmail(options);
 }
 
 export function userSignup(req, res) {
@@ -547,15 +542,15 @@ export function checkBalanceFromFront(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad request' });
   }
-  Order.findOne({ _id: req.body.orderID }).exec((err, order) => {
+  Order.findOne({ _id: req.body.orderID }).populate('projectID').exec((err, order) => {
     if (err) {
       return res.status(500).send(err);
     }
     if (order.status == 'paid') {
       if (order.totalTickets > order.paidTickets) {
-        return res.send({ status: 'less', paidTickets: order.paidTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
+        return res.send({ status: 'less', paidTickets: order.paidTickets, maximumAvailableTickets: order.projectID.maximumAvailableTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
       }
-      return res.send({ status: 'ok', paidTickets: order.paidTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
+      return res.send({ status: 'ok', paidTickets: order.paidTickets, maximumAvailableTickets: order.projectID.maximumAvailableTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
     }
     return res.send({ status: 'again' });
   });

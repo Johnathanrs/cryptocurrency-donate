@@ -287,6 +287,10 @@ class Home extends Component {
                 paidAmount: res.paidAmount,
                 paidTickets: res.paidTickets,
                 coinType: res.paidCoin,
+                project: {
+                    ...this.state.project,
+                    maximumAvailableTickets: res.maximumAvailableTickets,
+                }
             });
             clearInterval(this.balanceBTCInterval);
             clearInterval(this.balanceLTCInterval);

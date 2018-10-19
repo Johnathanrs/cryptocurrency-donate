@@ -41,7 +41,8 @@ class CustomerSignIn extends Component {
             } else {
                 window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
-                browserHistory.goBack();
+                // browserHistory.goBack();
+                this.navigate('user/mytickets');
             }
             self.setState({ ...self.state, isCreate: false, errOnCreate: message });
         });

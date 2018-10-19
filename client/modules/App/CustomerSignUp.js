@@ -43,7 +43,7 @@ class CustomerSignUp extends React.Component {
             } else {
                 window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
-                browserHistory.push('/');
+                this.navigate('user/mytickets');
             }
         });
     }

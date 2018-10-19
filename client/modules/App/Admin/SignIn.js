@@ -42,7 +42,7 @@ class SignIn extends Component {
             } else {
                 window.localStorage.setItem('smartprojectadmin', res.user.token);
                 this.props.dispatch(saveToken(res.user.token));
-                browserHistory.goBack();
+                this.navigate('admin/dashboard')
             }
             self.setState({ ...self.state, isCreate: false, errOnCreate: message });
         });
