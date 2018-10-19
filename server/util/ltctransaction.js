@@ -71,7 +71,7 @@ export  function broadcastTX(rawtx, network) {
 			} catch(err) {
 				reject(err);
 			}
-			request.post({url: url, form: {tx: tx}}, (err, response, body) => {
+			request.post({url: uri, form: {tx: tx}}, (err, response, body) => {
 				if (err) reject(err);
 				// if (response.statusCode != 200) reject({ message: 'something is wrong'});
 				if (body.txid) {
