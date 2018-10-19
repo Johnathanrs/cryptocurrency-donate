@@ -97,7 +97,7 @@ export function getOrders(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad Request' });
   }
-  Order.find().sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
+  Order.find({ userID: req.decoded }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
     }
