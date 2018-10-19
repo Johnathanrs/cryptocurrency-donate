@@ -78,4 +78,11 @@ class CustomerSignUp extends React.Component {
     }
 }
 
-export default CustomerSignUp;
+function mapStateToProps(state) {
+    return {
+      token: state.auth.token,
+    };
+}
+
+
+export default connect(mapStateToProps)(CustomerSignUp);
