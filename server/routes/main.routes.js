@@ -17,7 +17,7 @@ router.route('/users').get(MainController.getUsers);
 
 router.route('/users/signin').post(MainController.signin);
 
-router.route('/users/signup').post(MainController.signup);
+// router.route('/users/signup').post(MainController.signup);
 
 router.use('/users/authcheck', checkToken, MainController.authCheck);
 

@@ -74,10 +74,10 @@ export default (
       path="/:id"
       component={Home}
     />
-    <Route
+    {/* <Route
       path="/admin/signup"
       component={SignUp}
-    />
+    /> */}
     <Route
       path="/admin/"
       component={Admin}
