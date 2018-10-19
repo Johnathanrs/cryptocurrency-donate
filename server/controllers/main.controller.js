@@ -424,11 +424,18 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
 
     const toEmail = order.userID.email;
     const subject = 'Confirmation';
-    const text =  `Congratulation! Your payment has confirmed. Amount is ${order.btcAmount}`;
+    const text =  `Congratulation! Your payment has confirmed. ${order.btcAmount} in Bitcoin, ${order.ethAmount} in Ethereum and ${order.ltcAmount} in Litecoin. Puchased tickets ${order.paidTickets}`;
+    const html = `<div><strong>Congratulation</strong><p>Your payment has confirmed. ${order.btcAmount} in Bitcoin, ${order.ethAmount} in Ethereum and ${order.ltcAmount} in Litecoin. Puchased tickets ${order.paidTickets}</p></div>`;
 
     return Promise.all([
       order.save(),
       project.save(),
+      sendEmail({
+        to: toEmail,
+        subject: subject,
+        text: text,
+        html: html,
+      }),
     ]).then((err, data) => {
       console.log(err, data);
     });
