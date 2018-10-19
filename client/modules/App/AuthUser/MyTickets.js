@@ -9,7 +9,6 @@ import moment from 'moment';
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
 
-import '../App.css';
 import { fetchOrders } from '../AppActions';
 
 class MyTickets extends Component {

@@ -3,10 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import { browserHistory } from 'react-router';
-import Paper from '@material-ui/core/Paper';
 
-import './App.css';
-import { Button } from '@material-ui/core';
 import callApi from '../../util/apiCaller';
 import { saveToken } from './AuthActions';
 
@@ -42,7 +39,7 @@ class CustomerSignIn extends Component {
                 window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
                 // browserHistory.goBack();
-                this.navigate('user/mytickets');
+                this.navigate('/user/mytickets');
             }
             self.setState({ ...self.state, isCreate: false, errOnCreate: message });
         });

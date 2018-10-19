@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import { browserHistory } from 'react-router';
 
-import './App.css';
 import callApi from '../../util/apiCaller';
 
 import { saveToken } from '../App/AuthActions';
@@ -43,7 +42,7 @@ class CustomerSignUp extends React.Component {
             } else {
                 window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
-                this.navigate('user/mytickets');
+                this.navigate('/user/mytickets');
             }
         });
     }
