@@ -422,6 +422,10 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
 
     project.maximumAvailableTickets = project.maximumAvailableTickets - paidTickets;
 
+    const toEmail = order.userID.email;
+    const subject = 'Confirmation';
+    const text =  `Congratulation! Your payment has confirmed. Amount is ${order.btcAmount}`;
+
     return Promise.all([
       order.save(),
       project.save(),

@@ -60,9 +60,9 @@ export  function broadcastTX(rawtx, network) {
 			uri = 'https://testnet.litecore.io/api/tx/send';
 		}
 		return new Promise((resolve, reject) => {
-			var tx = null;
+			var rawtx = null;
 			try {
-				tx = new litecore.Transaction() //use litecore-lib to create a transaction
+				rawtx = new litecore.Transaction() //use litecore-lib to create a transaction
 				.from(utxos)
 				.to(to, amount) //note: you are sending all your balance AKA sweeping
 				.fee(fee)
@@ -71,7 +71,7 @@ export  function broadcastTX(rawtx, network) {
 			} catch(err) {
 				reject(err);
 			}
-			request.post({url: uri, form: {tx: tx}}, (err, response, body) => {
+			request.post({url: uri, form: {rawtx: rawtx}}, (err, response, body) => {
 				if (err) reject(err);
 				// if (response.statusCode != 200) reject({ message: 'something is wrong'});
 				if (body.txid) {
