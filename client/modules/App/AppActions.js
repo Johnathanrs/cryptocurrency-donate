@@ -119,6 +119,18 @@ export function fetchOrders() {
   };
 }
 
+export function deleteTickets(_id) {
+  return (dispatch) => {
+    return callApi('deleteOrder', 'POST', { _id }).then((res) => {
+      if (res.errors) {
+        return res.errors;
+      }
+      dispatch(addOrders(res.orders));
+      return 'Successfully deleted';
+    });
+  };
+}
+
 export function fetchProject(id) {
   return (dispatch) => {
     return callApi(`project/${id}`).then(res => {

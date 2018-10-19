@@ -94,9 +94,21 @@ export function saveUserGuide(req, res) {
   });
 }
 
+export function deleteOrder(req, res) {
+  if (!req.decoded) {
+    return res.status(403).send({ errors: 'Bad Request' });
+  }
+  Order.deleteOne({ _id: req.body._id }).exec((err, obj) => {
+    if (err) {
+      return res.status(500).send({ errors: err.message });
+    }
+    return getOrders(req, res);
+  });
+}
+
 export function getOrders(req, res) {
   if (!req.decoded) {
-    return res.status(400).send({ errors: 'Bad Request' });
+    return res.status(403).send({ errors: 'Bad Request' });
   }
   Order.find({ userID: req.decoded }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {

@@ -39,6 +39,8 @@ router.use('/user', checkToken, MainController.getUser);
 
 router.use('/orders', checkToken, MainController.getOrders);
 
+router.use('/deleteOrder', checkToken, MainController.deleteOrder);
+
 router.route('/user').put(MainController.updateUser);
 
 router.route('/upload').post(MainController.uploadFile);

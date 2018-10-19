@@ -8,7 +8,6 @@ import {
   GET_CRYPTO,
   FETCH_USER_GUIDE,
   ADD_ORDERS,
-  ADD_ERROR,
 } from './AppActions';
 
 // Initial State
@@ -29,14 +28,17 @@ const AppReducer = (state = initialState, action) => {
       };
     case FETCH_PROJECTS:
       return {
+        ...state,
         projects: action.projects,
       };
     case FETCH_USERS:
       return  {
+        ...state,
         users: action.users,
       };
     case FETCH_USER:
       return  {
+        ...state,
         res: action.res,
       };
     case FETCH_PROJECT:
@@ -59,11 +61,6 @@ const AppReducer = (state = initialState, action) => {
         ...state,
         orders: action.orders,
       };
-    case ADD_ERROR:
-      return {
-        ...state,
-        errors: action.errors,
-      }
     default:
       return state;
   }

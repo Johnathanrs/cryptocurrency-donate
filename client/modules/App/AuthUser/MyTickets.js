@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import { toast } from 'react-toastify';
 
 import moment from 'moment';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
 
-import { fetchOrders } from '../AppActions';
+import { fetchOrders, deleteTickets } from '../AppActions';
 
 class MyTickets extends Component {
     constructor(props) {
@@ -52,11 +53,19 @@ class MyTickets extends Component {
     };
 
     gotoHome = (id) => {
-        browserHistory.push(`/home/${id}`);
+        browserHistory.push(`/${id._id}`);
+    }
+
+    deleteTickets = (id) => {
+        this.props.dispatch(deleteTickets(id)).then(err => {
+            if (err) {
+                toast.warn(err);
+            }
+        });
     }
 
     actionFormatter = (cell, row) => {
-        return <button className="btn btn-info" onClick={()=> this.gotoHome(row.projectID)}>Purchase</button>;
+        return <div><button type="button" onClick={() => this.deleteTickets(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button><button className="btn btn-info" onClick={()=> this.gotoHome(row.projectID)}><i className="fa fa-plus fa-2x"></i></button></div>;
     }
 
     handlePaidFilter = name => {
@@ -122,7 +131,7 @@ class MyTickets extends Component {
                         <TableHeaderColumn dataField="paidTickets" >Purchased Tickets</TableHeaderColumn>
                         <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>
                         <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
-                        <TableHeaderColumn dataField="pID" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
+                        <TableHeaderColumn dataField="projectID" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
                     </BootstrapTable>
                 </div>}
                 <Footer />
