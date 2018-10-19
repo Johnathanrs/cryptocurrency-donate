@@ -5,6 +5,7 @@ import ReactBTCQR from './components/React-bitcoin-qr/ReactBTCQR';
 import EthereumQRPlugin from 'ethereum-qr-code';
 import Clipboard from 'react-clipboard.js';
 const web3 = require('web3');
+import { toast } from 'react-toastify';
 
 import BTC_ROUNDED from '../../assets/img/BTC_yellow.png';
 import ETH_ROUNDED from '../../assets/img/ETH_color.png';
@@ -95,7 +96,7 @@ class Payment extends React.Component {
                         <div className="input-group mb-3">
                             <input type="text" id="clipboard" className="form-control pl-2" value={crypto[coinType].address.publicKey} aria-label="Recipient's username" aria-describedby="basic-addon2"  disabled/>
                             <div className="input-group-append ml-1">
-                                <Clipboard data-clipboard-text={crypto[coinType].address.publicKey}>
+                                <Clipboard onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={crypto[coinType].address.publicKey}>
                                     <i className="fa fa-clipboard"></i>
                                 </Clipboard>
                             </div>

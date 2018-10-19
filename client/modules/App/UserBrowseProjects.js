@@ -107,7 +107,7 @@ class UserBrowseProjects extends Component {
                     <div className="heading text-center">
                         <h2 className="fb text-uppercase">Global's #1 Project Funding</h2>
                     </div>
-                    {!this.state.loading && <div className="row ml-1 mb-sm-5 d-flex align-items-baseline">
+                    {!this.state.loading && <div className="ml-1 mb-sm-5 d-flex align-items-baseline">
                         <TextField
                             id="outlined-search"
                             label="Search Project"

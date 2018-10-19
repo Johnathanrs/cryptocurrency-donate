@@ -3,6 +3,7 @@ import Project, { Address, Wallet, Coin } from '../models/project';
 import User, { SubProject } from '../models/user';
 import Guide from '../models/guide';
 import Order from '../models/order';
+const _ = require("lodash");
 
 import cuid from 'cuid';
 import slug from 'limax';
@@ -465,7 +466,9 @@ function promiseCheck(order) {
     order.btcAmount = parseFloat(btcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
 
     Project.findOne({ _id: order.projectID }).then((project) => {
+      if (!project) { console.log('no such project'); return; }
       project.donors.push(order.userID);
+      project.donors = _.intersection(project.donors);
 
       let paidTickets = 0;
       if (order.ethAmount) {
@@ -534,7 +537,7 @@ function promiseCheck(order) {
           }
         }
       }
-    });
+    }).catch(err => { console.log('no such project'); });
   }).catch(err => { console.log('balance check for user address', err.message); });
 }
 
@@ -606,7 +609,7 @@ export function createProject(req, res) {
     newObject.images = project.images;
     newObject.address = address;
     newObject.video = project.video;
-    newObject.keyfacts = project.key_facts;
+    newObject.keyfacts = _.compact(project.key_facts);
     newObject.wallet = wallet;
     newObject.totalMoneyInBTC = project.total_money_in_BTC;
     newObject.totalMoneyInUSD = project.total_money_in_USD;
@@ -676,7 +679,10 @@ export function deleteProject(req, res) {
     res.status(403).send({errors: 'something wrong happened'});
   } else {
     Project.deleteOne({ _id: req.body._id }).exec((err, obj) => {
-      res.json({ obj });
+      if (err) {
+        return res.status(500).send({ errors: err.message });
+      }
+      return getProjects(req, res);
     });
   }
 }

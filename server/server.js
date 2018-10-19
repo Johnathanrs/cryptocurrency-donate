@@ -191,7 +191,7 @@ app.listen(serverConfig.port, (error) => {
   }
 });
 
-setInterval(() => { MainController.projectCoinBalanceChecker(); }, 200000);
+// setInterval(() => { MainController.projectCoinBalanceChecker(); }, 200000);
 
 setInterval(() => { MainController.userCoinBalanceChecker(); }, 15000);
 

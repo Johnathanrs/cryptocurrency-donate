@@ -188,7 +188,7 @@ function getBTCUTxos(addr) {
 		// console.log(res);
 		let result = null;
 		if (network == 'mainnet') {
-		  result = res.body.unspent_outputs && res.body.unspent_outputs.map(function (e) {
+		  result = res.body && res.body.unspent_outputs && res.body.unspent_outputs.map(function (e) {
 			return {
 				txid: e.tx_hash_big_endian,
 				outputIndex: e.tx_output_n,
@@ -196,7 +196,7 @@ function getBTCUTxos(addr) {
 				scriptPubKey: e.script,
 				confirmations: e.confirmations
 			};
-		  });
+		  }) || [];
 		} else {
 		  result = res.body && res.body.map(function (e) {
 			return {
@@ -206,7 +206,7 @@ function getBTCUTxos(addr) {
 			  scriptPubKey: e.script,
 			  confirmations: e.confirmations
 			};
-		  });
+		  }) || [];
 		}
 		resolve(result);
 	  });

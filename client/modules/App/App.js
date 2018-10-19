@@ -11,7 +11,8 @@ import Helmet from 'react-helmet';
 // Import Actions
 import { toggleAddPost, registerAuth } from './AppActions';
 // import { switchLanguage } from '../../modules/Intl/IntlActions';
-import BACKGROUND from '../../assets/img/background.png';
+import { ToastContainer, toast } from 'react-toastify';
+import '../../assets/css/ReactToastify.css';
 
 let DevTools;
 if (process.env.NODE_ENV === 'development') {
@@ -62,7 +63,7 @@ class App extends Component {
           {/* <a href="#" className="back-to-top d-inline">
             <i className="fa fa-arrow-circle-up"></i>
           </a> */}
-
+          <ToastContainer />
           <div >
             {this.props.children}
           </div>

@@ -27,7 +27,7 @@ export function createUserEthereumAddress() {
 export function getBalance(addr) {
     return initWeb3().eth.getBalance(addr).then(balance => {
         return Number(web3.utils.fromWei(balance));
-    });
+    }).catch(err => { return err});
 }
 
 export function sendTransaction(from, privateKey, to, amount) {

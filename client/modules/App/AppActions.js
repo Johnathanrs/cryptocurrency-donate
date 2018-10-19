@@ -11,6 +11,7 @@ export const FETCH_USER_GUIDE = 'FETCH_USER_GUIDE';
 export const GET_TICKET = 'GET_TICKET';
 export const GET_CRYPTO = 'GET_CRYPTO';
 export const ADD_ORDERS = 'ADD_ORDERS';
+export const ADD_ERROR = 'ADD_ERROR';
 
 // Export Actions
 export function toggleAddPost() {
@@ -23,6 +24,13 @@ export function addProjects(projects) {
   return {
     type: FETCH_PROJECTS,
     projects,
+  };
+}
+
+export function addErrors(errors) {
+  return {
+    type: ADD_ERROR,
+    errors,
   };
 }
 
@@ -120,6 +128,17 @@ export function fetchProject(id) {
   };
 }
 
+export function deleteProject(_id) {
+  return (dispatch) => {
+    return callApi('deleteProjects', 'POST', { _id }).then((res) => {
+      if (res.errors) {
+        return res.errors;
+      }
+      dispatch(addProjects(res.projects));
+      return 'Successfully deleted';
+    });
+  };
+}
 
 export function fetchCryptoAddr(email, projectID) {
   return (dispatch) => {

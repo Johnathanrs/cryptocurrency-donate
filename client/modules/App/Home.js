@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
+import { toast } from 'react-toastify';
 
 import moment from 'moment';
 import { fetchProject } from './AppActions';
@@ -18,7 +19,7 @@ import TicketControl from './TicketControl';
 import UserRegister from './UserRegister';
 import Payment from './Payment';
 import Thankyou from './Thankyou';
-import CustomizedSnackbars from './components/SnackBar/CustomizedSnackbars';
+
 
 const coinTypeArray = {
     BTC: BTC_ROUNDED,
@@ -60,8 +61,6 @@ class Home extends Component {
                 },
             },
         };
-
-        this.onSuccessCopy = this.onSuccessCopy.bind(this);
     }
 
     componentWillUnmount() {
@@ -90,12 +89,7 @@ class Home extends Component {
         }
 
         if (this.props.token !== nextProps.token && !nextProps.token) {
-            this.setState({
-                ...this.state,
-                snackOpen: true,
-                message: 'Log out',
-                activePage: 'home',
-            });
+            toast.warn('Log out');
         }
     }
 
@@ -105,14 +99,6 @@ class Home extends Component {
             id = this.props.params.id;
         }
         this.props.dispatch(fetchProject(id));
-    }
-
-    onSuccessCopy = (msg) => {
-        this.setState({
-            ...this.state,
-            snackOpen: true,
-            message: msg,
-        });
     }
     
     handleTickets = (event, value) => {
@@ -147,7 +133,8 @@ class Home extends Component {
         };
         callApi('users/getNow', 'POST', body).then(res => {
             if (res.errors) {
-                this.setState({ ...this.state, snackOpen: true, message: res.errors });
+                
+                toast.warn(res.errors);
             } else {
                 console.log(res);
                 if (res.status == 'authorized') {
@@ -155,7 +142,6 @@ class Home extends Component {
                         orderID: res.id,
                         crypto: res.crypto,
                         isRegistering: false,
-                        snackOpen: false,
                         activePage: 'payment',
                     }, () => {
                         this.startBalanceInterval();
@@ -174,17 +160,17 @@ class Home extends Component {
 
     gotoNext = () => {
         if (!this.state.email) {
-            this.setState({ ...this.state, snackOpen: true, message: 'Please subscribe to Smartprojects.tech to donate!' });
+            toast.warn('Please subscribe to Smartprojects.tech to donate!');
             return;
         }
 
         if (!this.state.terms_cond) {
-            this.setState({ ...this.state, snackOpen: true, message: 'Please read and accept terms and conditions.' });
+            toast.warn('Please read and accept terms and conditions.');
             return;
         }
 
         if (!this.state.offers_email) {
-            this.setState({ ...this.state, snackOpen: true, message: 'Please agree to receive offers and emails from SmartProjects.tech.' });
+            toast.warn('Please agree to receive offers and emails from SmartProjects.tech.');
             return;
         }
 
@@ -205,12 +191,8 @@ class Home extends Component {
         callApi('users/userSignup', 'POST', body).then((res, err) => {
             let message = 'Successfully authenticated';
             if  (res.errors) {
-                message = res.errors;
-                this.setState({ ...this.state,
-                    isRegistering: false,
-                    message,
-                    snackOpen: true,
-                });
+                
+                toast.warn(res.errors);
             } else {
                 localStorage.setItem('smartproject', JSON.stringify({ email: res.email, token: res.token, isSignIn: false }));
                 if (res.isNewUser && res.isMsgSent) {
@@ -218,11 +200,12 @@ class Home extends Component {
                 } else {
                     message = 'You are automatically signed in';
                 }
+                
+                toast.warn(message);
                 this.setState({ ...this.state,
                     message,
                     crypto: res.crypto,
                     orderID: res.id,
-                    snackOpen: true,
                     activePage: 'payment',
                     token: res.token,
                 }, () => {
@@ -232,14 +215,6 @@ class Home extends Component {
             }
         });
     }
-
-    handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-    
-        this.setState({ snackOpen: false });
-    };
 
     handleCheck = name => event => {
         this.setState({
@@ -266,21 +241,13 @@ class Home extends Component {
         console.log('balance', res);
         let message = '';
         if(res.errors) {
-            message = res.errors;
-            // clearInterval(this.balanceInterval);
-            this.setState({
-                ...this.state,
-                activePage: 'payment',
-                snackOpen: true,
-                message: message
-            });
+            toast.warn(res.errors);
             return;
         } else if (res.status == 'ok') {
             // stop scheduling and go to the thank you page
             console.log(' got payment ');
             message = `You paid ${res.paidAmount} ${this.state.coinType} for ${res.paidTickets} out of ${this.state.tickets}`;
             this.setState({ ...this.state,
-                snackOpen: false,
                 activePage: 'thankyou',
                 message: message,
                 paidAmount: res.paidAmount,
@@ -291,21 +258,16 @@ class Home extends Component {
                     maximumAvailableTickets: res.maximumAvailableTickets,
                 }
             });
+            toast.warn(message);
             clearInterval(this.balanceBTCInterval);
             clearInterval(this.balanceLTCInterval);
             return;
         } else if (res.status == 'less') {
             message = `We got only ${res.amount}. \n which does not reach the 1 ticket out of ${this.state.tickets}`;
+            toast.warn(message);
         } else {
-            message = ' still wait for a payment ';
             console.log(' still wait for a payment ');
         }
-        this.setState({ ...this.state,
-            snackOpen: false,
-            activePage: 'payment',
-            message: message,
-            paidAmount: res.paidAmount,
-        });
     }
 
     balanceBody = () => {
@@ -361,10 +323,6 @@ class Home extends Component {
        return (
             <div>
                 <Header activePage={activePage} />
-                <CustomizedSnackbars
-                    handleClose={this.handleClose}
-                    open={this.state.snackOpen}
-                    message={message} />
                 <div className="container-fluid mt-5" style={{ paddingTop: '70px' }}>
                 { !loading &&
                     <div>

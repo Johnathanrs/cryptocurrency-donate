@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import classNames from 'classnames';
 import Button from '@material-ui/core/Button';
@@ -84,8 +85,27 @@ class CustomizedSnackbars extends React.Component {
         }
     }
 
+    componentWillReceiveProps(nextProps) {
+      if (this.props.errors != nextProps.errors) {
+        if (nextProps.errors) {
+          this.setState({ open: true });
+        } else {
+          this.setState({ open: false });
+        }
+      }
+    }
+
+    handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+  
+      this.setState({ open: false });
+    };
+
     render() {
-        const { message, handleClose, open } = this.props;
+        const { errors } = this.props;
+        const { open } = this.state;
   
       return (
         <Snackbar
@@ -95,18 +115,18 @@ class CustomizedSnackbars extends React.Component {
             }}
             open={open}
             autoHideDuration={6000}
-            onClose={handleClose}
+            onClose={this.handleClose}
             ContentProps={{
                 'aria-describedby': 'message-id',
             }}
-            message={<span id="message-id">{message}</span>}
+            message={<span id="message-id">{errors}</span>}
             action={[
                 <IconButton
                 key="close"
                 aria-label="Close"
                 color="inherit"
                 className="p-2"
-                onClick={handleClose}
+                onClick={this.handleClose}
                 >
                 <CloseIcon />
                 </IconButton>,
@@ -116,4 +136,11 @@ class CustomizedSnackbars extends React.Component {
     }
   }
 
-export default CustomizedSnackbars;
+
+function mapStateToProps(state) {
+  return {
+    errors: state.app.errors,
+  };
+}
+
+export default  connect(mapStateToProps)(CustomizedSnackbars);

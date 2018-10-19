@@ -8,6 +8,7 @@ import {
   GET_CRYPTO,
   FETCH_USER_GUIDE,
   ADD_ORDERS,
+  ADD_ERROR,
 } from './AppActions';
 
 // Initial State
@@ -16,12 +17,14 @@ const initialState = {
   projects: [],
   crypto: {},
   token: '',
+  errors: '',
 };
 
 const AppReducer = (state = initialState, action) => {
   switch (action.type) {
     case TOGGLE_ADD_POST:
       return {
+        ...state,
         showAddPost: !state.showAddPost,
       };
     case FETCH_PROJECTS:
@@ -38,6 +41,7 @@ const AppReducer = (state = initialState, action) => {
       };
     case FETCH_PROJECT:
       return {
+        ...state,
         project: action.project,
       };
     case GET_CRYPTO:
@@ -55,6 +59,11 @@ const AppReducer = (state = initialState, action) => {
         ...state,
         orders: action.orders,
       };
+    case ADD_ERROR:
+      return {
+        ...state,
+        errors: action.errors,
+      }
     default:
       return state;
   }
