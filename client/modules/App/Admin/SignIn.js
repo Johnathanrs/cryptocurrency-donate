@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import { browserHistory } from 'react-router';
 
+import '../App.css';
 import callApi from '../../../util/apiCaller';
 
 import { saveToken } from '../AuthActions';
