@@ -151,6 +151,10 @@ export function signin(req, res, next) {
     return res.status(422).json({ errors: { email: "can't be blank" } });
   }
 
+  if (!req.body.user.email != 'veselin.mitrovic@outlook.com') {
+    return res.status(422).json({ errors: 'You are not the admin.' });
+  }
+
   if (!req.body.user.password) {
     return res.status(422).json({ errors: { password: "can't be blank" } });
   }

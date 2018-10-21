@@ -65,7 +65,7 @@ class MyTickets extends Component {
     }
 
     actionFormatter = (cell, row) => {
-        return <div><button type="button" onClick={() => this.deleteTickets(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button><button className="btn btn-info" onClick={()=> this.gotoHome(row.projectID)}><i className="fa fa-plus fa-2x"></i></button></div>;
+        return <div><button type="button" onClick={() => this.deleteTickets(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button><button className="btn btn-link btn-info" onClick={()=> this.gotoHome(row.projectID)}><i className="fa fa-plus fa-2x"></i></button></div>;
     }
 
     handlePaidFilter = name => {

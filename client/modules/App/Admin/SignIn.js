@@ -34,7 +34,7 @@ class SignIn extends Component {
         const self = this;
         self.setState({ ...self.state, isCreate: true, errOnCreate: '' });
         callApi('users/signin', 'POST', { user: this.state }).then((res, err) => {
-            let message = 'Successfully created';
+            let message = 'Successfully Logged in';
             if  (res.errors) {
                 message = res.errors;
             } else {
