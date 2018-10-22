@@ -11,7 +11,7 @@ import sanitizeHtml from 'sanitize-html';
 var uniqueFilename = require('unique-filename');
 const generator = require('generate-password');
 const sgMail = require('@sendgrid/mail');
-import sensitive from '../sensitive';
+// import sensitive from '../sensitive';
 const bitcoinTransaction = require('../util/btctransaction');
 const ltcTransaction = require('../util/ltctransaction');
 const ethTransaction = require('../util/ethtransaction');
@@ -377,7 +377,7 @@ export function getTicketInfo(req, res) {
 
 function sendEmail(options) {
   return new Promise((resolve, reject) => {
-    sgMail.setApiKey(sensitive.sendgrid);
+    sgMail.setApiKey(process.env.sendgrid);
     const msg = {
       to: options.to,
       from: 'info@smartprojects.tech',
