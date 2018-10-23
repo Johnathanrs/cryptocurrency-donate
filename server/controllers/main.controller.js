@@ -577,7 +577,7 @@ export function userCoinBalanceChecker(req, res) {
       return console.log('error in check balance', errors.message);
     }
     orders.map(order => {
-      setTimeout(() => { promiseCheck(order); }, 3000);
+      setInterval(() => { promiseCheck(order); }, 3000);
     });
   });
 }
