@@ -2,7 +2,7 @@
 import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 import App from './modules/App/App';
-import Home from './modules/App/Home';
+import Home from './modules/App/Home/Home';
 import Dashboard from './modules/App/Admin/Dashboard';
 import Info from './modules/App/Info';
 import UserDashboard from './modules/App/AuthUser/UserDashboard';
@@ -23,7 +23,7 @@ import TransferTicket from './modules/App/AuthUser/TransferTicket';
 import Account from './modules/App/AuthUser/Account';
 import Statistics from './modules/App/Admin/Statistics';
 import Admin from './modules/App/Admin/Admin';
-import SignUp from './modules/App/Admin/SignUp';
+// import SignUp from './modules/App/Admin/SignUp';
 import User from './modules/App/Admin/User';
 import UserGuideManager from './modules/App/Admin/UserGuideManager';
 
@@ -43,9 +43,9 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/Project');
   require('./modules/App/Admin/Dashboard');
   require('./modules/App/Admin/SignIn');
-  require('./modules/App/Home');
-  require('./modules/App/TicketControl');
-  require('./modules/App/Payment');
+  require('./modules/App/Home/Home');
+  require('./modules/App/Home/TicketControl');
+  require('./modules/App/Home/Payment');
   require('./modules/App/UserRegister');
   require('./modules/App/Admin/ProjectDetail');
   require('./modules/App/UserBrowseProjects');

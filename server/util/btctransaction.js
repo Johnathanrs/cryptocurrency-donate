@@ -83,14 +83,22 @@ var providers = {
 			},
 			blockchain: function (addr) {
 				return request.get('https://blockchain.info/unspent?active=' + addr).send().then(function (res) {
-					return res.body.unspent_outputs.map(function (e) {
-						return {
-							txid: e.tx_hash_big_endian,
-							vout: e.tx_output_n,
-							satoshis: e.value,
-							confirmations: e.confirmations
-						};
-					});
+					if (res) {
+						return res.body.unspent_outputs.map(function (e) {
+							return {
+								txid: e.tx_hash_big_endian,
+								vout: e.tx_output_n,
+								satoshis: e.value,
+								confirmations: e.confirmations
+							};
+						});
+					}
+					return {
+						txid: '',
+						vout: '',
+						satoshis: 0,
+						confirmations: '',
+					};
 				});
 			}
 		},
@@ -188,7 +196,7 @@ function getBTCUTxos(addr) {
 		// console.log(res);
 		let result = null;
 		if (network == 'mainnet') {
-		  result = res.body && res.body.unspent_outputs && res.body.unspent_outputs.map(function (e) {
+		  result = res && res.body && res.body.unspent_outputs && res.body.unspent_outputs.map(function (e) {
 			return {
 				txid: e.tx_hash_big_endian,
 				outputIndex: e.tx_output_n,

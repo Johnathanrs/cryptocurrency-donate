@@ -6,6 +6,8 @@ const Schema = mongoose.Schema;
 const addressSchema = new Schema({
   country: { type: String, required: true },
   city: { type: String, required: true },
+  lat: { type: String, required: true },
+  lng: { type: String, required: true },
   postalCode: { type: String, required: false },
   location: { type: String, required: false },
 });
@@ -45,6 +47,7 @@ const projectSchema = new Schema({
   totalMoneyInBTC: { type: Number, default: 0.0, required: false },
   totalMoneyInUSD: { type: Number, default: 0.0, required: false },
   donors: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Signuped up users
+  isFeatured: { type: Boolean, default: false, required: true },
   startDate: { type: Date, default: Date.now, required: true },
   dateAdded: { type: Date, default: Date.now, required: true },
 });

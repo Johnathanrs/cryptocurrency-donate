@@ -1,17 +1,13 @@
-import Post from '../models/post';
 import Project, { Address, Wallet, Coin } from '../models/project';
 import User, { SubProject } from '../models/user';
 import Guide from '../models/guide';
 import Order from '../models/order';
-const _ = require("lodash");
+const _ = require('lodash');
 
-import cuid from 'cuid';
-import slug from 'limax';
-import sanitizeHtml from 'sanitize-html';
+import { geocoder, searchNearByFromProject } from '../util/util';
 var uniqueFilename = require('unique-filename');
 const generator = require('generate-password');
 const sgMail = require('@sendgrid/mail');
-// import sensitive from '../sensitive';
 const bitcoinTransaction = require('../util/btctransaction');
 const ltcTransaction = require('../util/ltctransaction');
 const ethTransaction = require('../util/ethtransaction');
@@ -151,7 +147,7 @@ export function signin(req, res, next) {
     return res.status(422).json({ errors: { email: "can't be blank" } });
   }
 
-  if (!req.body.user.email != 'veselin.mitrovic@outlook.com') {
+  if (req.body.user.email != 'veselin.mitrovic@outlook.com') {
     return res.status(422).json({ errors: 'You are not the admin.' });
   }
 
@@ -482,7 +478,7 @@ function promiseCheck(order) {
     order.btcAmount = parseFloat(btcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
 
     Project.findOne({ _id: order.projectID }).then((project) => {
-      if (!project) { console.log('no such project'); return; }
+      if (!project) { console.log('no such project while collection coin from the user address'); return; }
       project.donors.push(order.userID);
       project.donors = _.intersection(project.donors);
 
@@ -606,12 +602,6 @@ export function createProject(req, res) {
     wallet.ETH = coin;
     coin.address = project.coin_LTC;
     wallet.LTC = coin;
-    const address = new Address();
-    address.country = project.country;
-    address.city = project.city;
-    address.postalCode = project.postal_code;
-
-    // Let's sanitize inputs
     newObject.title = project.title;
     newObject.subTitle = project.sub_title;
     newObject.ticketPriceInBTC = project.ticket_price_BTC;
@@ -623,9 +613,8 @@ export function createProject(req, res) {
     newObject.fundingDuration = project.funding_duration;
     newObject.projectThumbnail = project.projectThumbnail;
     newObject.images = project.images;
-    newObject.address = address;
     newObject.video = project.video;
-    newObject.keyfacts = _.compact(project.key_facts);
+    newObject.keyfacts = project.key_facts.filter(fact => fact.name != '');
     newObject.wallet = wallet;
     newObject.totalMoneyInBTC = project.total_money_in_BTC;
     newObject.totalMoneyInUSD = project.total_money_in_USD;
@@ -633,15 +622,26 @@ export function createProject(req, res) {
     newObject.donors = [];
     newObject.shortDescription = project.short_description;
     newObject.fullDescription = project.long_description;
-    // newObject.location = project.location;
-    newObject.save((errors, saved) => {
-      if (errors) {
-        return res.status(500).send({errors});
-      } 
-      return res.json({ project: saved });
-    });
+
+    geocoder(`${project.city}, ${project.country}`).then((geo) => {
+      const address = new Address();
+      address.country = project.country;
+      address.city = project.city;
+      address.postalCode = project.postal_code;
+      const coords = geo && geo[0] || { latitude: geo.latitude, longitude: geo.longitude };
+      address.lat = coords.latitude;
+      address.lng = coords.longitude;
+      newObject.address = address;
+      // newObject.location = project.location;
+      newObject.save((errors, saved) => {
+        if (errors) {
+          return res.status(500).send({ errors });
+        }
+        return res.json({ project: saved, status: 'Ok' });
+      });
+    }).catch(err => { return res.send({ errors: err.message }); });
   } catch (err) {
-    return res.send({errors: err.message});
+    res.send({ errors: err.message });
   }
 }
 
@@ -651,7 +651,7 @@ export function updateProject(req, res) {
   } else {
     Project.findOne({ _id: req.body.project._id }).exec((errors, newObject) => {
       if (errors) {
-        res.status(500).send({ errors: errors });
+        res.status(500).send({ errors });
       } else {
         const project = req.body.project;
         newObject.title = project.title;
@@ -665,10 +665,9 @@ export function updateProject(req, res) {
         newObject.fundingDuration = project.funding_duration;
         newObject.projectThumbnail = project.projectThumbnail;
         newObject.images = project.images;
-        newObject.address.country = project.country;
-        newObject.address.city = project.city;
+     
         newObject.video = project.video;
-        newObject.keyfacts = project.key_facts;
+        newObject.keyfacts = project.key_facts.filter(fact => fact.name != '');
         newObject.wallet.BTC.address = project.coin_BTC;
         newObject.wallet.ETH.address = project.coin_ETH;
         newObject.wallet.LTC.address = project.coin_LTC;
@@ -677,14 +676,22 @@ export function updateProject(req, res) {
         newObject.totalTickets = project.total_tickets;
         newObject.shortDescription = project.short_description;
         newObject.fullDescription = project.long_description;
+
         // newObject.location = project.location;
-        newObject.save((err1, saved) => {
-          if (err1) {
-            res.status(500).send({ errors: err1});
-          } else {
-            res.json({ project: 'success' });
-          }
-        });
+        geocoder(`${project.city}, ${project.country}`).then((geo) => {
+          newObject.address.country = project.country;
+          newObject.address.city = project.city;
+          newObject.address.postalCode = project.postal_code;
+          const coords = geo && geo[0] || { latitude: geo.latitude, longitude: geo.longitude };
+          newObject.address.lat = coords.latitude;
+          newObject.address.lng = coords.longitude;
+          newObject.save((errors, saved) => {
+            if (errors) {
+              return res.status(500).send({ errors });
+            }
+            return res.json({ project: saved, status: 'Ok' });
+          });
+        }).catch(err => { return res.send({ errors: err.message }); });
       }
     });
   }
@@ -704,28 +711,39 @@ export function deleteProject(req, res) {
 }
 
 export function getProjects(req, res) {
-  Project.find().sort('-dateAdded').populate('donors').exec((errors, projects) => {
+  Project.find({}).sort('-dateAdded').populate('donors').exec((errors, projects) => {
     if (errors) {
-      return res.status(500).send({errors});
-    }
+      return res.status(500).send({ errors });
+    }  
     res.json({ projects });
   });
 }
 
 export function getProject(req, res) {
-  if (req.params.id == 'undefined' || req.params.id == 'null') {
-    Project.findOne().sort('-dateAdded').populate('donors').exec((errors, project) => {
-      if (errors) {
-        return res.status(500).send({errors});
-      }
-      res.json({ project });
-    });
-  } else {
-    Project.findOne({ _id: req.params.id }).exec((errors, project) => {
+  if (req.params.id == 'undefined' || req.params.id == 'null') { // check ip to get nearby project
+    Project.find().sort('-dateAdded').exec((errors, projects) => {
       if (errors) {
         return res.status(500).send({ errors });
       }
-      res.json({ project });
+      searchNearByFromProject(projects).then(_id => {
+        const featuredProjects = projects.filter(sub => sub.isFeatured == true);
+        let project = projects[0];
+        if (_id) {
+          project = projects.filter(sub => sub._id == _id);
+          project = project && project[0];
+        }
+        res.json({ project, featuredProjects });
+      }).catch(errors => { return res.status(500).send({ errors }); });
+    });
+  } else {
+    Project.find().sort('-dateAdded').exec((errors, projects) => {
+      if (errors) {
+        return res.status(500).send({ errors });
+      }
+      let project = projects.filter(sub => sub._id == req.params.id);
+      project = project[0] && project[0] || {};
+      const featuredProjects = projects.filter(sub => sub.isFeatured == true);
+      res.json({ project, featuredProjects });
     });
   }
 }

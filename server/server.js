@@ -9,6 +9,7 @@ import IntlWrapper from '../client/modules/Intl/IntlWrapper';
 var cors = require('cors');
 var session = require('express-session');
 const fileUpload = require('express-fileupload');
+const requestIp = require('request-ip');
 
 // Initialize the Express App
 const app = new Express();
@@ -74,6 +75,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Apply body Parser and server public assets and routes
 app.use(cors());
+app.use(requestIp.mw());
 
 app.use(compression());
 app.use(bodyParser.json({ limit: '20mb' }));

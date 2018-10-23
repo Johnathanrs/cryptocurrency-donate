@@ -52,11 +52,11 @@
 }
 
 .black-color {
-  color: black !important;
+  color: #4a4a4a !important;
 }
 
-.bg-black {
-  background-color: black !important;
+.bg-#4a4a4a {
+  background-color: #4a4a4a !important;
 }
 
 .waves-circle {
@@ -162,11 +162,11 @@
 }
 
 .card-body .card-text {
-  color: black;
+  color: #4a4a4a;
 }
 
 .card-title {
-  color: black;
+  color: #4a4a4a;
 }
 .card-title > .title-wraper {
   display: flex;
@@ -239,7 +239,7 @@
   position: relative;
   margin-bottom: 0.2rem;
   margin-right: 1rem;
-  color: black;
+  color: #4a4a4a;
   cursor: pointer;
   text-align: left;
 }
@@ -293,13 +293,13 @@ input.email {
   justify-content: space-between;
 }
 .slider button.MuiButtonBase-root-15.MuiSlider-thumb-6 {
-  background-color: black;
+  background-color: #4a4a4a;
   width: 17px;
   height: 30px;
   border-radius: 0;
 }
 .slider div.MuiSlider-track-3 {
-  background-color: black;
+  background-color: #4a4a4a;
   height: 8px;
 }
 
@@ -415,7 +415,7 @@ div.gallery:hover {
 
 .back-to-top i {
   font-size: 50px;
-  color: black;
+  color: #4a4a4a;
 }
 
 .login {

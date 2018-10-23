@@ -7,7 +7,7 @@ import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import ProjectItem from './ProjectItem';
+import ProjectItem from './Home/ProjectItem';
 
 import '../../assets/css/cards_gallery.css';
 import { fetchProjects } from './AppActions';
@@ -107,35 +107,37 @@ class UserBrowseProjects extends Component {
                     <div className="heading text-center">
                         <h2 className="fb text-uppercase">Global's #1 Project Funding</h2>
                     </div>
-                    {!this.state.loading && <div className="ml-1 mb-sm-5 d-flex align-items-baseline">
-                        <TextField
-                            id="outlined-search"
-                            label="Search Project"
-                            className="ml-3 ml-sm-0"
-                            type="search"
-                            value={this.state.search}
-                            placeholder="id, location or title"
-                            onChange={this.searchProject('')}
-                            margin="normal"
-                        />
-                        <div className="mb-sm-2" style={{ height: '36px' }}>
-                            <CountryDropdown
-                                defaultOptionLabel="Choose a country"
-                                value={this.state.country}
-                                onChange={(val) => this.selectCountry(val)}
-                                style={{
-                                    fontSize: '1.25rem',
-                                    padding: '0.25rem',
-                                    marginLeft: '1rem' }} />
-                            <RegionDropdown
-                                country={country}
-                                value={this.state.city}
-                                blankOptionLabel="No country selected."
-                                defaultOptionLabel="Now select a region"
-                                style={{
-                                    fontSize: '1.25rem',
-                                    padding: '0.25rem' }}
-                                onChange={(val) => this.selectRegion(val)} />
+                    {!this.state.loading && <div>
+                        <div className="ml-1 mb-sm-5 d-flex align-items-baseline">
+                            <TextField
+                                id="outlined-search"
+                                label="Search Project"
+                                className="ml-3 ml-sm-0"
+                                type="search"
+                                value={this.state.search}
+                                placeholder="id, location or title"
+                                onChange={this.searchProject('')}
+                                margin="normal"
+                            />
+                            <div className="mb-sm-2" style={{ height: '36px' }}>
+                                <CountryDropdown
+                                    defaultOptionLabel="Choose a country"
+                                    value={this.state.country}
+                                    onChange={(val) => this.selectCountry(val)}
+                                    style={{
+                                        fontSize: '1.25rem',
+                                        padding: '0.25rem',
+                                        marginLeft: '1rem' }} />
+                                <RegionDropdown
+                                    country={country}
+                                    value={this.state.city}
+                                    blankOptionLabel="No country selected."
+                                    defaultOptionLabel="Now select a region"
+                                    style={{
+                                        fontSize: '1.25rem',
+                                        padding: '0.25rem' }}
+                                    onChange={(val) => this.selectRegion(val)} />
+                            </div>
                         </div>
                         <div className="row">
                             {gallery}

@@ -44,7 +44,7 @@ const AppReducer = (state = initialState, action) => {
     case FETCH_PROJECT:
       return {
         ...state,
-        project: action.project,
+        res: action.res,
       };
     case GET_CRYPTO:
       return {

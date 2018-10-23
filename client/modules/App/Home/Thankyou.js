@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 
-import PAYMENT_CONFIRMED from '../../assets/img/payment_confirmed.png';
-import BTC_ROUNDED from '../../assets/img/BTC_yellow.png';
-import ETH_ROUNDED from '../../assets/img/ETH_color.png';
-import LTC_ROUNDED from '../../assets/img/LTC_yellow.png';
-import TICKET_BACKGROUND from '../../assets/img/Ticket_Black_Clean.png';
+import PAYMENT_CONFIRMED from '../../../assets/img/payment_confirmed.png';
+import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
+import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
+import LTC_ROUNDED from '../../../assets/img/LTC_yellow.png';
+import TICKET_BACKGROUND from '../../../assets/img/Ticket_Black_Clean.png';
 
 class Thankyou extends React.Component {
 

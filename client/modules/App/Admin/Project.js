@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios, { post } from 'axios';
+import { post } from 'axios';
 import { Player } from 'video-react';
-import { browserHistory } from 'react-router';
 import moment from 'moment';
 
 import TextField from '@material-ui/core/TextField';
@@ -10,9 +9,9 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
-import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 
-import callApi, {fetchFxCryptoRate} from '../../../util/apiCaller';
+import callApi from '../../../util/apiCaller';
 
 class Project extends React.Component {
     constructor(props) {
@@ -215,7 +214,7 @@ class Project extends React.Component {
                     console.log('loading finished', res, err);
                     let message = 'Successfully created';
                     if  (res.errors) {
-                        message = 'Fail to create new project.';
+                        message = err;
                     }
                     self.setState({ ...self.state, isCreate: false, errOnCreate: message });
                 });

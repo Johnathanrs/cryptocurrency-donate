@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 const bitcore = require('bitcore-lib');
 const litecore = require('litecore-lib');
-import ReactBTCQR from './components/React-bitcoin-qr/ReactBTCQR';
+import ReactBTCQR from '../components/React-bitcoin-qr/ReactBTCQR';
 import EthereumQRPlugin from 'ethereum-qr-code';
 import Clipboard from 'react-clipboard.js';
 const web3 = require('web3');
 import { toast } from 'react-toastify';
 
-import BTC_ROUNDED from '../../assets/img/BTC_yellow.png';
-import ETH_ROUNDED from '../../assets/img/ETH_color.png';
-import LTC_ROUNDED from '../../assets/img/LTC_yellow.png';
-import TICKET_BACKGROUND from '../../assets/img/Ticket_Black_Clean.png';
+import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
+import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
+import LTC_ROUNDED from '../../../assets/img/LTC_yellow.png';
+import TICKET_BACKGROUND from '../../../assets/img/Ticket_Black_Clean.png';
 
 class Payment extends React.Component {
     constructor(props) {

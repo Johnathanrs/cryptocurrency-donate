@@ -62,10 +62,10 @@ export function addGuide(guide) {
   };
 }
 
-export function getProject(project) {
+export function getProject(res) {
   return {
     type: FETCH_PROJECT,
-    project,
+    res,
   };
 }
 
@@ -134,8 +134,8 @@ export function deleteTickets(_id) {
 export function fetchProject(id) {
   return (dispatch) => {
     return callApi(`project/${id}`).then(res => {
-      dispatch(getProject(res.project));
-      return res.project;
+      dispatch(getProject(res));
+      return res;
     });
   };
 }

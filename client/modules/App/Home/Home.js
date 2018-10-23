@@ -5,21 +5,21 @@ import { browserHistory } from 'react-router';
 import { toast } from 'react-toastify';
 
 import moment from 'moment';
-import { fetchProject } from './AppActions';
-import { saveToken } from './AuthActions';
-import callApi from '../../util/apiCaller';
+import { fetchProject } from '../AppActions';
+import { saveToken } from '../AuthActions';
+import callApi from '../../../util/apiCaller';
 
-import BTC_ROUNDED from '../../assets/img/BTC_yellow.png';
-import ETH_ROUNDED from '../../assets/img/ETH_color.png';
-import LTC_ROUNDED from '../../assets/img/LTC_yellow.png';
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
+import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
+import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
+import LTC_ROUNDED from '../../../assets/img/LTC_yellow.png';
+import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
 import ProjectView from './ProjectView';
 import TicketControl from './TicketControl';
-import UserRegister from './UserRegister';
+import UserRegister from '../UserRegister';
 import Payment from './Payment';
 import Thankyou from './Thankyou';
-
+import Featured from './Featured';
 
 const coinTypeArray = {
     BTC: BTC_ROUNDED,
@@ -68,9 +68,9 @@ class Home extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.project !== nextProps.project) {
-            const project = nextProps.project;
-            if (!project) return;
+        if (this.props.project !== nextProps.res.project) {
+            const project = nextProps.res.project;
+            if (!project) this.setState({ loading: false });
             let a = moment(project.fundingDuration, 'YYYY-MM-DD');
             let b = moment().format('YYYY-MM-DD');
             var days = a.diff(b, 'days');
@@ -234,6 +234,10 @@ class Home extends Component {
         this.setState({ ...this.state, activePage: 'home' });
     }
 
+    gotoHome = (id) => {
+        browserHistory.push(`/${id}`);
+    }
+
     manageBalanceResponse = (res) => {
         if (this.state.activePage != 'payment') {
             return;
@@ -318,7 +322,8 @@ class Home extends Component {
     }
 
     render() {
-        const { message, project, activePage, activePane, loading, remainingDays } = this.state;
+        const { project, activePage, activePane, loading, remainingDays } = this.state;
+        const { res } = this.props;
 
        return (
             <div>
@@ -331,7 +336,9 @@ class Home extends Component {
                                 project={project}
                                 remainingDays={remainingDays}
                                 activePane={activePane}
-                                toggleDetail={this.toggleDetail} />
+                                toggleDetail={this.toggleDetail}
+                                featuredProjects={res.featuredProjects}
+                                />
                             {
                                 activePage == 'home' && <TicketControl 
                                                         email={this.getEmail}
@@ -413,7 +420,7 @@ Home.propTypes = {
 // Retrieve data from store as props
 function mapStateToProps(state) {
   return {
-    project: state.app.project,
+    res: state.app.res,
     token: state.auth.token,
   };
 }

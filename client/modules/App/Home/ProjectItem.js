@@ -1,9 +1,9 @@
 import React from 'react';
 
 import moment from 'moment';
-import TICKET_BACKGROUND from '../../assets/img/Ticket_Black_Clean.png';
+import TICKET_BACKGROUND from '../../../assets/img/Ticket_Black_Clean.png';
 
-import '../../assets/css/cards_gallery.css';
+import '../../../assets/css/cards_gallery.css';
 
 function ProjectItem(props) {
     console.log(props)
@@ -13,7 +13,7 @@ function ProjectItem(props) {
     var daysLeft = a.diff(b, 'days');
     const thumbnail = 'http://' +  window.location.host + '/' + project.projectThumbnail;
     return (
-        <div className="col-md-6 col-lg-4 black-color">
+        <div className="col-md-6 col-lg-4 black-color mb-2">
             <div className="card border-0 transform-on-hover">
                 <div className="card-img-container">
                     <a href="#" onClick={() => gotoHome(project._id)}>

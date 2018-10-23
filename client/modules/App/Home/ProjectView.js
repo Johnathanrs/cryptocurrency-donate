@@ -1,10 +1,11 @@
 import React from 'react';
 import { Player } from 'video-react';
+import Featured from './Featured';
 
-import '../../assets/css/cards_gallery.css';
+import '../../../assets/css/cards_gallery.css';
 
 function ProjectView(props) {
-    const { project, remainingDays, activePane, toggleDetail } = props;
+    const { project, remainingDays, activePane, toggleDetail, featuredProjects, gotoHome } = props;
 
     let  $imageGallery = null;
     if (project.images) {
@@ -96,6 +97,11 @@ function ProjectView(props) {
                     <div className={shortDescClass}>
                         <p> {project.shortDescription}</p>
                     </div>
+                    <Featured 
+                        featuredProjects={featuredProjects}
+                        gotoHome={gotoHome}
+                        activePane={activePane}
+                    />
                     <div className={fullDescClass}>
                         <p> {project.fullDescription}</p>
                     </div>
