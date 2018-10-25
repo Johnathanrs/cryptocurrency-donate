@@ -9,6 +9,8 @@ router.route('/updateProjects').post(MainController.updateProject);
 
 router.route('/deleteProjects').post(MainController.deleteProject);
 
+router.route('/setFeaturedProject').post(MainController.setFeaturedProject);
+
 router.route('/projects').get(MainController.getProjects);
 
 router.route('/project/:id').get(MainController.getProject);
@@ -41,7 +43,7 @@ router.use('/orders', checkToken, MainController.getOrders);
 
 router.use('/deleteOrder', checkToken, MainController.deleteOrder);
 
-router.route('/user').put(MainController.updateUser);
+router.route('/updateUser').put(MainController.updateUser);
 
 router.route('/upload').post(MainController.uploadFile);
 

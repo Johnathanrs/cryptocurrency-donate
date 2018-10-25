@@ -290,35 +290,36 @@ class ProjectDetail extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.project !== nextProps.project && nextProps.project) {
-            this.setState({ 
+        if (this.props.res !== nextProps.project && nextProps.res) {
+            const project = nextProps.res.project;
+            this.setState({
                 ...this.state,
                 loading: false,
-                _id: nextProps.project._id,
-                title: nextProps.project.title,
-                sub_title: nextProps.project.subTitle,
-                short_description: nextProps.project.shortDescription,
-                long_description: nextProps.project.fullDescription,
-                country: nextProps.project.address.country,
-                city: nextProps.project.address.city,
-                postal_code: nextProps.project.address.postalCode,
-                coin_BTC: nextProps.project.wallet.BTC.address,
-                coin_ETH: nextProps.project.wallet.ETH.address,
-                coin_LTC: nextProps.project.wallet.LTC.address,
-                ticket_price_BTC: nextProps.project.ticketPriceInBTC,
-                ticket_price_ETH: nextProps.project.ticketPriceInETH,
-                ticket_price_LTC: nextProps.project.ticketPriceInLTC,
-                ticket_price_USD: nextProps.project.ticketPriceInUSD,
-                videoPreviewUrl: nextProps.project.video,
-                images: nextProps.project.images,
-                projectThumbnail: nextProps.project.projectThumbnail,
-                total_tickets: nextProps.project.totalTickets,
-                maximum_available_tickets_per_person: nextProps.project.maximumAvailableTicketsPerPerson,
-                maximum_available_tickets: nextProps.project.maximumAvailableTickets,
-                funding_duration: nextProps.project.fundingDuration,
-                key_facts: nextProps.project.keyfacts,
-                total_money_in_BTC: nextProps.project.totalMoneyInBTC,
-                total_money_in_USD: nextProps.project.totalMoneyInUSD,
+                _id: project._id,
+                title: project.title,
+                sub_title: project.subTitle,
+                short_description: project.shortDescription,
+                long_description: project.fullDescription,
+                country: project.address.country,
+                city: project.address.city,
+                postal_code: project.address.postalCode,
+                coin_BTC: project.wallet.BTC.address,
+                coin_ETH: project.wallet.ETH.address,
+                coin_LTC: project.wallet.LTC.address,
+                ticket_price_BTC: project.ticketPriceInBTC,
+                ticket_price_ETH: project.ticketPriceInETH,
+                ticket_price_LTC: project.ticketPriceInLTC,
+                ticket_price_USD: project.ticketPriceInUSD,
+                videoPreviewUrl: project.video,
+                images: project.images,
+                projectThumbnail: project.projectThumbnail,
+                total_tickets: project.totalTickets,
+                maximum_available_tickets_per_person: project.maximumAvailableTicketsPerPerson,
+                maximum_available_tickets: project.maximumAvailableTickets,
+                funding_duration: project.fundingDuration,
+                key_facts: project.keyfacts,
+                total_money_in_BTC: project.totalMoneyInBTC,
+                total_money_in_USD: project.totalMoneyInUSD,
             });
         }
     }
@@ -692,7 +693,7 @@ ProjectDetail.propTypes = {
 // Retrieve data from store as props
 function mapStateToProps(state) {
   return {
-    project: state.app.project,
+    res: state.app.res,
   };
 }
 

@@ -106,7 +106,7 @@ export function getOrders(req, res) {
   if (!req.decoded) {
     return res.status(403).send({ errors: 'Bad Request' });
   }
-  Order.find({ userID: req.decoded }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
+  Order.find({ userID: req.decoded._id }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
     }
@@ -116,7 +116,7 @@ export function getOrders(req, res) {
 
 export function getUser(req, res) {
   Promise.all([
-    User.findById( req.decoded),
+    User.findOne({ _id: req.decoded._id }),
     Project.find(),
   ]).then(data => {
     if (!data[0]) { return res.send({ errors: 'Unauthorized user' }); }
@@ -125,16 +125,19 @@ export function getUser(req, res) {
 }
 
 export function updateUser(req, res, next) {
-  User.findById(req.body.id).then(function(user) {
-    if (!user) { return res.status(401).send({errors: 'Unauthorized user'}); }
+  User.findById(req.body.user._id).then((user) => {
+    if (!user) { return res.status(401).send({ errors: 'Unauthorized user' }); }
+    const userData = req.body.user;
+    if (typeof req.body.password !== 'undefined') {
+      user.setPassword(req.body.password);
+    }
 
-    if (typeof req.body.user.email !== 'undefined') {
-      user.email = req.body.user.email;
-    }
-    
-    if (typeof req.body.user.password !== 'undefined') {
-      user.setPassword(req.body.user.password);
-    }
+    user.fullName = userData.fullName && userData.fullName || user.fullName;
+    user.nationality = userData.nationality && userData.nationality || user.nationality;
+    user.birthday = userData.birthday && userData.birthday || user.birthday;
+    user.address = userData.address && userData.address || user.address;
+    user.phone = userData.phone && userData.phone || user.phone;
+    user.ID = userData.ID && userData.ID || user.ID;
 
     return user.save().then(function() {
       return res.json({ user: user.toAuthJSON() });
@@ -251,7 +254,7 @@ export function authCheck(req, res) {
   if (!req.decoded) {
     return res.send({ status: 'unauthorized' });
   }
-  User.findOne({ _id: req.decoded })
+  User.findOne({ _id: req.decoded._id })
   .then(user => {
     if (user) {
       return res.send({ status: 'authorized' });
@@ -266,7 +269,7 @@ export function authCheckAdmin(req, res) {
   if (!req.decoded) {
     return res.send({ status: 'unauthorized' });
   }
-  User.findOne({ _id: req.decoded, email: 'veselin.mitrovic@outlook.com' })
+  User.findOne({ _id: req.decoded._id, email: 'veselin.mitrovic@outlook.com' })
   .then(user => {
     if (user) {
       return res.send({ status: 'authorized' });
@@ -351,8 +354,8 @@ export function getNow(req, res) {
     return res.status(400).send({ errors: 'Bad request.' });
   }
 
-  // req.decoded = user.id
-  User.findOne({ _id: req.decoded })
+  // req.decoded._id = user.id
+  User.findOne({ _id: req.decoded._id })
   .then((user) => {
     if (user) { // User exists
       return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
@@ -577,7 +580,7 @@ export function userCoinBalanceChecker(req, res) {
       return console.log('error in check balance', errors.message);
     }
     orders.map(order => {
-      setInterval(() => { promiseCheck(order); }, 3000);
+      setTimeout(() => { promiseCheck(order); }, 3000);
     });
   });
 }
@@ -697,9 +700,18 @@ export function updateProject(req, res) {
   }
 }
 
+export function getProjects(req, res) {
+  Project.find({}).sort('-dateAdded').populate('donors').exec((errors, projects) => {
+    if (errors) {
+      return res.status(500).send({ errors });
+    } 
+    res.json({ projects });
+  });
+}
+
 export function deleteProject(req, res) {
   if (!req.body._id) {
-    res.status(403).send({errors: 'something wrong happened'});
+    res.status(403).send({ errors: 'something wrong happened'});
   } else {
     Project.deleteOne({ _id: req.body._id }).exec((err, obj) => {
       if (err) {
@@ -710,13 +722,17 @@ export function deleteProject(req, res) {
   }
 }
 
-export function getProjects(req, res) {
-  Project.find({}).sort('-dateAdded').populate('donors').exec((errors, projects) => {
-    if (errors) {
-      return res.status(500).send({ errors });
-    }  
-    res.json({ projects });
-  });
+export function setFeaturedProject(req, res) {
+  if (!req.body._id) {
+    res.status(403).send({errors: 'something wrong happened'});
+  } else {
+    Project.findOneAndUpdate({ _id: req.body._id }, { $set: { isFeatured: req.body.set } }, { upsert: true }, (err, model) => {
+      if (err) {
+        return res.status(500).send({ errors: err.message });
+      }
+      return getProjects(req, res);
+    });
+  }
 }
 
 export function getProject(req, res) {

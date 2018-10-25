@@ -152,6 +152,18 @@ export function deleteProject(_id) {
   };
 }
 
+export function setFeaturedProject(_id, set) {
+  return (dispatch) => {
+    return callApi('setFeaturedProject', 'POST', { _id, set }).then((res) => {
+      if (res.errors) {
+        return res.errors;
+      }
+      dispatch(addProjects(res.projects));
+      return 'Successfully set';
+    });
+  };
+}
+
 export function fetchCryptoAddr(email, projectID) {
   return (dispatch) => {
     return callApi(`users/getCryptoAddr/${email}/${projectID}`).then(res => {

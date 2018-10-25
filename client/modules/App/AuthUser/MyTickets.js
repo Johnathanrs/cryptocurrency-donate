@@ -105,7 +105,7 @@ class MyTickets extends Component {
             }
         }
         return (
-            <div className="container-fluid mt-5" style={{ paddingTop: '70px' }}>
+            <div className="container mt-5" style={{ paddingTop: '70px' }}>
                 <AuthHeader token={this.state.token} />
                 {this.state.loading && <div>loading...</div>}
                 {!this.state.loading && <div>

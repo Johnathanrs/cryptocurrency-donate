@@ -6,6 +6,7 @@ import { browserHistory } from 'react-router';
 
 import '../App.css';
 import callApi from '../../../util/apiCaller';
+import { toast } from 'react-toastify';
 
 import { saveToken } from '../AuthActions';
 

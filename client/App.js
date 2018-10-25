@@ -90,7 +90,6 @@ class App extends React.Component {
     }
     if (!tokenData || !isSignIn) {
       replace('/user/signin');
-      callback();
       return;
     }
     callApi('users/authcheck', 'POST', {}).then(res => {
@@ -98,7 +97,6 @@ class App extends React.Component {
         callback();
       } else {
         replace('/user/signin');
-        callback();
       }
     });
   }
@@ -107,7 +105,6 @@ class App extends React.Component {
     const token = window.localStorage.getItem('smartprojectadmin');
     if (!token) {
       replace('/admin/signin');
-      callback();
       return;
     }
     callApi('users/authcheckAdmin', 'POST', {}, token).then(res => {
@@ -115,7 +112,6 @@ class App extends React.Component {
         callback();
       } else {
         replace('/admin/signin');
-        callback();
       }
     });
   }
@@ -193,26 +189,32 @@ class App extends React.Component {
               <Route
                 path="/user/mytickets"
                 component={MyTickets}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/user/referral"
                 component={Referral}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/user/checktickets"
                 component={CheckTickets}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/user/claimbenefits"
                 component={ClaimBenefits}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/user/transferticket"
                 component={TransferTicket}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/user/account"
                 component={Account}
+                onEnter={this.requireAuth}
               />
               <Route
                 path="/admin/signin"

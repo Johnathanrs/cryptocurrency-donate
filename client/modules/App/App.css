@@ -6,6 +6,11 @@
   background-color: rgba(254, 254, 254, 0.8);
 }
 
+.container-option {
+  padding-top: 100px;
+  min-height: 100vh;
+}
+
 .navbar.scrolling-navbar {
   z-index: 100;
 }

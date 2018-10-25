@@ -29,69 +29,68 @@ class ProjectDetailView extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.project !== nextProps.project) {
-            const project = nextProps.project;
+        if (this.props.res !== nextProps.res) {
+            const project = nextProps.res.project;
             this.setState({ ...this.state, loading: false });
         }
     }
 
     updateProject = () => {
-        browserHistory.push(`/admin/project/${this.props.project._id}`)
+        browserHistory.push(`/admin/project/${this.props.res.project._id}`)
     }
     
     render() {
-        const { project } = this.props;
+        const { res } = this.props;
         console.log(this.props);
         let daysLeft = 0;
         let thumbnail = '';
-        if (project) {
-            let a = moment(project.fundingDuration, 'YYYY-MM-DD');
+        if (res && res.project) {
+            let a = moment(res.project.fundingDuration, 'YYYY-MM-DD');
             let b = moment().format('YYYY-MM-DD');
             daysLeft = a.diff(b, 'days');
-            thumbnail = 'http://' +  window.location.host + '/' + project.projectThumbnail;
+            thumbnail = 'http://' +  window.location.host + '/' + res.project.projectThumbnail;
         }
         return (
-            <div className="container">
+            <div className="container container-option">
                 <AdminHeader />
                 {this.state.loading && <div>...loading</div>}
-                {!this.state.loading && <div className="row" style={{ marginTop: '90px' }}> 
-                <div className="col-md-12">
-                    <div className=""> 
+                {!this.state.loading && <div> 
+                    <div className="row">
                         <button className="btn btn-lg bg-warning text-white float-right" onClick={this.updateProject}>Update</button>
                     </div>
                     <div className="card border-0 transform-on-hover">
                         <div className="card-img-container">
                             <a href="#">
-                                <img className="card-img-top" src={thumbnail} alt={project.title} />
+                                <img className="card-img-top" src={thumbnail} alt={res.project.title} />
                             </a>
                             <a href="#" className="btn btn-info btn-link top-left bg-dard" data-toggle="tooltip" title="Location">
-                                <span className="align-middle">{project.address && project.address.city}</span>
+                                <span className="align-middle">{res.project.address && res.project.address.city}</span>
                                 <i className="fa fa-map-marker fa-2x align-middle warning-color" aria-hidden="true"></i>
                             </a>
                             <div className="bottom-left bg-dark px-1">
-                                <span>$&nbsp;{project.totalMoneyInUSD}</span>&nbsp;&nbsp;<i className="fa fa-btc text-white" aria-hidden="true"></i>&nbsp;<span>{project.totalMoneyInBTC}</span>
+                                <span>$&nbsp;{res.project.totalMoneyInUSD}</span>&nbsp;&nbsp;<i className="fa fa-btc text-white" aria-hidden="true"></i>&nbsp;<span>{res.project.totalMoneyInBTC}</span>
                             </div>
                         </div>
                         <div className="p-2">
                             <div className="text-left">
-                                <span>Tickets From ${project.ticketPriceInUSD}</span><span className="float-right">{daysLeft} Days Left</span>
+                                <span>Tickets From ${res.project.ticketPriceInUSD}</span><span className="float-right">{daysLeft} Days Left</span>
                             </div>
-                            <h3 className="fb text-center mb-2">{project.title}</h3>
+                            <h3 className="fb text-center mb-2">{res.project.title}</h3>
                             <div className="row divider text-center">
                                 <div className="col-xs-12 col-sm-4 emphasis">
-                                    <h5><strong> {project.donatedBTC.toFixed(8)} </strong></h5>       
+                                    <h5><strong> {res.project.donatedBTC.toFixed(8)} </strong></h5>       
                                     <img src={'../../' + BTC_ROUNDED} alt="BTC" width="50" height="50" />
                                 </div>
                                 <div className="col-xs-12 col-sm-4 emphasis">
-                                    <h5><strong>{project.donatedETH.toFixed(8)}</strong></h5>                    
+                                    <h5><strong>{res.project.donatedETH.toFixed(8)}</strong></h5>                    
                                     <img src={'../../' + ETH_ROUNDED} alt="ETH" width="50" height="50" />
                                 </div>
                                 <div className="col-xs-12 col-sm-4 emphasis">
-                                    <h5><strong> {project.donatedLTC.toFixed(8)} </strong></h5>                    
+                                    <h5><strong> {res.project.donatedLTC.toFixed(8)} </strong></h5>                    
                                     <img src={'../../' + LTC_ROUNDED} alt="LTC" width="50" height="50" />
                                 </div>
                             </div>
-                        </div>
+                        
                     </div>
                     </div>
                 </div>}
@@ -110,7 +109,7 @@ ProjectDetailView.propTypes = {
   // Retrieve data from store as props
   function mapStateToProps(state) {
     return {
-      project: state.app.project,
+      res: state.app.res,
     };
   }
   

@@ -23,6 +23,12 @@ const subProjectSchema = new Schema({
 
 const userSchema = new Schema({
   email: { type: String, lowercase: true, unique: 'Two users cannot share the same email ({VALUE})', required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true },
+  fullName: { type: String, default: '', required: false },
+  birthday: { type: String, default: '', required: false },
+  nationality: { type: String, default: '', required: false },
+  address: { type: String, default: '', required: false },
+  phone: { type: String, default: '', required: false },
+  ID: { type: String, default: '', required: false },
   subProjects: [subProjectSchema],
   hash: String,
   salt: String,

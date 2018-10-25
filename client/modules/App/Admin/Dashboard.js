@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 
-import { fetchProjects, deleteProject } from '../AppActions';
+import { fetchProjects, deleteProject, setFeaturedProject } from '../AppActions';
 
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import TextField from '@material-ui/core/TextField';
@@ -15,6 +15,8 @@ import moment from 'moment';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
 class Dashboard extends Component {
+   
+
     constructor(props) {
         super(props);
         this.state = {
@@ -25,6 +27,11 @@ class Dashboard extends Component {
         };
 
         this.deleteProject = this.deleteProject.bind(this);
+        this.setFeatured = this.setFeatured.bind(this);
+    }
+
+    onRowSelect = (row, isSelected, e) => {
+        browserHistory.push(`admin/projectdetail/${row._id}`);
     }
 
     componentDidMount() {
@@ -44,7 +51,6 @@ class Dashboard extends Component {
         if (this.props.projects !== nextProps.projects) {
             this.setState({ ...this.state, loading: false });
         }
-       
     }
 
     searchProject = name => event => {
@@ -110,9 +116,24 @@ class Dashboard extends Component {
         });
     }
 
+    setFeatured = (id, isFeatured) => {
+        this.props.dispatch(setFeaturedProject(id, isFeatured)).then(err => {
+            if (err) {
+                toast.warn(err);
+            }
+        });
+    }
+
     actionFormatter = (cell, row) => {
         return <button type="button" onClick={() => this.deleteProject(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button>;
     }
+
+    activeFormatter = (cell, row, enumObject, index) => {
+        console.log(`The row index: ${index}`);
+        return (
+            <input type="checkbox" checked={cell} onClick={() => this.setFeatured(row._id, !cell)} />
+        );
+      }
 
     render() {
         const { projects } = this.props;
@@ -159,6 +180,11 @@ class Dashboard extends Component {
                     
                         <BootstrapTable 
                             data={data}
+                            selectRow={{ 
+                                mode: 'radio',
+                                clickToSelect: true,
+                                onSelect: this.onRowSelect,
+                            }}
                             striped={true}
                             hover={true}
                             pagination>
@@ -168,6 +194,7 @@ class Dashboard extends Component {
                             <TableHeaderColumn dataField="cntOfdonors" dataSort={true} width='150'># of Donors</TableHeaderColumn>
                             <TableHeaderColumn dataField="days" width='200'>Duration (Days)</TableHeaderColumn>
                             <TableHeaderColumn dataField="startDate" width='200'>Start Date</TableHeaderColumn>
+                            <TableHeaderColumn dataField="isFeatured" dataAlign="center" dataFormat={this.activeFormatter} export={false} width='100'>Featured</TableHeaderColumn>
                             <TableHeaderColumn dataField="_id" isKey={true} dataAlign="center" dataFormat={this.actionFormatter} export={false} width='70'></TableHeaderColumn>
                         </BootstrapTable>
                     </div>}
