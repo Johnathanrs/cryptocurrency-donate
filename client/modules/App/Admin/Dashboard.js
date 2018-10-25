@@ -30,9 +30,7 @@ class Dashboard extends Component {
         this.setFeatured = this.setFeatured.bind(this);
     }
 
-    onRowSelect = (row, isSelected, e) => {
-        browserHistory.push(`admin/projectdetail/${row._id}`);
-    }
+   
 
     componentDidMount() {
         this.props.dispatch(fetchProjects());
@@ -116,6 +114,10 @@ class Dashboard extends Component {
         });
     }
 
+    detailProject = (id) => {
+        browserHistory.push(`admin/projectdetail/${id}`);
+    }
+
     setFeatured = (id, isFeatured) => {
         this.props.dispatch(setFeaturedProject(id, isFeatured)).then(err => {
             if (err) {
@@ -125,7 +127,10 @@ class Dashboard extends Component {
     }
 
     actionFormatter = (cell, row) => {
-        return <button type="button" onClick={() => this.deleteProject(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button>;
+        return <div>
+            <button type="button" onClick={() => this.deleteProject(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button>
+            <button type="button" onClick={() => this.detailProject(row._id)} className="btn btn-link btn-sm"><i className="fa fa-edit fa-2x"></i></button>
+        </div>;
     }
 
     activeFormatter = (cell, row, enumObject, index) => {
@@ -143,7 +148,7 @@ class Dashboard extends Component {
         return (
             <div>
                 <AdminHeader />
-                <div className="container-fluid mt-100">
+                <div className="container mt-100">
                     {!this.state.loading && <div> 
                         <div className="fs-125 fb" style={{ flex: '1 1 auto' }}>
                             Browser Projects
@@ -180,11 +185,6 @@ class Dashboard extends Component {
                     
                         <BootstrapTable 
                             data={data}
-                            selectRow={{ 
-                                mode: 'radio',
-                                clickToSelect: true,
-                                onSelect: this.onRowSelect,
-                            }}
                             striped={true}
                             hover={true}
                             pagination>
@@ -195,7 +195,7 @@ class Dashboard extends Component {
                             <TableHeaderColumn dataField="days" width='200'>Duration (Days)</TableHeaderColumn>
                             <TableHeaderColumn dataField="startDate" width='200'>Start Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="isFeatured" dataAlign="center" dataFormat={this.activeFormatter} export={false} width='100'>Featured</TableHeaderColumn>
-                            <TableHeaderColumn dataField="_id" isKey={true} dataAlign="center" dataFormat={this.actionFormatter} export={false} width='70'></TableHeaderColumn>
+                            <TableHeaderColumn dataField="_id" isKey={true} dataAlign="center" dataFormat={this.actionFormatter} export={false} width='120'></TableHeaderColumn>
                         </BootstrapTable>
                     </div>}
                     {this.state.loading && <div>...loading</div>}
