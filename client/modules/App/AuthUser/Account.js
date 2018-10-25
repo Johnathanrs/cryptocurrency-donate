@@ -50,10 +50,10 @@ class Account extends React.Component {
         const { user, newPassword, confirmPassword } = this.state;
         this.setState({
             ...this.state,
-            passwordErr: !newPassword && !confirmPassword && newPassword != confirmPassword,
+            passwordErr: !newPassword || !confirmPassword || newPassword != confirmPassword,
         });
         if (this.state.passwordErr) {
-            toast.warn('Previous password wrong or New password does not match');
+            toast.warn('Password does not match');
             this.setState({ ...this.state });
             return;
         }
