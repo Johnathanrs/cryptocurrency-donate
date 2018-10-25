@@ -32,7 +32,7 @@ class CustomerSignIn extends Component {
         const self = this;
         self.setState({ ...self.state, isCreate: true, errOnCreate: '' });
         callApi('users/customersignin', 'POST', { user: this.state }).then((res, err) => {
-            let message = 'Successfully created';
+            let message = 'Successfully signin';
             if  (res.errors) {
                 message = res.errors;
             } else {

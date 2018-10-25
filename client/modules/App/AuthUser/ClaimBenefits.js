@@ -14,13 +14,13 @@ class ClaimBenefits extends React.Component {
     constructor(props) {
         super(props);
 
-        const today = new moment().format('YYYY-MM-DD');
+        
         this.state = {
             loading: true,
             user: {
                 fullName: '',
                 email: '',
-                birthday: today,
+                birthday: '',
                 nationality: '',
                 address: '',
                 phone: '',
@@ -42,7 +42,12 @@ class ClaimBenefits extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (this.props.res != nextProps.res) {
-            this.setState({ loading: false, user: nextProps.res.user });
+            const today = new moment().format('YYYY-MM-DD');
+            const user = nextProps.res.user;
+            if (!user.birthday) {
+                user.birthday = today;
+            }
+            this.setState({ loading: false, user: user });
         }
     }
 
