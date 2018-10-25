@@ -126,6 +126,7 @@ const renderFullPage = (html, initialState) => {
         <div id="root">${process.env.NODE_ENV === 'production' ? html : `<div>${html}</div>`}</div>
         <script>
           window.__INITIAL_STATE__ = ${JSON.stringify(initialState)};
+          window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
           ${isProdMode ?
           `//<![CDATA[
           window.webpackManifest = ${JSON.stringify(chunkManifest)};
