@@ -44,13 +44,13 @@ export function searchNearByFromProject(projects) {
             });
                
             const dataSet = Geo.createCompactSet(data, { id: '_id', lat: ['coord', 'lat'], lon: ['coord', 'lon'] });
-            const geo = new Geo(dataSet, { sorted: true });
+            const geo = new Geo(dataSet, { sorted: true, limit: 1 });
             
-            const results = geo.nearBy(coords.lat, coords.lng, 5000);
-            if (!results || !results[0]) {
+            const results = geo.nearBy(coords.lat, coords.lng, 60000000);
+            if (!results) {
                return resolve('');
             }
-            resolve(results[0].i);
+            resolve(results.i);
         });
     });
 }

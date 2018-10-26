@@ -38,6 +38,10 @@ class ProjectDetailView extends React.Component {
     updateProject = () => {
         browserHistory.push(`/admin/project/${this.props.res.project._id}`)
     }
+
+    gotoHome = () => {
+        browserHistory.push(`/${this.props.res.project._id}`)
+    }
     
     render() {
         const { res } = this.props;
@@ -60,10 +64,10 @@ class ProjectDetailView extends React.Component {
                     </div>
                     <div className="card border-0 transform-on-hover">
                         <div className="card-img-container">
-                            <a href="#">
+                            <a href="javascript:void(0)" onClik={() => this.gotoHome()}>
                                 <img className="card-img-top" src={thumbnail} alt={res.project.title} />
                             </a>
-                            <a href="#" className="btn btn-info btn-link top-left bg-dard" data-toggle="tooltip" title="Location">
+                            <a href="javascript:void(0)" className="btn btn-info btn-link top-left bg-dard" data-toggle="tooltip" title="Location">
                                 <span className="align-middle">{res.project.address && res.project.address.city}</span>
                                 <i className="fa fa-map-marker fa-2x align-middle warning-color" aria-hidden="true"></i>
                             </a>

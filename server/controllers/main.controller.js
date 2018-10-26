@@ -2,6 +2,7 @@ import Project, { Address, Wallet, Coin } from '../models/project';
 import User, { SubProject } from '../models/user';
 import Guide from '../models/guide';
 import Order from '../models/order';
+import Ticket from '../models/ticket';
 const _ = require('lodash');
 
 import { geocoder, searchNearByFromProject } from '../util/util';
@@ -423,6 +424,24 @@ export function userSignup(req, res) {
   }).catch(err => { return res.send({ errors: err.message }); });
 }
 
+function createTicketsBasedUponOrder(paidTickets, order) {
+  const tickets = [];
+  paidTickets.map(each => {
+    const ticket = new Ticket();
+    ticket.userID = order.userID;
+    ticket.projectID = order.projectID;
+    ticket.orderID = order._id;
+    tickets.push(ticket);
+  });
+  Ticket.insertMany(tickets, (err, docs) => {
+    if (err) {
+      console.log('error happened during ticket creating');
+    } else {
+      console.log('created tickets', docs);
+    }
+  });
+}
+
 function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
   if (paidTickets > 0) {
     order.paidTickets = paidTickets;
@@ -487,7 +506,8 @@ function promiseCheck(order) {
 
       let paidTickets = 0;
       if (order.ethAmount) {
-        paidTickets += Math.round((order.ethAmount) / order.ethTicketPrice);
+        const ethTickets = Math.round((order.ethAmount) / order.ethTicketPrice);
+        paidTickets += ethTickets;
         let isETHSending = false;
         if (!isETHSending) {
           isETHSending = true;
@@ -496,14 +516,16 @@ function promiseCheck(order) {
             if (txid) {
               console.log(txid);
             }
+            createTicketsBasedUponOrder(ethTickets, order);
             updateOrderAndProject(paidTickets, order, project, txid, 'ETH');
-          }).catch(err => {console.log('eth transaction', err.message); isETHSending = false;});
+          }).catch(err => { console.log('eth transaction', err.message); isETHSending = false;});
         }
       }
 
       // BTC transaction
       if (order.btcAmount) {
-        paidTickets += Math.round((order.btcAmount) / order.btcTicketPrice);
+        const btcTickets = Math.round((order.btcAmount) / order.btcTicketPrice);
+        paidTickets += btcTickets;
         const fee = bitcoinTransaction.getTransactionSize(ninputs, 1);
         const amount = order.btcAmount * bitcoinTransaction.BITCOIN_SAT_MULT;
         if (amount <= fee) {
@@ -524,6 +546,7 @@ function promiseCheck(order) {
               if (msg.err) {
                 console.log(msg.err);
               } else if (msg.statusCode == 200 || msg.status == 'OK') { // 200 for blockchain  'OK' for Omni
+                createTicketsBasedUponOrder(btcTickets, order);
                 updateOrderAndProject(paidTickets, order, project, '', 'BTC');
               }
             }).catch(err => { console.log('btc transaction ', err.message); isBTCSending = false; });
@@ -533,7 +556,8 @@ function promiseCheck(order) {
 
       // LTC transaction
       if (order.ltcAmount) {
-        paidTickets += Math.round((order.ltcAmount) / order.ltcTicketPrice);
+        const ltcTickets = Math.round((order.ltcAmount) / order.ltcTicketPrice);
+        paidTickets += ltcTickets;
         const feeLTC = 0.00077 * bitcoinTransaction.BITCOIN_SAT_MULT;
         if (order.ltcAddress < feeLTC) {
           console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
@@ -546,9 +570,10 @@ function promiseCheck(order) {
               isLTCSending = false;
               if (msg) {
                 console.log(msg);
-              } 
+              }
+              createTicketsBasedUponOrder(ltcTickets, order);
               updateOrderAndProject(paidTickets, order, project, '', 'LTC');
-            }).catch(err => { console.log('ltc transaction', err.message); isLTCSending = false;});
+            }).catch(err => { console.log('ltc transaction', err.message); isLTCSending = false; });
           }
         }
       }
