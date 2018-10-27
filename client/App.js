@@ -8,7 +8,7 @@ import { Router, browserHistory, Route, IndexRoute } from 'react-router';
 import IntlWrapper from './modules/Intl/IntlWrapper';
 import Home from './modules/App/Home/Home';
 import AppComponent from './modules/App/App';
-import Dashboard from './modules/App/Admin/Dashboard';
+import BrowserProjects from './modules/App/Admin/BrowserProjects';
 import Info from './modules/App/Info';
 
 import callApi from './util/apiCaller';
@@ -47,7 +47,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/EnhancedTableHead');
   require('./modules/App/Admin/User');
   require('./modules/App/Admin/Project');
-  require('./modules/App/Admin/Dashboard');
+  require('./modules/App/Admin/BrowserProjects');
   require('./modules/App/Admin/SignIn');
   require('./modules/App/Home/Home');
   require('./modules/App/Home/TicketControl');
@@ -143,7 +143,7 @@ class App extends React.Component {
                 />
                 <Route
                   path="dashboard"
-                  component={Dashboard}
+                  component={BrowserProjects}
                 />
                 <Route
                   path="users"

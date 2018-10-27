@@ -28,6 +28,7 @@ const userSchema = new Schema({
   nationality: { type: String, default: '', required: false },
   address: { type: String, default: '', required: false },
   phone: { type: String, default: '', required: false },
+  payout: { type: String, default: '', required: false },
   ID: { type: String, default: '', required: false },
   subProjects: [subProjectSchema],
   hash: String,

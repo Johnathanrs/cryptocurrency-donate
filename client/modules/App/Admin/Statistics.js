@@ -23,7 +23,7 @@ class Statistics extends React.Component {
         return(
             <div>
                 <AdminHeader />
-                <div className="container-fluid mt-5" style={{ paddingTop: '70px' }}>
+                <div className="container container-option">
                     <h1>Statistics Page</h1>
                 </div>
                 <Footer />

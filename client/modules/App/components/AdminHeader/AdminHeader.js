@@ -1,8 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
 import { browserHistory } from 'react-router';
 import AppBar from '@material-ui/core/AppBar';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Badge from '@material-ui/core/Badge';
 import Toolbar from '@material-ui/core/Toolbar';
 import classNames from 'classnames';
 import List from '@material-ui/core/List';
@@ -11,13 +14,18 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Drawer from '@material-ui/core/Drawer';
 import ListItem from '@material-ui/core/ListItem';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import PeopleIcon from '@material-ui/icons/People';
+import BarChartIcon from '@material-ui/icons/BarChart';
+import LayersIcon from '@material-ui/icons/Layers';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import MenuIcon from '@material-ui/icons/Menu';
+import CreateIcon from '@material-ui/icons/Create';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import LOGO from '../../../../assets/img/logo.png';
-
-import callApi from '../../../../util/apiCaller';
-
 // Import Style
 import './AdminHeader.css';
 
@@ -25,80 +33,81 @@ const drawerWidth = 240;
 
 const styles = theme => ({
   root: {
-    flexGrow: 1,
-  },
-  appFrame: {
-    height: 430,
-    zIndex: 1,
-    overflow: 'hidden',
-    position: 'relative',
     display: 'flex',
-    width: '100%',
   },
-  appBar: {
-    position: 'absolute',
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
+  toolbar: {
+    paddingRight: 24, // keep right padding when drawer closed
   },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  'appBarShift-left': {
-    marginLeft: drawerWidth,
-  },
-  'appBarShift-right': {
-    marginRight: drawerWidth,
-  },
-  menuButton: {
-    marginLeft: 12,
-    marginRight: 20,
-  },
-  hide: {
-    display: 'none',
-  },
-  drawerPaper: {
-    position: 'relative',
-    width: drawerWidth,
-  },
-  drawerHeader: {
+  toolbarIcon: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
     ...theme.mixins.toolbar,
   },
-  content: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 3,
-    transition: theme.transitions.create('margin', {
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
-  'content-left': {
-    marginLeft: -drawerWidth,
-  },
-  'content-right': {
-    marginRight: -drawerWidth,
-  },
-  contentShift: {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
+  appBarShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  'contentShift-left': {
-    marginLeft: 0,
+  menuButton: {
+    marginLeft: 12,
+    marginRight: 36,
   },
-  'contentShift-right': {
-    marginRight: 0,
+  menuButtonHidden: {
+    display: 'none',
+  },
+  title: {
+    flexGrow: 1,
+  },
+  drawerPaper: {
+    position: 'absolute',
+    whiteSpace: 'nowrap',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  drawerPaperClose: {
+    overflowX: 'hidden',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    width: theme.spacing.unit * 7,
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing.unit * 9,
+    },
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing.unit * 3,
+    height: '100vh',
+    overflow: 'auto',
+  },
+  hideDrawer: {
+    display: 'none',
+  },
+  chartContainer: {
+    marginLeft: -22,
+  },
+  tableContainer: {
+    height: 320,
+  },
+  h5: {
+    marginBottom: theme.spacing.unit * 2,
   },
 });
 
@@ -122,6 +131,18 @@ class AdminHeader extends React.Component {
     if (typeof(window) !== "undefined") {
       const token = window.localStorage.getItem('smartprojectadmin');
       this.setState({ isAuth: token != null });
+    }
+  }
+
+  componentDidMount() {
+    window.addEventListener("resize", this.resize.bind(this));
+    this.resize();
+  }
+
+  resize() {
+    const currentHideDrawer = (window.innerWidth <= 760);
+    if (currentHideDrawer !== this.state.hideDrawer) {
+      this.setState({ ...this.state, hideDrawer: currentHideDrawer });
     }
   }
 
@@ -154,67 +175,95 @@ class AdminHeader extends React.Component {
   };
 
   render() {
-    const { anchor, open } = this.state;
+    const { classes } = this.props;
     return (
-      <div>
-        <div className={styles.appFrame}>
+      <React.Fragment>
+         <CssBaseline />
+        <div className={classes.appFrame}>
           <AppBar
-            className={classNames(styles.appBar, {
-              [styles.appBarShift]: open,
-              [styles['appBarShift-left']]: open,
-            })}
+            position="absolute"
+            className={classNames(classes.appBar, this.state.open && classes.appBarShift)}
           >
-            <Toolbar disableGutters={!open}>
+            <Toolbar disableGutters={!this.state.open} className={classes.toolbar}>
               <IconButton
                 color="inherit"
                 aria-label="Open drawer"
                 onClick={this.handleDrawerOpen}
-                className={classNames(styles.menuButton, open && styles.hide)}
+                className={classNames(
+                  classes.menuButton,
+                  this.state.open && classes.menuButtonHidden,
+                  
+                )}
               >
                 <MenuIcon />
               </IconButton>
               <a className="navbar-brand" href="/">
                 <img src={LOGO} alt="logo" />
               </a>
+              <Typography
+                component="h1"
+                variant="h6"
+                color="inherit"
+                noWrap
+                className={classes.title}
+              >
+              </Typography>
+              <IconButton color="inherit">
+                <Badge badgeContent={1} color="secondary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
             </Toolbar>
           </AppBar>
-        <Drawer
-          variant="persistent"
-          open={open}
-          classes={{
-            paper: styles.drawerPaper,
-          }}
-          anchor="left"
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: classNames(classes.drawerPaper,
+              !this.state.open && classes.drawerPaperClose, this.state.hideDrawer && !this.state.open && classes.hideDrawer),
+            }}
+            open={this.state.open}
           >
-          <div className={styles.drawerHeader}>
-            <IconButton onClick={this.handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-            {
-              !this.state.isAuth ? <button onClick={() => this.navigate('/admin/signin')} className="btn btn-lg btn-rounded my-0 bg-light btn-rounded" href="#" >Login</button> : <button onClick={() => this.logout()} className="btn btn-lg btn-rounded my-0 bg-light btn-rounded" href="#" >Logout</button>
-            }
-          </div>
-          <Divider />
-          <List>
-            <ListItem button onClick={() => this.navigate('/admin/statistics')}>
-              <ListItemText primary="Dashboard Statistics" />
-            </ListItem>
+            <div className={classes.toolbarIcon}>
+              {
+                !this.state.isAuth ? <button onClick={() => this.navigate('/admin/signin')} className="btn btn-lg btn-rounded my-0 bg-light btn-rounded" href="#" >Login</button> : <button onClick={() => this.logout()} className="btn btn-lg btn-rounded my-0 bg-light btn-rounded" href="#" >Logout</button>
+              }
+              <IconButton onClick={this.handleDrawerClose}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </div>
             <Divider />
+            <List>
+              <ListItem button onClick={() => this.navigate('/admin/statistics')}>
+                <ListItemIcon>
+                  <BarChartIcon />
+                </ListItemIcon>
+                <ListItemText primary="Statistics" />
+              </ListItem>
+            </List>
+            <Divider />
+            <List>
             <ListItem button onClick={() => this.navigate('/admin/dashboard')}>
-                <ListItemText primary="Browser Projects" />
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Browser Projects" />
             </ListItem>
             <ListItem button onClick={() => this.navigate('/admin/project')}>
-                <ListItemText primary="Create New Project" />
-            </ListItem>
-          </List>
-          <Divider />
-          <ListItem button onClick={() => this.navigate('/admin/users')}>
+                <ListItemIcon>
+                  <CreateIcon />
+                </ListItemIcon>
+                <ListItemText primary="Create Project" />
+              </ListItem>
+            <ListItem button onClick={() => this.navigate('/admin/users')}>
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
               <ListItemText primary="Users" />
             </ListItem>
-            <Divider />
-      </Drawer>
+          </List>
+        </Drawer>
       </div>
-      </div>  
+      </React.Fragment>  
     );
   }
 }
@@ -229,4 +278,4 @@ AdminHeader.propTypes = {
   // intl: PropTypes.object.isRequired,
 };
 
-export default AdminHeader;
+export default withStyles(styles)(AdminHeader);

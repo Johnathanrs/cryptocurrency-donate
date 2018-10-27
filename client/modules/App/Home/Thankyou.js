@@ -14,7 +14,7 @@ class Thankyou extends React.Component {
     }
     
     render() {
-        const { email, tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project } = this.props;
+        const { email, tickets, coinTypeArray, paidAmount, coinType, project } = this.props;
 
         return(
             <div className="col-xl-4 col-lg-5 col-md-5 col-sm-12 right-pane">
@@ -31,7 +31,7 @@ class Thankyou extends React.Component {
                     <div className="justify-content-center mt-2 pt-1 pb-4 ticket-background" role="alert" style={{backgroundImage: `url(${TICKET_BACKGROUND})`, height: '70px' }}>
                         <h5 className="card-title text-center fw-500 text-white fs-125 mb-0 mt-1" style={{  paddingTop: '0.1rem' }}><strong className="fs-11 text-white">{tickets}</strong> tickets</h5>
                         <div className="text-center">
-                            <span className="card-text mr-1 fs-1 text-white"> {totalPrice}</span><img src={coinTypeArray[coinType]} alt="BTC" width="25" height="25" />
+                            <span className="card-text mr-1 fs-1 text-white"> {paidAmount[coinType]}</span><img src={coinTypeArray[coinType]} alt="BTC" width="25" height="25" />
                         </div>
                     </div>
                     <div className="mt-2">

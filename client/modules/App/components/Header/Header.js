@@ -50,6 +50,7 @@ class Header extends React.Component {
     localStorage.setItem('smartproject', '');
     this.props.dispatch(saveToken(''));
     browserHistory.push('/');
+    this.setState({ isUnAuth: true });
   }
 
   navigate = (url) => {

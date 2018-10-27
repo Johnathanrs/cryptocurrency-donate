@@ -138,6 +138,7 @@ export function updateUser(req, res, next) {
     user.birthday = userData.birthday && userData.birthday || user.birthday;
     user.address = userData.address && userData.address || user.address;
     user.phone = userData.phone && userData.phone || user.phone;
+    user.payout = userData.payout && userData.payout || user.payout;
     user.ID = userData.ID && userData.ID || user.ID;
 
     return user.save().then(function() {
@@ -436,7 +437,13 @@ export function getMyTickets(req, res) {
   });
 }
 
-function transferTickets(req, res) {
+export function sendReferral(req, res) {
+  if (!req.decoded) {
+    return res.status(400).send({ errors: 'Bad request' });
+  }
+}
+
+export function transferTickets(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad request' });
   }
@@ -444,6 +451,10 @@ function transferTickets(req, res) {
   const order = new Order();
   order.userID = req.decoded._id;
   order.projectID = req.body.projectID;
+  order.ticketID = req.body.ticketID;
+  order.btcAmount = req.body.btcTicketPrice;
+  order.ethAmount = req.body.ethTicketPrice;
+  order.ltcAmount = req.body.ltcTicketPrice;
   order.selectedTickets = req.body.tickets;
   order.btcAddress = req.body.btcAddress.publicKey;
   order.ethAddress = req.body.ethAddress.publicKey;
@@ -455,26 +466,24 @@ function transferTickets(req, res) {
   order.ethTicketPrice = req.body.ethTicketPrice;
   order.ltcTicketPrice = req.body.ltcTicketPrice;
   order.network = process.env.BTCNET;
-  order.status = 'pending';
+  order.status = 'paid';
   order.type = 'transfer';
-    
-    const toEmail = req.body.transferredEmail;
-    const subject = 'Ticket Transfer';
-    const text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}`;
-    const html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}</p></div>`;
+  const toEmail = req.body.transferredEmail;
+  const subject = 'Ticket Transfer';
+  const text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}`;
+  const html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}</p></div>`;
 
-    return Promise.all([
-      order.save(),
-      project.save(),
-      sendEmail({
-        to: toEmail,
-        subject: subject,
-        text: text,
-        html: html,
-      }),
-    ]).then((err, data) => {
-      console.log(err, data);
-    });
+  return Promise.all([
+    order.save(),
+    sendEmail({
+      to: toEmail,
+      subject: subject,
+      text: text,
+      html: html,
+    }),
+  ]).then((data) => {
+    return res.send({ status: 'OK' });
+  }).catch(err => { return res.end({ errors: err.message }); });
 }
 
 function createTicketsBasedUponOrder(paidTickets, order) {

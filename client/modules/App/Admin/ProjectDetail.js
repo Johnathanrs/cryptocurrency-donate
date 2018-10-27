@@ -359,8 +359,8 @@ class ProjectDetail extends Component {
                 <div className="container-fluid mt-100">
                     {!this.state.loading && <div className="container bg-white mt-100">
                         <div className="card bg-light">
-                            <div className="card-body card-header card-title text-uppercase">
-                                <span className="fs-125">Update the Project</span> {this.state.isCreate && <span className="warning-color">Please wait...</span>}
+                            <div className="card-body card-header card-title">
+                                <h2>Update the Project</h2> {this.state.isCreate && <span className="warning-color">Please wait...</span>}
                                 <button className="btn btn-lg bg-warning text-white float-right" onClick={this.updateProject}>Update</button>
                                 <button className="btn btn-lg bg-warning text-white float-right mr-2" onClick={this.deleteProject}>Delete</button>
                                 <p className="warning-color">{!this.state.isCreate && this.state.errOnCreate}</p>

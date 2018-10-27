@@ -287,7 +287,7 @@ class Project extends React.Component {
         let {projectThumbnail, videoPreviewUrl} = this.state;
         let $imagePreview = null, $videoPreview = null;
         if (projectThumbnail) {
-            $imagePreview = ( <img src={'http://' + window.location.host +'/' + projectThumbnail} /> );
+            $imagePreview = ( <img src={`http://${window.location.host}/${projectThumbnail}`} /> );
         } else {
             $imagePreview = (<div className="previewText">Project Thumbnail</div>);
         }
@@ -318,8 +318,8 @@ class Project extends React.Component {
                 <AdminHeader />
                 <div className="container bg-white mt-100">
                     <div className="card bg-light">
-                        <div className="card-body card-header card-title text-uppercase">
-                            <span className="fs-125">Create New Project</span>{this.state.isCreate && <span className="warning-color">Please wait...</span>}
+                        <div className="card-body card-header card-title">
+                            <h3>Create New Project</h3>{this.state.isCreate && <span className="warning-color">Please wait...</span>}
                             <button className="btn btn-lg bg-warning text-white float-right" onClick={this.createProject}>{this.state.isCreate && <i className="fa fa-spinner fa-spin fa-3x text-red"></i>}&nbsp;Create</button>
                             <p className="warning-color">{!this.state.isCreate && this.state.errOnCreate}</p>
                         </div>

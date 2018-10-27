@@ -53,4 +53,6 @@ router.route('/fxrate').get(MainController.getFxRate);
 
 router.use('/tickets', checkTokenAdmin, MainController.getMyTickets);
 
+router.use('/transferTickets', checkTokenAdmin, MainController.transferTickets);
+
 export default router;

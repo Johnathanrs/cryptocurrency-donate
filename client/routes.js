@@ -3,7 +3,7 @@ import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 import App from './modules/App/App';
 import Home from './modules/App/Home/Home';
-import Dashboard from './modules/App/Admin/Dashboard';
+import BrowserProjects from './modules/App/Admin/BrowserProjects';
 import Info from './modules/App/Info';
 import UserDashboard from './modules/App/AuthUser/UserDashboard';
 import ProjectDetailView from './modules/App/Admin/ProjectDetailView';
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/EnhancedTableHead');
   require('./modules/App/Admin/User');
   require('./modules/App/Admin/Project');
-  require('./modules/App/Admin/Dashboard');
+  require('./modules/App/Admin/BrowserProjects');
   require('./modules/App/Admin/SignIn');
   require('./modules/App/Home/Home');
   require('./modules/App/Home/TicketControl');
@@ -58,6 +58,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/CustomerSignUp');
   require('./modules/App/Admin/ProjectDetailView');
   require('./modules/App/Admin/UserGuideManager');
+  require('./modules/App/AuthUser/CheckTickets');
 }
 
 /* Workaround for async react routes to work with react-hot-reloader till
@@ -88,7 +89,7 @@ export default (
       />
       <Route
         path="dashboard"
-        component={Dashboard}
+        component={BrowserProjects}
       />
       <Route
         path="users"

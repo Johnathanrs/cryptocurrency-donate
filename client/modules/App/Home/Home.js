@@ -245,16 +245,23 @@ class Home extends Component {
         console.log('balance', res);
         let message = '';
         if(res.errors) {
-            toast.warn(res.errors);
+            // toast.warn(res.errors);
+            console.log(res.errors);
             return;
         } else if (res.status == 'ok') {
             // stop scheduling and go to the thank you page
             console.log(' got payment ');
-            message = `You paid ${res.paidAmount} ${this.state.coinType} for ${res.paidTickets} out of ${this.state.tickets}`;
+            const paidAmount = {
+                BTC: res.btcAmount,
+                ETH: res.ethAmount,
+                LTC: res.ltcAmount,
+            };
+            const amount = paidAmount[this.state.coinType];
+            message = `You paid ${amount} ${this.state.coinType} for ${res.paidTickets} out of ${this.state.tickets}`;
             this.setState({ ...this.state,
                 activePage: 'thankyou',
                 message: message,
-                paidAmount: res.paidAmount,
+                paidAmount: paidAmount,
                 paidTickets: res.paidTickets,
                 coinType: res.paidCoin,
                 project: {
@@ -290,7 +297,6 @@ class Home extends Component {
 
     checkBalance = () => {
         if (!this.state.crypto || this.state.activePage != 'payment') {
-            // console.log('clearInterval ', addr);
             this.clearBalanceInterval();
             return;
         }
@@ -394,7 +400,7 @@ class Home extends Component {
                                                         coinTypeArray={coinTypeArray}
                                                         coinType={this.state.coinType}
                                                         tickets={this.state.paidTickets}
-                                                        totalPrice={this.state.paidAmount}
+                                                        paidAmount={this.state.paidAmount}
                                                         project={project}
                                                         ticketPrice={this.state.ticketPrice}
                                                         />

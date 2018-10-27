@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
 import { getDurationInDays, toReadableDate } from '../../../util/util';
-
+import callApi from '../../../util/apiCaller';
 import { fetchTickets } from '../AppActions';
 
 class CheckTickets extends React.Component {
@@ -19,7 +19,7 @@ class CheckTickets extends React.Component {
 
         this.state = {
             loading: true,
-            showModal: true,
+            showModal: false,
             transferredEmail: ''
         }
     }
@@ -44,10 +44,10 @@ class CheckTickets extends React.Component {
                 ticket.btcTicketPrice = each.projectID.ticketPriceInBTC;
                 ticket.ethTicketPrice = each.projectID.ticketPriceInETH;
                 ticket.ltcTIcketPrice = each.projectID.ticketPriceInLTC;
-                ticket.ticketPrice = `${ticket.btcTicketPrice}/${ticket.ethTicketPrice}/${ticket.ltcTIcketPrice}`
+                ticket.ticketPrice = `${ticket.btcTicketPrice}/${ticket.ethTicketPrice}/${ticket.ltcTIcketPrice}`;
                 ticket.projectID = each.projectID._id;
                 ticket.title = each.projectID.title;
-                const subProjectInUser = each.userID.subProjects.filter(sub => sub.projectID == each.projectID._id);
+                const subProjectInUser = each.userID.subProjects.filter(sub => sub.projectID == each.projectID._id)[0];
                 ticket.btcAddress = subProjectInUser.btcAddress;
                 ticket.ethAddress = subProjectInUser.ethAddress;
                 ticket.ltcAddress = subProjectInUser.ltcAddress;
@@ -64,23 +64,52 @@ class CheckTickets extends React.Component {
     }
 
     handleOK = () => {
-        console.log('Ok');
+        if (!this.state.transferredEmail) {
+            this.setState({ ...this.state, emailErr: true });
+            return;
+        }
+        this.transferTicket();
+        this.handleClose();
     }
 
     handleClose = () => {
         this.setState({ ...this.state, showModal: false });
     }
 
-    transferTicket = (id) => {
-        this.setState({ ...this.state, showModal: true });
+    transferTicket = () => {
+        const { ticket, transferredEmail } = this.state;
+        const body = {
+            ticketID: ticket._id,
+            projectID: ticket.projectID,
+            tickets: 1,
+            btcAddress: ticket.btcAddress,
+            ethAddress: ticket.ethAddress,
+            ltcAddress: ticket.ltcAddress,
+            btcTicketPrice: ticket.btcTicketPrice,
+            ethTicketPrice: ticket.ethTicketPrice,
+            ltcTIcketPrice: ticket.ltcTIcketPrice,
+            transferredEmail: transferredEmail,
+        };
+        callApi('transferTickets', 'POST', body).then(res => {
+            if (res.errors) {
+                toast.warn(res.errors);
+            } else if (res.status == 'OK') {
+                console.log(res);
+                toast.warn('Successfully transferred');
+            }
+        });
+    }
+
+    showTransferModal = (ticket) => {
+        this.setState({ ...this.state, showModal: true, ticket: ticket });
     }
 
     actionFormatter = (cell, row) => {
-        return <div><button type="button" onClick={() => this.transferTicket(row._id)} className="btn btn-link btn-sm"><i className="fas fa-exchange-alt"></i></button></div>;
+        return <div><button type="button" onClick={() => this.showTransferModal(row)} className="btn btn-link btn-sm"><i className="fa fa-exchange fa-2x"></i></button></div>;
     }
 
     render() {
-        const { loading, tickets, showModal, transferredEmail } = this.state;
+        const { loading, tickets, showModal, transferredEmail, emailErr } = this.state;
         return(
             <div>
                 <AuthHeader />
@@ -88,7 +117,7 @@ class CheckTickets extends React.Component {
                 {loading && <div>...loading</div>}
                 {!loading && <div>
                     <h1>Check Your Tickets Page</h1>
-                    <BootstrapTable 
+                    <BootstrapTable
                         data={tickets}
                         striped={true}
                         hover={true}
@@ -96,9 +125,9 @@ class CheckTickets extends React.Component {
                         <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
                         <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
                         <TableHeaderColumn dataField="ticketPrice" dataSort={true}>TicketPrice(BTC/ETH/LTC)</TableHeaderColumn>
-                        <TableHeaderColumn dataField="fundingDuration" dataSort={true}>Duration</TableHeaderColumn>
-                        <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
-                        <TableHeaderColumn dataField="_id" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
+                        <TableHeaderColumn dataField="fundingDuration" dataAlign="center" dataSort={true}>Duration (Days)</TableHeaderColumn>
+                        <TableHeaderColumn dataField="datePaid" dataAlign="center">Paid Date</TableHeaderColumn>
+                        <TableHeaderColumn dataField="_id" dataAlign="center" dataFormat={this.actionFormatter} export={false} width="150">Transfer Tickets</TableHeaderColumn>
                     </BootstrapTable>
                     
                 </div>}
@@ -117,6 +146,8 @@ class CheckTickets extends React.Component {
                                     </Typography>
                                     <div className="row mx-2">
                                         <TextField
+                                            required
+                                            error={emailErr}
                                             id="email"
                                             label="Email"
                                             type="email"

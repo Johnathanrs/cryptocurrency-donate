@@ -14,9 +14,7 @@ import moment from 'moment';
 
 import AdminHeader from '../components/AdminHeader/AdminHeader';
 import Footer from '../components/Footer/Footer';
-class Dashboard extends Component {
-   
-
+class BrowserProjects extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -29,8 +27,6 @@ class Dashboard extends Component {
         this.deleteProject = this.deleteProject.bind(this);
         this.setFeatured = this.setFeatured.bind(this);
     }
-
-   
 
     componentDidMount() {
         this.props.dispatch(fetchProjects());
@@ -143,16 +139,15 @@ class Dashboard extends Component {
     render() {
         const { projects } = this.props;
         const data = projects && this.filterData(projects) || [];
-        console.log('projects', projects);
 
         return (
             <div>
                 <AdminHeader />
-                <div className="container mt-100">
+                <main className="container container-option">
                     {!this.state.loading && <div> 
-                        <div className="fs-125 fb" style={{ flex: '1 1 auto' }}>
+                        <h2 className="fb" style={{ flex: '1 1 auto' }}>
                             Browser Projects
-                        </div>
+                        </h2>
                         <div className="d-flex align-items-baseline">
                             <TextField
                                 id="outlined-search"
@@ -199,14 +194,14 @@ class Dashboard extends Component {
                         </BootstrapTable>
                     </div>}
                     {this.state.loading && <div>...loading</div>}
-                </div>
+                </main>
                 <Footer />
             </div>
         );
     }
 }
 
-Dashboard.propTypes = {
+BrowserProjects.propTypes = {
   dispatch: PropTypes.func.isRequired,
     // intl: PropTypes.object.isRequired,
 };
@@ -219,4 +214,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Dashboard);
+export default connect(mapStateToProps)(BrowserProjects);
