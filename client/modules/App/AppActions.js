@@ -12,6 +12,7 @@ export const GET_TICKET = 'GET_TICKET';
 export const GET_CRYPTO = 'GET_CRYPTO';
 export const ADD_ORDERS = 'ADD_ORDERS';
 export const ADD_ERROR = 'ADD_ERROR';
+export const ADD_TICKETS = 'ADD_TICKETS';
 
 // Export Actions
 export function toggleAddPost() {
@@ -80,6 +81,13 @@ export function addOrders(orders) {
   return {
     type: ADD_ORDERS,
     orders,
+  };
+}
+
+export function addTickets(tickets) {
+  return  {
+    type: ADD_TICKETS,
+    tickets,
   }
 }
 
@@ -115,6 +123,15 @@ export function fetchOrders() {
     return callApi('orders').then(res => {
       dispatch(addOrders(res.orders));
       return res.orders;
+    });
+  };
+}
+
+export function fetchTickets() {
+  return (dispatch) => {
+    return callApi('tickets').then(res => {
+      dispatch(addTickets(res.tickets));
+      return res.tickets;
     });
   };
 }

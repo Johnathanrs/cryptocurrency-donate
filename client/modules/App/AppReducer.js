@@ -8,6 +8,7 @@ import {
   GET_CRYPTO,
   FETCH_USER_GUIDE,
   ADD_ORDERS,
+  ADD_TICKETS,
 } from './AppActions';
 
 // Initial State
@@ -60,6 +61,11 @@ const AppReducer = (state = initialState, action) => {
       return {
         ...state,
         orders: action.orders,
+      };
+    case ADD_TICKETS:
+      return {
+        ...state,
+        tickets: action.tickets,
       };
     default:
       return state;

@@ -59,6 +59,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/AuthUser/UserDashboard');
   require('./modules/App/Info');
   require('./modules/App/UserGuide');
+  require('./modules/App/AuthUser/CheckTickets');
   require('./modules/App/LiveChat');
   require('./modules/App/AuthUser/MyTickets');
   require('./modules/App/CustomerSignIn');

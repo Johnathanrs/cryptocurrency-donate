@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ticketSchema = new Schema({
-  userId: { type: Schema.ObjectId, ref: 'User' },
-  projectId: { type: Schema.ObjectId, ref: 'Project' },
-  orderId: { type: Schema.ObjectId, ref: 'Order' },
-  cuid: { type: 'String', required: true },
+  userID: { type: Schema.ObjectId, ref: 'User' },
+  projectID: { type: Schema.ObjectId, ref: 'Project' },
+  orderID: { type: Schema.ObjectId, ref: 'Order' },
   dateAdded: { type: Date, default: Date.now, required: true },
   dateTransferred: { type: Date, required: false },
   status: { type: String, default: 'valid', required: false },

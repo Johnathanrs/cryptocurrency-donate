@@ -25,6 +25,8 @@ const orderSchema = new Schema({
   paidCoin: { type: String, default: 'BTC', required: false },
   dateAdded: { type: Date, default: Date.now, required: true },
   network: { type: String, default: 'testnet', required: true },
+  type: { type: String, default: 'normal', require: false }, // normal: pay via website, transfer: transfer ticket
+  ticketID: { type: String, default: '', require: false },
   datePaid: { type: Date, default: Date.now, required: false },
 });
 

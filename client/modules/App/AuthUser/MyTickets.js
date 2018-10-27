@@ -5,7 +5,7 @@ import { browserHistory } from 'react-router';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
 
-import moment from 'moment';
+import { getDurationInDays, toReadableDate } from '../../../util/util';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
@@ -84,14 +84,12 @@ class MyTickets extends Component {
                 const project = order.projectID;
                 order.title = project.title;
                 order.pID = project._id;
-                const a = moment(project.fundingDuration, 'YYYY-MM-DD');
-                const b = moment().format('YYYY-MM-DD');
-                order.days = a.diff(b, 'days');
-                order.startDate = moment(project.dateAdded).format('MMM DD, YYYY');
+                order.days = getDurationInDays(project.fundingDuration);
+                order.startDate = toReadableDate(project.dateAdded);
                 if (!order.datePaid || order.datePaid == '-') {
                     order.datePaid = '-';
                 } else {
-                    order.datePaid = moment(order.datePaid).format('MMM DD, YYYY');
+                    order.datePaid = toReadableDate(order.datePaid);
                 }
                 order.coins = `${order.btcAmount}/${order.ethAmount}/${order.ltcAmount}`;
                 order.ticketPrice = `${order.btcTicketPrice}/${order.ethTicketPrice}/${order.ltcTicketPrice}`;

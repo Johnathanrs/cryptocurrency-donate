@@ -30,6 +30,10 @@ export function getBalance(addr) {
     }).catch(err => { return err});
 }
 
+export function calcBasicOpportunities(amount) {
+    return parseInt(web3.utils.toWei(amount+'', 'ether')) > (21000 * 8835992700);
+}
+
 export function sendTransaction(from, privateKey, to, amount) {
     web3 = initWeb3();
     const parameter = {
@@ -46,12 +50,11 @@ export function sendTransaction(from, privateKey, to, amount) {
         web3.eth.estimateGas(parameter)
         .then((gasLimit) => {
             _gasLimit = gasLimit;
-            parameter.gasLimit = web3.utils.toHex(gasLimit + 10000);
+            parameter.gasLimit = web3.utils.toHex(_gasLimit);
             return web3.eth.getGasPrice();
         }).then((gasPrice) => {
-            _gasPrice = gasPrice*1.5
-            ;
-            parameter.gasPrice = web3.utils.toHex(gasPrice);
+            _gasPrice = gasPrice;
+            parameter.gasPrice = web3.utils.toHex(_gasPrice);
             return web3.eth.getTransactionCount(from);
         }).then((count) => {
             parameter.nonce = count;

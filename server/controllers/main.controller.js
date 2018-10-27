@@ -424,15 +424,69 @@ export function userSignup(req, res) {
   }).catch(err => { return res.send({ errors: err.message }); });
 }
 
+export function getMyTickets(req, res) {
+  if (!req.decoded) {
+    return res.status(400).send({ errors: 'Bad request' });
+  }
+  Ticket.find({ userID: req.decoded._id }).sort('-dateAdded').populate('projectID').populate('orderID').populate('userID').exec((errors, tickets) => {
+    if (errors) {
+      res.status(500).send({ errors });
+    }
+    res.json({ tickets });
+  });
+}
+
+function transferTickets(req, res) {
+  if (!req.decoded) {
+    return res.status(400).send({ errors: 'Bad request' });
+  }
+  // Create order with type of 'transfer'
+  const order = new Order();
+  order.userID = req.decoded._id;
+  order.projectID = req.body.projectID;
+  order.selectedTickets = req.body.tickets;
+  order.btcAddress = req.body.btcAddress.publicKey;
+  order.ethAddress = req.body.ethAddress.publicKey;
+  order.ltcAddress = req.body.ltcAddress.publicKey;
+  order.btcPrivateAddress = req.body.btcAddress.privateKey;
+  order.ethPrivateAddress = req.body.ethAddress.privateKey;
+  order.ltcPrivateAddress = req.body.ltcAddress.privateKey;
+  order.btcTicketPrice = req.body.btcTicketPrice;
+  order.ethTicketPrice = req.body.ethTicketPrice;
+  order.ltcTicketPrice = req.body.ltcTicketPrice;
+  order.network = process.env.BTCNET;
+  order.status = 'pending';
+  order.type = 'transfer';
+    
+    const toEmail = req.body.transferredEmail;
+    const subject = 'Ticket Transfer';
+    const text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}`;
+    const html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}</p></div>`;
+
+    return Promise.all([
+      order.save(),
+      project.save(),
+      sendEmail({
+        to: toEmail,
+        subject: subject,
+        text: text,
+        html: html,
+      }),
+    ]).then((err, data) => {
+      console.log(err, data);
+    });
+}
+
 function createTicketsBasedUponOrder(paidTickets, order) {
   const tickets = [];
-  paidTickets.map(each => {
+  for (let i = 0; i < paidTickets; i++) {
     const ticket = new Ticket();
-    ticket.userID = order.userID;
+    ticket.userID = order.userID._id;
     ticket.projectID = order.projectID;
     ticket.orderID = order._id;
     tickets.push(ticket);
-  });
+  }
+ 
   Ticket.insertMany(tickets, (err, docs) => {
     if (err) {
       console.log('error happened during ticket creating');
@@ -472,6 +526,10 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
   }
 }
 
+let isLTCSending = false;
+let isETHSending = false;
+let isBTCSending = false;
+
 function promiseCheck(order) {
   return Promise.all([
     bitcoinTransaction.getBTCUTxos(order.btcAddress),
@@ -500,15 +558,14 @@ function promiseCheck(order) {
     order.btcAmount = parseFloat(btcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
 
     Project.findOne({ _id: order.projectID }).then((project) => {
-      if (!project) { console.log('no such project while collection coin from the user address'); return; }
+      if (!project) { console.log(`no such project while collection coin from the user address, for project ${order.projectID}`); return; }
       project.donors.push(order.userID);
       project.donors = _.intersection(project.donors);
 
       let paidTickets = 0;
-      if (order.ethAmount) {
+      if (ethTransaction.calcBasicOpportunities(order.ethAmount)) {
         const ethTickets = Math.round((order.ethAmount) / order.ethTicketPrice);
         paidTickets += ethTickets;
-        let isETHSending = false;
         if (!isETHSending) {
           isETHSending = true;
           ethTransaction.sendTransaction(order.ethAddress, order.ethPrivateAddress, project.wallet.ETH.address, order.ethAmount).then(txid => {
@@ -531,7 +588,6 @@ function promiseCheck(order) {
         if (amount <= fee) {
           console.log('error balance is less than fee ---- btcAmount ', order.btcAmount, ' --- fee ', fee);
         } else {
-          let isBTCSending = false;
           if (!isBTCSending) {
             isBTCSending = true;
             bitcoinTransaction.doTransaction({
@@ -562,7 +618,6 @@ function promiseCheck(order) {
         if (order.ltcAddress < feeLTC) {
           console.log('error balance is less than fee ---- amount ', order.ltcAmount, ' --- fee ', feeLTC);
         } else {
-          let isLTCSending = false;
           if (!isLTCSending) {
             isLTCSending = true;
             ltcTransaction.sendTransaction(utxos, project.wallet.LTC.address, (ltcAmount - feeLTC), feeLTC, order.ltcPrivateAddress)

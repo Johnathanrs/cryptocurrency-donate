@@ -39,9 +39,9 @@ router.route('/user/guide').get(MainController.getUserGuide);
 
 router.use('/user', checkToken, MainController.getUser);
 
-router.use('/orders', checkToken, MainController.getOrders);
+router.use('/orders', checkTokenAdmin, MainController.getOrders);
 
-router.use('/deleteOrder', checkToken, MainController.deleteOrder);
+router.use('/deleteOrder', checkTokenAdmin, MainController.deleteOrder);
 
 router.route('/updateUser').put(MainController.updateUser);
 
@@ -50,5 +50,7 @@ router.route('/upload').post(MainController.uploadFile);
 router.route('/uploadVideo').post(MainController.uploadVideoFile);
 
 router.route('/fxrate').get(MainController.getFxRate);
+
+router.use('/tickets', checkTokenAdmin, MainController.getMyTickets);
 
 export default router;
