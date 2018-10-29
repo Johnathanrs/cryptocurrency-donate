@@ -107,7 +107,7 @@ class MyTickets extends Component {
             <div className="container mt-5" style={{ paddingTop: '70px' }}>
                 <AuthHeader token={this.state.token} />
                 {loading && <div>loading...</div>}
-                {!loading && params && <div className="alert alert-success">
+                {!loading && params.sender && <div className="alert alert-success">
                     <strong>Congulatulation!</strong> You have received a gift from {params.sender}.
                     <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
