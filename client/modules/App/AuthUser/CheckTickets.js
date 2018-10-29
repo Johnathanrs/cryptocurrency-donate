@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
-import { getDurationInDays, toReadableDate } from '../../../util/util';
+import { getDurationInDays, toReadableDate, getEmail } from '../../../util/util';
 import callApi from '../../../util/apiCaller';
 import { fetchTickets } from '../AppActions';
 
@@ -55,6 +55,7 @@ class CheckTickets extends React.Component {
                 ticket.datePaid = toReadableDate(each.datePaid);
                 tickets.push(ticket);
             });
+       
             this.setState({ loading: false, tickets: tickets });
         }
     }
@@ -89,6 +90,7 @@ class CheckTickets extends React.Component {
             ethTicketPrice: ticket.ethTicketPrice,
             ltcTIcketPrice: ticket.ltcTIcketPrice,
             transferredEmail: transferredEmail,
+            owner: getEmail(),
         };
         callApi('transferTickets', 'POST', body).then(res => {
             if (res.errors) {
@@ -96,6 +98,7 @@ class CheckTickets extends React.Component {
             } else if (res.status == 'OK') {
                 console.log(res);
                 toast.warn('Successfully transferred');
+                this.props.dispatch(fetchTickets());
             }
         });
     }

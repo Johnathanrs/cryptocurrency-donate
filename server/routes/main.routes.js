@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as MainController from '../controllers/main.controller';
 import { checkToken, checkTokenAdmin } from './auth';
-const router = new Router();
+const router = new Router({ mergeParams: true });
 
 router.route('/projects').post(MainController.createProject);
 

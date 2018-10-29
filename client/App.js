@@ -193,6 +193,11 @@ class App extends React.Component {
                 onEnter={this.requireAuth}
               />
               <Route
+                path="/user/mytickets/:newTicket/:sender"
+                component={MyTickets}
+                onEnter={this.requireAuth}
+              />
+              <Route
                 path="/user/referral"
                 component={Referral}
                 onEnter={this.requireAuth}

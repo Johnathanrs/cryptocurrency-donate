@@ -10,3 +10,14 @@ export function getDurationInDays(duration) {
 export function toReadableDate(date) {
     return moment(date).format('MMM DD, YYYY');
 }
+
+export function getEmail() {
+    const tokenData = window.localStorage.getItem('smartproject');
+    let email = '';
+    try {
+      email = JSON.parse(tokenData).email
+    } catch(err) {
+      console.log(err);
+    }
+    return email;
+}

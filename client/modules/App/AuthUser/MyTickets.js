@@ -76,7 +76,8 @@ class MyTickets extends Component {
     }
 
     render() {
-        const { orders } = this.props;
+        const { orders, params } = this.props;
+        const { loading } = this.state;
         let data = [];
         if (!this.state.loading && orders) {
             for (let i = 0; i < orders.length; i++) {
@@ -105,10 +106,17 @@ class MyTickets extends Component {
         return (
             <div className="container mt-5" style={{ paddingTop: '70px' }}>
                 <AuthHeader token={this.state.token} />
-                {this.state.loading && <div>loading...</div>}
-                {!this.state.loading && <div>
+                {loading && <div>loading...</div>}
+                {!loading && params && <div className="alert alert-success">
+                    <strong>Congulatulation!</strong> You have received a gift from {params.sender}.
+                    <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>}
+                {!loading && <div>
                     <div className="d-flex align-items-center mb-1">
                         <h3 className="fb">My Tickets</h3>
+                      
                         <div className="custom-control custom-checkbox mx-2">
                             <input type="checkbox" className="custom-control-input" name="paid" id="customCheck1" onChange={this.handlePaidFilter} checked={this.state.paid} />
                             <label className="custom-control-label" htmlFor="customCheck1">Paid Tickets</label>

@@ -10,7 +10,7 @@ import TICKET_BACKGROUND from '../../../assets/img/Ticket_Black_Clean.png';
 class Thankyou extends React.Component {
 
     gotoDashboard = () => {
-        browserHistory.push('/user/dashboard');
+        browserHistory.push('/user/mytickets');
     }
     
     render() {

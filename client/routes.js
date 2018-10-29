@@ -137,6 +137,10 @@ export default (
       component={MyTickets}
     />
     <Route
+      path="/user/mytickets/:newTicket/:sender"
+      component={MyTickets}
+    />
+    <Route
       path="/user/referral"
       component={Referral}
     />

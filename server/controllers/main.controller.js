@@ -429,7 +429,7 @@ export function getMyTickets(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad request' });
   }
-  Ticket.find({ userID: req.decoded._id }).sort('-dateAdded').populate('projectID').populate('orderID').populate('userID').exec((errors, tickets) => {
+  Ticket.find({ userID: req.decoded._id, status: 'valid' }).sort('-dateAdded').populate('projectID').populate('orderID').populate('userID').exec((errors, tickets) => {
     if (errors) {
       res.status(500).send({ errors });
     }
@@ -441,49 +441,66 @@ export function sendReferral(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad request' });
   }
+  
 }
 
 export function transferTickets(req, res) {
   if (!req.decoded) {
     return res.status(400).send({ errors: 'Bad request' });
   }
-  // Create order with type of 'transfer'
-  const order = new Order();
-  order.userID = req.decoded._id;
-  order.projectID = req.body.projectID;
-  order.ticketID = req.body.ticketID;
-  order.btcAmount = req.body.btcTicketPrice;
-  order.ethAmount = req.body.ethTicketPrice;
-  order.ltcAmount = req.body.ltcTicketPrice;
-  order.selectedTickets = req.body.tickets;
-  order.btcAddress = req.body.btcAddress.publicKey;
-  order.ethAddress = req.body.ethAddress.publicKey;
-  order.ltcAddress = req.body.ltcAddress.publicKey;
-  order.btcPrivateAddress = req.body.btcAddress.privateKey;
-  order.ethPrivateAddress = req.body.ethAddress.privateKey;
-  order.ltcPrivateAddress = req.body.ltcAddress.privateKey;
-  order.btcTicketPrice = req.body.btcTicketPrice;
-  order.ethTicketPrice = req.body.ethTicketPrice;
-  order.ltcTicketPrice = req.body.ltcTicketPrice;
-  order.network = process.env.BTCNET;
-  order.status = 'paid';
-  order.type = 'transfer';
-  const toEmail = req.body.transferredEmail;
-  const subject = 'Ticket Transfer';
-  const text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}`;
-  const html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}</p></div>`;
+  User.findOne({ email: req.body.transferredEmail }).exec((err, user) => {
+    if (err) {
+      return res.end({ errors: err.message });
+    }
+    if (!user) {
+      return res.status(404).send({ errors: 'User with that email does not exist' });
+    }
+    // Create order with type of 'transfer'
+    const order = new Order();
+    order.userID = req.decoded._id;
+    order.projectID = req.body.projectID;
+    order.ticketID = req.body.ticketID;
+    order.btcAmount = req.body.btcTicketPrice;
+    order.ethAmount = req.body.ethTicketPrice;
+    order.ltcAmount = req.body.ltcTicketPrice;
+    order.selectedTickets = req.body.tickets;
+    order.btcAddress = req.body.btcAddress.publicKey;
+    order.ethAddress = req.body.ethAddress.publicKey;
+    order.ltcAddress = req.body.ltcAddress.publicKey;
+    order.btcPrivateAddress = req.body.btcAddress.privateKey;
+    order.ethPrivateAddress = req.body.ethAddress.privateKey;
+    order.ltcPrivateAddress = req.body.ltcAddress.privateKey;
+    order.btcTicketPrice = req.body.btcTicketPrice;
+    order.ethTicketPrice = req.body.ethTicketPrice;
+    order.ltcTicketPrice = req.body.ltcTicketPrice;
+    order.network = process.env.BTCNET;
+    order.status = 'paid';
+    order.type = 'transfer';
 
-  return Promise.all([
-    order.save(),
-    sendEmail({
-      to: toEmail,
-      subject: subject,
-      text: text,
-      html: html,
-    }),
-  ]).then((data) => {
-    return res.send({ status: 'OK' });
-  }).catch(err => { return res.end({ errors: err.message }); });
+    const toEmail = req.body.transferredEmail;
+    const subject = 'Ticket Transfer';
+    const text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on your dashboard`;
+    const html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard</a></p></div>`;
+
+    return Promise.all([
+      order.save(),
+      sendEmail({
+        to: toEmail,
+        subject: subject,
+        text: text,
+        html: html,
+      }),
+      Ticket.findOneAndUpdate({ _id: req.body.ticketID }, { status: 'transferred' }),
+    ]).then((data) => {
+      const ticket = new Ticket();
+      ticket.userID = user._id;
+      ticket.projectID = data[0].projectID;
+      ticket.orderID = data[0]._id.toString();
+      ticket.save((err, saved) => {
+        return res.send({ status: 'OK' });
+      }).catch(err => { return res.end({ errors: err.message }); });
+    }).catch(err => { return res.end({ errors: err.message }); });
+  });
 }
 
 function createTicketsBasedUponOrder(paidTickets, order) {

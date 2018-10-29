@@ -88,7 +88,7 @@ export function addTickets(tickets) {
   return  {
     type: ADD_TICKETS,
     tickets,
-  }
+  };
 }
 
 export function fetchProjects() {
