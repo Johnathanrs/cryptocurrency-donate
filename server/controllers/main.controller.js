@@ -327,7 +327,7 @@ export function forgetPassword(req, res) {
       return res.status(404).json({ errors: 'User with this email does not exists' });
     }
     const token = user.generateSimpleJWT();
-    const url = `http://smartprojects.tech/changepassword/${token}`;
+    const url = `http://smartprojects.tech/user/changepassword/${token}`;
     const text = `Congratulation! You can change your password in this link ${url}`;
     const html = `<div><strong>Congratulation</strong><p>You can change your password in <a href='${url}'>this link</a></p></div>`;
     sendEmail({
