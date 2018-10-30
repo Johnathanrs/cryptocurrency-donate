@@ -14,7 +14,7 @@ export const ADD_ORDERS = 'ADD_ORDERS';
 export const ADD_ERROR = 'ADD_ERROR';
 export const ADD_TICKETS = 'ADD_TICKETS';
 export const ADD_REFERRAL = 'ADD_REFERRAL';
-
+export const ADD_SETTINGS = 'ADD_SETTINGS';
 // Export Actions
 export function toggleAddPost() {
   return {
@@ -92,6 +92,13 @@ export function addOrders(orders) {
   };
 }
 
+export function addSettings(settings) {
+  return {
+    type: ADD_SETTINGS,
+    settings,
+  };
+}
+
 export function addTickets(tickets) {
   return  {
     type: ADD_TICKETS,
@@ -130,9 +137,18 @@ export function fetchOrders() {
   return (dispatch) => {
     return callApi('orders').then(res => {
       dispatch(addOrders(res.orders));
-      return res.orders;
+      return res;
     });
   };
+}
+
+export function fetchSettings() {
+  return (dispatch) => {
+    return callApi('getSettings').then(res => {
+      dispatch(addSettings(res.settings));
+      return res;
+    });
+  }
 }
 
 export function fetchTickets() {
@@ -208,7 +224,7 @@ export function fetchUserGuide() {
 
 export function fetchReferrals() {
   return (dispatch) => {
-    return callApi('user/referrals').then(res => {
+    return callApi('getReferrals').then(res => {
       dispatch(addReferral(res.referrals));
     });
   };

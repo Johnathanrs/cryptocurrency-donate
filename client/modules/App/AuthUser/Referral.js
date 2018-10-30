@@ -86,6 +86,16 @@ class Referral extends React.Component {
         return <div>{toReadableDate(cell)}</div>;
     }
 
+    onExportToCSV = () => {
+        const exportData = [];
+        this.props.referrals.map(referral => {
+            referral.dateAdded = toReadableDate(referral.dateAdded);
+            referral.dateReferred = referral.dateReferred ? toReadableDate(referral.dateReferred) : '';
+            exportData.push(referral);
+        });
+        return exportData;
+    }
+
     render() {
         const { loading, showModal, field1, field2, field1Err, field2Err, email, emailErr } = this.state;
         const { referrals } = this.props;
@@ -100,14 +110,17 @@ class Referral extends React.Component {
                             <button type="button" onClick={this.showModal} className="btn btn-large btn-link"><i className="fa fa-plus"></i>Add New</button>
                         </div>
                         <BootstrapTable
+                            exportCSV
                             data={referrals}
                             striped
                             hover
-                            pagination>
+                            pagination
+                            options={{ onExportToCSV: this.onExportToCSV }}>
                             <TableHeaderColumn dataField="_id" isKey={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
                             <TableHeaderColumn dataField="isReferred" dataSort={true}>Referred</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidout" dataSort={true}>Payout</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataSort={true}>Amount Paid</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} >Create Date</TableHeaderColumn>
+                            <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} >Referred Date</TableHeaderColumn>
                         </BootstrapTable>
                     </div>}
                     {showModal && <Modal

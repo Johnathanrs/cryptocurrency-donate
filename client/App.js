@@ -99,6 +99,7 @@ class App extends React.Component {
         callback();
       } else {
         replace('/user/signin');
+        callback();
       }
     });
   }
@@ -114,6 +115,7 @@ class App extends React.Component {
         callback();
       } else {
         replace('/admin/signin');
+        callback();
       }
     });
   }

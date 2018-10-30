@@ -19,6 +19,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import PeopleIcon from '@material-ui/icons/People';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import LayersIcon from '@material-ui/icons/Layers';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -192,7 +193,6 @@ class AdminHeader extends React.Component {
                 className={classNames(
                   classes.menuButton,
                   this.state.open && classes.menuButtonHidden,
-                  
                 )}
               >
                 <MenuIcon />
@@ -242,28 +242,37 @@ class AdminHeader extends React.Component {
             </List>
             <Divider />
             <List>
-            <ListItem button onClick={() => this.navigate('/admin/dashboard')}>
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Browser Projects" />
-            </ListItem>
-            <ListItem button onClick={() => this.navigate('/admin/project')}>
+              <ListItem button onClick={() => this.navigate('/admin/dashboard')}>
                 <ListItemIcon>
-                  <CreateIcon />
+                  <DashboardIcon />
                 </ListItemIcon>
-                <ListItemText primary="Create Project" />
+                <ListItemText primary="Browser Projects" />
               </ListItem>
-            <ListItem button onClick={() => this.navigate('/admin/users')}>
-              <ListItemIcon>
-                <PeopleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Users" />
-            </ListItem>
-          </List>
+              <ListItem button onClick={() => this.navigate('/admin/project')}>
+                  <ListItemIcon>
+                    <CreateIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Create Project" />
+                </ListItem>
+              <ListItem button onClick={() => this.navigate('/admin/users')}>
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Users" />
+              </ListItem>
+            </List>
+            <Divider />
+            <List>
+              <ListItem button onClick={() => this.navigate('/admin/referral')}>
+                <ListItemIcon>
+                  <VerifiedUserIcon />
+                </ListItemIcon>
+                <ListItemText primary="Referral" />
+              </ListItem>
+            </List>
         </Drawer>
       </div>
-      </React.Fragment>  
+      </React.Fragment>
     );
   }
 }

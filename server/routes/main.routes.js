@@ -37,9 +37,11 @@ router.use('/users/checkBalance', checkToken, MainController.checkBalanceFromFro
 
 router.route('/user/guide').get(MainController.getUserGuide);
 
-router.route('/user/referrals').get(MainController.getReferrals);
+router.use('/getReferrals', checkToken, MainController.getReferrals);
 
 router.use('/addNewReferral', checkToken, MainController.addNewReferral);
+
+router.route('/registerReferral').post(MainController.registerReferral);
 
 router.use('/user', checkToken, MainController.getUser);
 
@@ -58,5 +60,9 @@ router.route('/fxrate').get(MainController.getFxRate);
 router.use('/tickets', checkTokenAdmin, MainController.getMyTickets);
 
 router.use('/transferTickets', checkTokenAdmin, MainController.transferTickets);
+
+router.use('/getSettings', checkTokenAdmin, MainController.getSettings);
+
+router.use('/updateSettings', checkTokenAdmin, MainController.updateSettings);
 
 export default router;

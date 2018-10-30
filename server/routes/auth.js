@@ -10,7 +10,9 @@ let checkToken = (req, res, next) => {
   if (token) {
     jwt.verify(token, process.env.secret, (err, decoded) => {
       if (!err) {
-        req.decoded = decoded;  
+        req.decoded = decoded;
+      } else {
+        req.err = err.message; 
       }
     });
   }
@@ -29,6 +31,8 @@ let checkTokenAdmin = (req, res, next) => {
     jwt.verify(token, process.env.secret, (err, decoded) => {
       if (!err) {
         req.decoded = decoded;  
+      } else {
+        req.err = err.message; 
       }
     });
   }

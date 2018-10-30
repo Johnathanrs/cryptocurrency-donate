@@ -22,6 +22,15 @@ class CustomerSignUp extends React.Component {
 
     componentWillMount() {
         const params = this.props.params;
+        if (params.id) {
+            const body = {
+                id: params.id,
+            };
+            callApi('registerReferral', 'POST', body).then(res => {
+                console.log('registerReferral', res);
+                this.navigate('/user/signup')
+            });
+        }
     }
 
     handleChange = name => event => {

@@ -28,7 +28,11 @@ class MyTickets extends Component {
     }
 
     componentDidMount() {
-        this.props.dispatch(fetchOrders());
+        this.props.dispatch(fetchOrders()).then(res => {
+            if (res.errors) {
+                browserHistory.push('/user/signin');
+            }
+        });
     }
 
     componentWillReceiveProps(nextProps) {

@@ -4,9 +4,11 @@ import Guide from '../models/guide';
 import Order from '../models/order';
 import Ticket from '../models/ticket';
 import Referral from '../models/referral';
+import Setting from '../models/setting';
 const _ = require('lodash');
 
 import { geocoder, searchNearByFromProject } from '../util/util';
+import { settings } from 'cluster';
 var uniqueFilename = require('unique-filename');
 const generator = require('generate-password');
 const sgMail = require('@sendgrid/mail');
@@ -93,7 +95,10 @@ export function saveUserGuide(req, res) {
 }
 
 export function getReferrals(req, res) {
-  Referral.find().sort('-dateAdded').exec((errors, referrals) => {
+  if (!req.decoded) {
+    return res.status(403).send({ errors: req.err });
+  }
+  Referral.find({ sender: req.decoded._id }).sort('-dateAdded').exec((errors, referrals) => {
     if (errors) {
       res.status(500).send({ errors });
     }
@@ -101,15 +106,34 @@ export function getReferrals(req, res) {
   });
 }
 
+export function registerReferral(req, res) {
+  Referral.findOne({ _id: req.body.id }).then(referral => {
+    if (!referral) {
+      console.log('no such referral');
+    } else {
+      referral.isReferred = true;
+      referral.dateReferred = new Date();
+      referral.save((err, saved) => {
+        if (err) {
+          console.log('err during update the referral', err);
+        } else {
+          console.log('successfully update for referral');
+        }
+      });
+    }
+  });
+}
+
 export function addNewReferral(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: 'Bad Request' });
+    return res.status(403).send({ errors: req.err });
   }
   User.findOne({ email: req.body.receiver }).then(user => {
     if (user) {
       return res.status(403).send({ errors: 'This user already exists' });
     }
     const referral = new Referral();
+    referral.sender = req.decoded._id.toString();
     referral.receiver = req.body.receiver;
     referral.field1 = req.body.field1;
     referral.field2 = req.body.field2;
@@ -136,7 +160,7 @@ export function addNewReferral(req, res) {
 
 export function deleteOrder(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: 'Bad Request' });
+    return res.status(403).send({ errors: req.err });
   }
   Order.deleteOne({ _id: req.body._id }).exec((err, obj) => {
     if (err) {
@@ -148,7 +172,7 @@ export function deleteOrder(req, res) {
 
 export function getOrders(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: 'Bad Request' });
+    return res.status(403).send({ errors: req.err });
   }
   Order.find({ userID: req.decoded._id }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
@@ -392,7 +416,7 @@ function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, 
 
 export function getNow(req, res) {
   if (!req.decoded) {
-    return res.send({ status: 'unauthorized' });
+    return res.send({ status: req.err });
   }
 
   if (!req.body.ticket.projectID) {
@@ -470,7 +494,7 @@ export function userSignup(req, res) {
 
 export function getMyTickets(req, res) {
   if (!req.decoded) {
-    return res.status(400).send({ errors: 'Bad request' });
+    return res.status(400).send({ errors: req.err });
   }
   Ticket.find({ userID: req.decoded._id, status: 'valid' }).sort('-dateAdded').populate('projectID').populate('orderID').populate('userID').exec((errors, tickets) => {
     if (errors) {
@@ -482,14 +506,14 @@ export function getMyTickets(req, res) {
 
 export function sendReferral(req, res) {
   if (!req.decoded) {
-    return res.status(400).send({ errors: 'Bad request' });
+    return res.status(400).send({ errors: req.err });
   }
   
 }
 
 export function transferTickets(req, res) {
   if (!req.decoded) {
-    return res.status(400).send({ errors: 'Bad request' });
+    return res.status(400).send({ errors: req.err });
   }
   User.findOne({ email: req.body.transferredEmail }).exec((err, user) => {
     if (err) {
@@ -707,7 +731,7 @@ function promiseCheck(order) {
 
 export function checkBalanceFromFront(req, res) {
   if (!req.decoded) {
-    return res.status(400).send({ errors: 'Bad request' });
+    return res.status(400).send({ errors: req.err });
   }
   Order.findOne({ _id: req.body.orderID }).populate('projectID').exec((err, order) => {
     if (err) {
@@ -992,5 +1016,30 @@ export function getFxRate(req, res) {
       LTC_BTC: json.result.XLTCXXBT.a,
       BTC_USD: json.result.XXBTZUSD.a,
     });
+  });
+}
+
+/*
+* Settings
+*/
+
+export function getSettings(req, res) {
+  if (!req.decoded) {
+    return res.status(403).send({ errors: req.err });
+  }
+  Setting.findOne().then(settings => {
+    return res.send({ settings })
+  }).catch(err => { return res.status(404).send({ errors: err.message }); });
+}
+
+export function updateSettings(req, res) {
+  if (!req.decoded) {
+    return res.status(403).send({ errors: req.err });
+  }
+  Setting.findOneAndUpdate({}, { $set: { referralPercent: req.body.referralPercent } }, { upsert: true }, (err, model) => {
+    if (err) {
+      return res.status(503).send({ errors: err.message });
+    }
+    return res.send({ status: 'OK' });
   });
 }

@@ -51,7 +51,7 @@ userSchema.methods.generateJWT = function() {
     // set expiration to 1 days
   const today = new Date();
   const exp = new Date(today);
-  exp.setDate(today.getDate() + 1);
+  exp.setDate(today.getDate() + 100);
 
   return jwt.sign({
     _id: this._id,
