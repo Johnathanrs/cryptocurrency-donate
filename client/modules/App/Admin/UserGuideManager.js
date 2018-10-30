@@ -19,14 +19,14 @@ class UserGuideManager extends React.Component {
         this.handelRemoveFAQ = this.handelRemoveFAQ.bind(this);
     }
 
+    componentDidMount() {
+        this.props.dispatch(fetchUserGuide());
+    }
+
     componentWillReceiveProps(nextProps) {
         if (this.props.guide != nextProps.guide) {
             this.setState({ ...this.state, loading: false, guide: nextProps.guide[0] });
         }
-    }
-
-    componentDidMount() {
-        this.props.dispatch(fetchUserGuide());
     }
 
     handleFAQChange = (idx, name) => (evt) => {

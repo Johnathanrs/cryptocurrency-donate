@@ -172,6 +172,10 @@ export default (
       path="/user/signup"
       component={CustomerSignUp}
     />
+    <Route
+      path="/referral/:id/:field1/:field2"
+      component={CustomerSignUp}
+    />
   </Route>
 
   );

@@ -9,6 +9,7 @@ import {
   FETCH_USER_GUIDE,
   ADD_ORDERS,
   ADD_TICKETS,
+  ADD_REFERRAL,
 } from './AppActions';
 
 // Initial State
@@ -66,6 +67,11 @@ const AppReducer = (state = initialState, action) => {
       return {
         ...state,
         tickets: action.tickets,
+      };
+    case ADD_REFERRAL:
+      return {
+        ...state,
+        referrals: action.referrals,
       };
     default:
       return state;

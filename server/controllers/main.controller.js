@@ -3,6 +3,7 @@ import User, { SubProject } from '../models/user';
 import Guide from '../models/guide';
 import Order from '../models/order';
 import Ticket from '../models/ticket';
+import Referral from '../models/referral';
 const _ = require('lodash');
 
 import { geocoder, searchNearByFromProject } from '../util/util';
@@ -89,6 +90,48 @@ export function saveUserGuide(req, res) {
       });
     }
   });
+}
+
+export function getReferrals(req, res) {
+  Referral.find().sort('-dateAdded').exec((errors, referrals) => {
+    if (errors) {
+      res.status(500).send({ errors });
+    }
+    res.json({ referrals });
+  });
+}
+
+export function addNewReferral(req, res) {
+  if (!req.decoded) {
+    return res.status(403).send({ errors: 'Bad Request' });
+  }
+  User.findOne({ email: req.body.receiver }).then(user => {
+    if (user) {
+      return res.status(403).send({ errors: 'This user already exists' });
+    }
+    const referral = new Referral();
+    referral.receiver = req.body.receiver;
+    referral.field1 = req.body.field1;
+    referral.field2 = req.body.field2;
+    referral.save((err, saved) => {
+      if (err) {
+        return res.status(503).send({ errors: err.message });
+      }
+      const url = `http://smartprojects.tech/referral/${saved._id}/${saved.field1}/${saved.field2}`;
+      const receiver = saved.receiver;
+      const subject = 'Promotion';
+      const text = `Congratulation! It is time to donate. Please click below link to get involved. ${url}`;
+      const html = `<div><strong>Congratulation</strong><p>It is time to donate <a href='${url}'>Please click this link to get involved.</a></p></div>`;
+      sendEmail({
+        to: receiver,
+        subject: subject,
+        text: text,
+        html: html,
+      }).then(msg => {
+        return res.send({ status: 'OK' });
+      }).catch(err => { return res.status(404).send({ errors: err.message }); })
+    });
+  }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 
 export function deleteOrder(req, res) {

@@ -13,6 +13,7 @@ export const GET_CRYPTO = 'GET_CRYPTO';
 export const ADD_ORDERS = 'ADD_ORDERS';
 export const ADD_ERROR = 'ADD_ERROR';
 export const ADD_TICKETS = 'ADD_TICKETS';
+export const ADD_REFERRAL = 'ADD_REFERRAL';
 
 // Export Actions
 export function toggleAddPost() {
@@ -60,6 +61,13 @@ export function addGuide(guide) {
   return {
     type: FETCH_USER_GUIDE,
     guide,
+  };
+}
+
+export function addReferral(referrals) {
+  return {
+    type: ADD_REFERRAL,
+    referrals,
   };
 }
 
@@ -194,6 +202,14 @@ export function fetchUserGuide() {
   return (dispatch) => {
     return callApi('user/guide').then(res => {
       dispatch(addGuide(res.guide));
+    });
+  };
+}
+
+export function fetchReferrals() {
+  return (dispatch) => {
+    return callApi('user/referrals').then(res => {
+      dispatch(addReferral(res.referrals));
     });
   };
 }

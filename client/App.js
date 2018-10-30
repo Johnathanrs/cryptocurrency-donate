@@ -67,6 +67,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/ProjectDetailView');
   require('./modules/App/Admin/SignUp');
   require('./modules/App/Admin/UserGuideManager');
+  require('./modules/App/AuthUser/Referral');
 }
 
 
@@ -233,6 +234,10 @@ class App extends React.Component {
               />
               <Route
                 path="/user/signup"
+                component={CustomerSignUp}
+              />
+              <Route
+                path="/referral/:id/:field1/:field2"
                 component={CustomerSignUp}
               />
             </Route>

@@ -132,7 +132,6 @@ class CheckTickets extends React.Component {
                         <TableHeaderColumn dataField="datePaid" dataAlign="center">Paid Date</TableHeaderColumn>
                         <TableHeaderColumn dataField="_id" dataAlign="center" dataFormat={this.actionFormatter} export={false} width="150">Transfer Tickets</TableHeaderColumn>
                     </BootstrapTable>
-                    
                 </div>}
                 {showModal && <Modal
                                 aria-labelledby="transfer-ticket"
@@ -163,8 +162,7 @@ class CheckTickets extends React.Component {
                                     <button onClick={this.handleOK} className="btn btn-lg bg-dark text-white mr-2" >OK</button>
                                     <button onClick={this.handleClose} className="btn btn-lg bg-dark text-white" >Cancel</button>
                                 </div>
-                                </Modal>
-                    }
+                            </Modal>}
                 </div>
                 <Footer />
             </div>

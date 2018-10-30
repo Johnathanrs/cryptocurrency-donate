@@ -37,6 +37,10 @@ router.use('/users/checkBalance', checkToken, MainController.checkBalanceFromFro
 
 router.route('/user/guide').get(MainController.getUserGuide);
 
+router.route('/user/referrals').get(MainController.getReferrals);
+
+router.use('/addNewReferral', checkToken, MainController.addNewReferral);
+
 router.use('/user', checkToken, MainController.getUser);
 
 router.use('/orders', checkTokenAdmin, MainController.getOrders);
