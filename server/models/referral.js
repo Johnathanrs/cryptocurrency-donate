@@ -9,7 +9,7 @@ const referralSchema = new Schema({
   isReferred: { type: Boolean, default: false, required: false },
   paidAmount: { type: Number, default: 0.0, required: false },
   dateAdded: { type: 'Date', default: Date.now, required: true },
-  dateReferred: { type: 'Date', required: true },
+  dateReferred: { type: 'Date', required: false },
   datePaid: { type: 'Date', default: Date.now, required: true },
 });
 

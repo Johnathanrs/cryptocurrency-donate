@@ -8,29 +8,14 @@ import callApi from '../../util/apiCaller';
 
 import { saveToken } from '../App/AuthActions';
 
-class CustomerSignUp extends React.Component {
+class ForgetPassword extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             email: '',
-            password: '',
-            password_repeat: '',
             isCreate: false,
         }
         this.handleChange = this.handleChange.bind(this);
-    }
-
-    componentWillMount() {
-        const params = this.props.params;
-        if (params.id) {
-            const body = {
-                id: params.id,
-            };
-            callApi('registerReferral', 'POST', body).then(res => {
-                console.log('registerReferral', res);
-                this.navigate('/user/signup')
-            });
-        }
     }
 
     handleChange = name => event => {
@@ -44,10 +29,10 @@ class CustomerSignUp extends React.Component {
         browserHistory.push(url);
     }
 
-    signUp = () => {
+    send = () => {
         const self = this;
         self.setState({ ...self.state, isCreate: true});
-        callApi('users/customersignup', 'POST', { user: this.state }).then((res, err) => {
+        callApi('users/forgetPassword', 'POST', { user: this.state }).then((res, err) => {
             let message = 'Successfully created';
             if  (res.errors) {
                 message = res.errors;
@@ -65,7 +50,7 @@ class CustomerSignUp extends React.Component {
             <div className="container mt-100">
                 <div className="card" style={{ width: '33%', margin: '0 auto', minWidth: '330px' }}>
                     <div className="card-head mt-5 text-center">
-                        <h2 className="text-center text-uppercase">Sign Up</h2>
+                        <h2 className="text-center text-uppercase">Please input the email to recover.</h2>
                         {this.state.isCreate && <i className="fa fa-spinner fa-spin fa-3x text-red"></i>}
                         {!this.state.isCreate && <div className="warning-color text-center">{this.state.errOnCreate}</div>}
                     </div>
@@ -81,7 +66,7 @@ class CustomerSignUp extends React.Component {
                             onChange={this.handleChange('email')}
                             margin="normal"
                         />
-                        <button onClick={() => this.signUp()} className="btn btn-lg bg-warning text-white mt-4 mb-4">Sign Up</button>
+                        <button onClick={() => this.send()} className="btn btn-lg bg-warning text-white mt-4 mb-4">Send</button>
                         <p>Do you already have an account? <a href="javascript:void(0)" onClick={() => this.navigate('/user/signin')} className="warning-color">Sign In</a></p>
                     </div>
                 </div>
@@ -96,5 +81,4 @@ function mapStateToProps(state) {
     };
 }
 
-
-export default connect(mapStateToProps)(CustomerSignUp);
+export default connect(mapStateToProps)(ForgetPassword);

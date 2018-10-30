@@ -196,7 +196,7 @@ export function updateUser(req, res, next) {
   User.findById(req.body.user._id).then((user) => {
     if (!user) { return res.status(401).send({ errors: 'Unauthorized user' }); }
     const userData = req.body.user;
-    if (typeof req.body.password !== 'undefined') {
+    if (typeof req.body.password !== 'undefined' && req.body.password) {
       user.setPassword(req.body.password);
     }
 
