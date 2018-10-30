@@ -1066,7 +1066,16 @@ export function getSettings(req, res) {
     return res.status(403).send({ errors: req.err });
   }
   Setting.findOne().then(settings => {
-    return res.send({ settings })
+    if (!settings) {
+      settings = new Setting();
+      settings.save((err, saved) => {
+        if (err) {
+          return res.status(401).send({ errors: err.message });
+        }
+        return res.send({ settings: saved });
+      });
+    }
+    return res.send({ settings });
   }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 
@@ -1074,7 +1083,7 @@ export function updateSettings(req, res) {
   if (!req.decoded) {
     return res.status(403).send({ errors: req.err });
   }
-  Setting.findOneAndUpdate({}, { $set: { referralPercent: req.body.referralPercent } }, { upsert: true }, (err, model) => {
+  Setting.findOneAndUpdate({}, { $set: { referralPercent: req.body.settings.referralPercent } }, { upsert: true }, (err, model) => {
     if (err) {
       return res.status(503).send({ errors: err.message });
     }

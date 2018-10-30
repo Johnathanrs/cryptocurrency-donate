@@ -98,6 +98,7 @@ function ProjectView(props) {
                         <p> {project.shortDescription}</p>
                     </div>
                     <Featured 
+                        className={shortDescClass}
                         featuredProjects={featuredProjects}
                         gotoHome={gotoHome}
                         activePane={activePane}

@@ -35,6 +35,7 @@ import User from './modules/App/Admin/User';
 import UserGuideManager from './modules/App/Admin/UserGuideManager';
 import ChangePassword from './modules/App/ChangePassword';
 import ForgetPassword from './modules/App/ForgetPassword';
+import ReferralManager from './modules/App/Admin/ReferralManager';
 // Import Routes
 // import Routes from './routes';
 
@@ -70,6 +71,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/SignUp');
   require('./modules/App/Admin/UserGuideManager');
   require('./modules/App/AuthUser/Referral');
+  require('./modules/App/Admin/ReferralManager');
 }
 
 
@@ -172,6 +174,10 @@ class App extends React.Component {
                 <Route
                   path="projectdetail/:id"
                   component={ProjectDetailView}
+                />
+                <Route
+                  path="referral"
+                  component={ReferralManager}
                 />
               </Route>
               <Route

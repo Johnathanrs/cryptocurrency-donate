@@ -136,7 +136,7 @@ class ClaimBenefits extends React.Component {
             <div>
                 <AuthHeader />
                 <div className="container container-option" >
-                    { !loading && <div><h1>Claim Your Benefits Page</h1>
+                    {!loading && <div><h1>Claim Your Benefits Page</h1>
                         <div className="row m-y-2">
                             <div className="col-6">
                                 <TextField
