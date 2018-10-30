@@ -6,6 +6,7 @@ import TextField from '@material-ui/core/TextField';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
 import callApi from '../../../util/apiCaller';
 import { toReadableDate } from '../../../util/util';

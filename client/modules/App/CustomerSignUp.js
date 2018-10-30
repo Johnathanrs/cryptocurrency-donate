@@ -20,6 +20,10 @@ class CustomerSignUp extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
+    componentWillMount() {
+        const params = this.props.params;
+    }
+
     handleChange = name => event => {
         this.setState({
           ...this.state,
