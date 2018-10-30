@@ -87,6 +87,7 @@ class MyTickets extends Component {
             for (let i = 0; i < orders.length; i++) {
                 const order = orders[i];
                 const project = order.projectID;
+                if (!project) continue;
                 order.title = project.title;
                 order.pID = project._id;
                 order.days = getDurationInDays(project.fundingDuration);
