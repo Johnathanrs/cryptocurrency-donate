@@ -34,6 +34,7 @@ const userSchema = new Schema({
   hash: String,
   salt: String,
   role: String,
+  dateExpired: { type: Date, required: false },
   dateAdded: { type: Date, default: Date.now, required: true },
 });
 
@@ -52,6 +53,18 @@ userSchema.methods.generateJWT = function() {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 100);
+
+  return jwt.sign({
+    _id: this._id,
+    exp: parseInt(exp.getTime() / 1000, 10),
+  }, process.env.secret);
+};
+
+userSchema.methods.generateSimpleJWT = function() {
+  // set expiration to 1 days
+  const today = new Date();
+  const exp = new Date(today);
+  exp.setDate(today.getDate() + 1);
 
   return jwt.sign({
     _id: this._id,

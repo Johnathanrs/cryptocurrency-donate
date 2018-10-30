@@ -77,7 +77,7 @@ class CustomerSignIn extends Component {
                             margin="normal"
                         />
                         <button onClick={() => this.signIn()} className="btn btn-lg bg-warning text-white mt-4 mb-3">Sign In</button>
-                        <a href="javascript:void(0)" onClick={() => this.navigate('/user/updatePassword')} className="warning-color">Forget password?</a>
+                        <a href="javascript:void(0)" onClick={() => this.navigate('/user/forgetpassword')} className="warning-color mb-2">Forget password?</a>
                         <div className="mb-2">Do you want to have an account? <a href="javascript:void(0)" onClick={() => this.navigate('/user/signup')} className="warning-color">Sign Up</a>
                         </div>
                     </div>

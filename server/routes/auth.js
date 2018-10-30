@@ -40,4 +40,17 @@ let checkTokenAdmin = (req, res, next) => {
   next();
 };
 
-export { checkToken, checkTokenAdmin };
+const verifyToken = (token) => {
+  const result = {};
+  jwt.verify(token, process.env.secret, (err, decoded) => {
+    if (!err) {
+      result.decoded = decoded;
+    } else {
+      result.err = err.message; 
+    }
+  });
+
+  return result;
+};
+
+export { checkToken, checkTokenAdmin, verifyToken };

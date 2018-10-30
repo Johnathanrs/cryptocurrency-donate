@@ -33,6 +33,8 @@ import Admin from './modules/App/Admin/Admin';
 // import SignUp from './modules/App/Admin/SignUp';
 import User from './modules/App/Admin/User';
 import UserGuideManager from './modules/App/Admin/UserGuideManager';
+import ChangePassword from './modules/App/ChangePassword';
+import ForgetPassword from './modules/App/ForgetPassword';
 // Import Routes
 // import Routes from './routes';
 
@@ -75,6 +77,7 @@ if (process.env.NODE_ENV !== 'production') {
 require('./main.css');
 import './modules/App/App.css';
 
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -92,6 +95,7 @@ class App extends React.Component {
     }
     if (!tokenData || !isSignIn) {
       replace('/user/signin');
+      callback();
       return;
     }
     callApi('users/authcheck', 'POST', {}).then(res => {
@@ -108,6 +112,7 @@ class App extends React.Component {
     const token = window.localStorage.getItem('smartprojectadmin');
     if (!token) {
       replace('/admin/signin');
+      callback();
       return;
     }
     callApi('users/authcheckAdmin', 'POST', {}, token).then(res => {
@@ -241,6 +246,14 @@ class App extends React.Component {
               <Route
                 path="/referral/:id/:field1/:field2"
                 component={CustomerSignUp}
+              />
+              <Route
+                path="/user/changepassword/:token"
+                component={ChangePassword}
+              />
+              <Route
+                path="/user/forgetpassword"
+                component={ForgetPassword}
               />
             </Route>
           </Router>

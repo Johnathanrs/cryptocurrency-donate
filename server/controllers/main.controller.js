@@ -5,6 +5,7 @@ import Order from '../models/order';
 import Ticket from '../models/ticket';
 import Referral from '../models/referral';
 import Setting from '../models/setting';
+import { verifyToken } from '../routes/auth';
 const _ = require('lodash');
 
 import { geocoder, searchNearByFromProject } from '../util/util';
@@ -293,7 +294,7 @@ export function customerSignup(req, res) {
   User.findOne({ email: req.body.user.email })
   .then(user => {
     if (user) {
-      return res.status(422).json({ errors: 'User width this email already exists' });
+      return res.status(422).json({ errors: 'User with this email already exists' });
     }
     const newUser = new User();
     newUser.email = req.body.user.email;
@@ -317,6 +318,43 @@ export function customerSignup(req, res) {
       });
     });
   }).catch(err => { return res.send({ errors: err.message }); });
+}
+
+export function forgetPassword(req, res) {
+  User.findOne({ email: req.body.email })
+  .then(user => {
+    if (!user) {
+      return res.status(404).json({ errors: 'User with this email does not exists' });
+    }
+    const token = user.generateSimpleJWT();
+    const url = `http://smartprojects.tech/changepassword/${token}`;
+    const text = `Congratulation! You can change your password in this link ${url}`;
+    const html = `<div><strong>Congratulation</strong><p>You can change your password in <a href='${url}'>this link</a></p></div>`;
+    sendEmail({
+      to: user.email,
+      subject: 'Change password',
+      text: text,
+      html: html,
+    }).then(msg => {
+      return res.json({ status: 'OK' });
+    });
+  });
+}
+
+export function changePassword(req, res) {
+  const result = verifyToken(req.body.token);
+  if (result.err) {
+    return res.status(400).send({ errors: 'Token expired, Please try to send request for changing password again.' });
+  }
+  User.findById(result.decoded._id).then((user) => {
+    if (!user) { return res.status(404).send({ errors: 'There is no such user with this email' }); }
+    if (typeof req.body.password !== 'undefined' && req.body.password) {
+      user.setPassword(req.body.password);
+    }
+    return user.save().then(() => {
+      return res.json({ user: user.toAuthJSON() });
+    });
+  }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 
 export function authCheck(req, res) {

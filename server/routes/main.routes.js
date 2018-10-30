@@ -29,6 +29,10 @@ router.route('/users/customersignin').post(MainController.customerSignin);
 
 router.route('/users/customersignup').post(MainController.customerSignup);
 
+router.route('/users/forgetPassword').post(MainController.forgetPassword);
+
+router.route('/users/changePassword').put(MainController.changePassword);
+
 router.use('/users/getNow', checkToken, MainController.getNow);
 
 router.route('/users/userSignup').post(MainController.userSignup);

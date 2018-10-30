@@ -26,6 +26,8 @@ import Admin from './modules/App/Admin/Admin';
 // import SignUp from './modules/App/Admin/SignUp';
 import User from './modules/App/Admin/User';
 import UserGuideManager from './modules/App/Admin/UserGuideManager';
+import ChangePassword from './modules/App/ChangePassword';
+import ForgetPassword from './modules/App/ForgetPassword';
 
 // require.ensure polyfill for node
 if (typeof require.ensure !== 'function') {
@@ -175,6 +177,14 @@ export default (
     <Route
       path="/referral/:id/:field1/:field2"
       component={CustomerSignUp}
+    />
+    <Route
+      path="/user/changepassword/:token"
+      component={ChangePassword}
+    />
+    <Route
+      path="/user/forgetpassword"
+      component={ForgetPassword}
     />
   </Route>
 
