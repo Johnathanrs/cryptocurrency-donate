@@ -4,7 +4,7 @@ import Modal from '@material-ui/core/Modal';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import StepZilla from 'react-stepzilla';
-
+import { browserHistory } from 'react-router';
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
@@ -195,6 +195,18 @@ class Referral extends React.Component {
         return <div>{toReadableDate(cell)}</div>;
     }
 
+    checkFormatter = (cell, row) => {
+        return <input type="checkbox" checked={cell}/>
+    }
+
+    detailProject = (id) => {
+        browserHistory.push(`${id}`);
+    }
+
+    projectDetailFormatter = (cell, row) => {
+        return <button type="button" onClick={() => this.detailProject(cell)} className="btn btn-link btn-sm"><i className="fa fa-edit fa-2x"></i></button>
+    }
+
     onExportToCSV = () => {
         const exportData = [];
         this.props.referrals.map(referral => {
@@ -266,12 +278,14 @@ class Referral extends React.Component {
                             pagination
                             options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true }}>
                             <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
-                            <TableHeaderColumn dataField="isReferred" dataSort >Referred</TableHeaderColumn>
+                            <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center" width="50">Referred</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.checkFormatter} dataAlign="center">Paid</TableHeaderColumn>
                             <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
                             <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
                             <TableHeaderColumn dataField="paidAmount" dataSort >Profit</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} >Create Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} >Referred Date</TableHeaderColumn>
+                            <TableHeaderColumn dataField="projectID" dataAlign="center" dataFormat={this.projectDetailFormatter} >Action</TableHeaderColumn>
                         </BootstrapTable>
                     </div>}
                     {showModal && <Modal

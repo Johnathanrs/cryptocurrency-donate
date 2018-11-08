@@ -62,6 +62,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./modules/App/Admin/ProjectDetailView');
   require('./modules/App/Admin/UserGuideManager');
   require('./modules/App/AuthUser/CheckTickets');
+  require('./modules/App/AuthUser/Referral');
 }
 
 /* Workaround for async react routes to work with react-hot-reloader till

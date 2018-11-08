@@ -681,7 +681,7 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
     const html = `<div><strong>Congratulation</strong><p>Your payment has confirmed. ${order.btcAmount} in Bitcoin, ${order.ethAmount} in Ethereum and ${order.ltcAmount} in Litecoin. Puchased tickets ${order.paidTickets}</p></div>`;
 
     return Promise.all([
-      Referral.findOneAndUpdate({ _id: order.userID.referralID }, { isReferred: true, datePaid: new Date() }),
+      Referral.findOneAndUpdate({ _id: order.userID.referralID }, { isReferred: true, dateReferred: new Date() }),
       order.save(),
       project.save(),
       sendEmail({
