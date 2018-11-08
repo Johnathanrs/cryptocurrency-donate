@@ -17,7 +17,7 @@ class BSTable extends React.Component {
         return cell ? <a href={`http://${window.location.host}/${cell}`} target="_blank"><i className="fa fa-download"></i></a> : ''; 
     }
 
-    BirthdayFormatter = (cell, row) => {
+    dateFormatter = (cell, row) => {
         return cell ? toReadableDate(cell) : cell;
     }
 
@@ -27,7 +27,7 @@ class BSTable extends React.Component {
           <BootstrapTable data={ this.props.data }>
             <TableHeaderColumn dataField="Email" isKey={ true } width="250">Email</TableHeaderColumn>
             <TableHeaderColumn dataField="FullName">Full Name</TableHeaderColumn>
-            <TableHeaderColumn dataField="Birthday" dataFormat={ this.BirthdayFormatter }>Birthday</TableHeaderColumn>
+            <TableHeaderColumn dataField="Birthday" dataFormat={this.dateFormatter}>Birthday</TableHeaderColumn>
             <TableHeaderColumn dataField="Nationality">Nationality</TableHeaderColumn>
             <TableHeaderColumn dataField="Address">Address</TableHeaderColumn>
             <TableHeaderColumn dataField="ID" dataFormat={ this.IDFormatter } width="50">ID</TableHeaderColumn>
@@ -55,6 +55,10 @@ class RefundRequest extends Component {
         toast.warn(type);
     } 
 
+    dateFormatter = (cell, row) => {
+        return cell ? toReadableDate(cell) : cell;
+    }
+
     btcAddressFormatter = (cell, row) => {
         return <button type="button" onClick={() => this.showQRCode('BTC')} className="btn btn-link btn-sm"><i className="fa fa-qrcode fa-2x" aria-hidden="true"></i></button>;
     }
@@ -78,7 +82,7 @@ class RefundRequest extends Component {
               <TableHeaderColumn dataField="btcAddress" dataFormat={this.btcAddressFormatter} dataAlign="center" width="70"><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
               <TableHeaderColumn dataField="btcAddress" dataFormat={this.ethAddressFormatter} dataAlign="center" width="70"><i className="fa fa-ethereum fa-2x" aria-hidden="true"></i></TableHeaderColumn>
               <TableHeaderColumn dataField="btcAddress" dataFormat={this.ltcAddressFormatter} dataAlign="center" width="70"><img src={LTC_ROUNDED} alt="LTC" width="30" height="30" /></TableHeaderColumn>  
-              <TableHeaderColumn dataField="dateAdded" dataFormat={this.BirthdayFormatter}>Date</TableHeaderColumn>
+              <TableHeaderColumn dataField="dateAdded" dataFormat={this.dateFormatter} width="120">Date</TableHeaderColumn>
             </BootstrapTable>);
         } else {
           return (<p>?</p>);
