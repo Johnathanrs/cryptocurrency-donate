@@ -40,6 +40,12 @@ class CustomerSignUp extends React.Component {
         });
     };
 
+    handleKeyDown = name => event => {
+        if(event.keyCode == 13) {
+            this.signUp();
+        }
+    }
+
     navigate = (url) => {
         browserHistory.push(url);
     }
@@ -79,6 +85,7 @@ class CustomerSignUp extends React.Component {
                             autoComplete="email"
                             value={this.state.email}
                             onChange={this.handleChange('email')}
+                            onKeyDown={this.handleKeyDown()}
                             margin="normal"
                         />
                         <button onClick={() => this.signUp()} className="btn btn-lg bg-warning text-white mt-4 mb-4">Sign Up</button>

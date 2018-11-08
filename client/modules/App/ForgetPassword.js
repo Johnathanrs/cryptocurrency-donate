@@ -23,6 +23,12 @@ class ForgetPassword extends React.Component {
         });
     };
 
+    handleKeyDown = name => event => {
+        if(event.keyCode == 13) {
+            this.send();
+        }
+    }
+
     navigate = (url) => {
         browserHistory.push(url);
     }
@@ -59,6 +65,7 @@ class ForgetPassword extends React.Component {
                             autoComplete="email"
                             value={this.state.email}
                             onChange={this.handleChange('email')}
+                            onKeyDown={this.handleKeyDown()}
                             margin="normal"
                         />
                         <button onClick={() => this.send()} className="btn btn-lg bg-warning text-white mt-4 mb-4">Send</button>

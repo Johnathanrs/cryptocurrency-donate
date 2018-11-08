@@ -87,12 +87,6 @@ class AuthHeader extends React.Component {
               </li>
               <li className="nav-item">
                 <NavButton
-                  onClick={() => this.navigate('/user/transferticket')}
-                  label="Transfer Tickets"
-                />
-              </li>
-              <li className="nav-item">
-                <NavButton
                   onClick={() => this.navigate('/user/account')}
                   label="Account"
                 />

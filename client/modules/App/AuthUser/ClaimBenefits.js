@@ -25,8 +25,10 @@ class ClaimBenefits extends React.Component {
                 nationality: '',
                 address: '',
                 phone: '',
-                payout: '',
-                ID:''
+                payoutBTC: '',
+                payoutETH: '',
+                payoutLTC: '',
+                ID:'',
             },
             IDErr: true,
         };
@@ -50,7 +52,7 @@ class ClaimBenefits extends React.Component {
             if (!user.birthday) {
                 user.birthdayPlaceholder = today;
             }
-            this.setState({ loading: false, user: user });
+            this.setState({ loading: false, user: user, IDErr: !user.ID });
         }
     }
 
@@ -75,7 +77,9 @@ class ClaimBenefits extends React.Component {
             nationalityErr: !user.nationality,
             addressErr: !user.address,
             phoneErr: !user.phone,
-            payoutErr: !user.payout,
+            payoutBTCErr: !user.payoutBTC,
+            payoutETHErr: !user.payoutETH,
+            payoutLTCErr: !user.payoutLTC,
             IDErr: !user.ID,
         });
         if (this.state.fullNameErr ||
@@ -84,6 +88,9 @@ class ClaimBenefits extends React.Component {
             this.state.nationalityErr ||
             this.state.addressErr ||
             this.state.phoneErr ||
+            this.state.payoutBTCErr ||
+            this.state.payoutETHErr ||
+            this.state.payoutLTCErr ||
             this.state.IDErr) {
                 toast.warn('Please fix the error before saving');
                 this.setState({ ...this.state });
@@ -127,7 +134,7 @@ class ClaimBenefits extends React.Component {
     }
 
     render() {
-        const  { loading, user, fullNameErr, emailErr, birthdayErr, nationalityErr, addressErr, phoneErr, payoutErr, IDErr } = this.state;
+        const  { loading, user, fullNameErr, emailErr, birthdayErr, nationalityErr, addressErr, phoneErr, payoutBTCErr, payoutETHErr, payoutLTCErr, IDErr } = this.state;
         let $imagePreview = null;
         if (user.ID) {
             $imagePreview = (<img src={`http://${ window.location.host}/${user.ID}`} />);
@@ -156,6 +163,7 @@ class ClaimBenefits extends React.Component {
                                     fullWidth
                                     error={emailErr}
                                     id="outlined-email-input"
+                                    className="textfield w-20rem"
                                     label="Email"
                                     type="email"
                                     name="email"
@@ -216,13 +224,37 @@ class ClaimBenefits extends React.Component {
                                 <TextField
                                     fullWidth
                                     required
-                                    error={payoutErr}
-                                    id="outlined-Payout-input"
+                                    error={payoutBTCErr}
+                                    id="outlined-PayoutBTC-input"
                                     label="Payout Address in BTC"
                                     type="text"
-                                    name="payout"
-                                    value={user.payout}
-                                    onChange={this.handleChange('payout')}
+                                    name="payoutBTC"
+                                    value={user.payoutBTC}
+                                    onChange={this.handleChange('payoutBTC')}
+                                    margin="normal"
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    error={payoutETHErr}
+                                    id="outlined-PayoutETH-input"
+                                    label="Payout Address in ETH"
+                                    type="text"
+                                    name="payoutETH"
+                                    value={user.payoutETH}
+                                    onChange={this.handleChange('payoutETH')}
+                                    margin="normal"
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    error={payoutLTCErr}
+                                    id="outlined-PayoutLTC-input"
+                                    label="Payout Address in LTC"
+                                    type="text"
+                                    name="payoutLTC"
+                                    value={user.payoutLTC}
+                                    onChange={this.handleChange('payoutLTC')}
                                     margin="normal"
                                 />
                                 <div className="">

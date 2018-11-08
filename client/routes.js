@@ -78,6 +78,10 @@ export default (
       path="/:id"
       component={Home}
     />
+    <Route
+      path="/referral/:id/:referralID/:field1/:field2/:email"
+      component={Home}
+    />
     {/* <Route
       path="/admin/signup"
       component={SignUp}
@@ -179,10 +183,7 @@ export default (
       path="/user/signup"
       component={CustomerSignUp}
     />
-    <Route
-      path="/referral/:id/:field1/:field2"
-      component={CustomerSignUp}
-    />
+    
     <Route
       path="/user/changepassword/:token"
       component={ChangePassword}

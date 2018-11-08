@@ -95,14 +95,14 @@ class UserBrowseProjects extends Component {
         const newProjects = this.filterData();
         if (newProjects) {
             gallery = newProjects.map(project => {
-                return <ProjectItem project={project} gotoHome={this.gotoHome}/>
+                return (<ProjectItem project={project} gotoHome={this.gotoHome} />);
             });
         }
 
         return (
             <section className="gallery-block cards-gallery">
-                <div className="container-fluid mt-5">
-                    <Header activePage={this.state.activePage} token={this.state.token}/>
+                <div className="container-fluid container-option">
+                    <Header activePage={this.state.activePage} token={this.state.token} />
                     {this.state.loading && <div>...loading</div>}
                     <div className="heading text-center">
                         <h2 className="fb text-uppercase">Global's #1 Project Funding</h2>

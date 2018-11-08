@@ -68,7 +68,7 @@ class Home extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.project !== nextProps.res.project) {
+        if (nextProps.res && this.props.project !== nextProps.res.project) {
             const project = nextProps.res.project;
             if (!project) this.setState({ loading: false });
             let a = moment(project.fundingDuration, 'YYYY-MM-DD');
@@ -94,11 +94,29 @@ class Home extends Component {
     }
 
     componentDidMount() {
-        let id = undefined;
-        if (this.props.params.id) {
-            id = this.props.params.id;
+        const { params } = this.props;
+        if (params.referralID) {
+            const url = `${params.id}`;
+            browserHistory.replace(url);
+            if (this.props.params.email) {
+                this.signUp(this.props.params.email);
+            }
+        } else {
+            const id = this.props.params.id && this.props.params.id || undefined;
+            this.props.dispatch(fetchProject(id));
         }
-        this.props.dispatch(fetchProject(id));
+    }
+
+    signUp = (email) => {
+        const self = this;
+        callApi('users/customersignup', 'POST', { user: { email, referralID: this.props.params.referralID } }).then((res, err) => {
+            // let message = 'Successfully created';
+            // if  (res.errors) {
+            //     message = res.errors;
+            // } else {
+            //     window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: false }));
+            // }
+        });
     }
     
     handleTickets = (event, value) => {
@@ -147,7 +165,7 @@ class Home extends Component {
                         this.startBalanceInterval();
                     });
                     this.props.dispatch(saveToken(res.token));
-                } else if (res.status == 'unauthorized') {
+                } else {
                     this.setState({
                         ...this.state,
                         home: false,

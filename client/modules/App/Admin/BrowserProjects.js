@@ -182,7 +182,8 @@ class BrowserProjects extends Component {
                             data={data}
                             striped={true}
                             hover={true}
-                            pagination>
+                            pagination
+                            options={{ paginationShowsTotal: true }}>
                             <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
                             <TableHeaderColumn dataField="maximumAvailableTickets" dataSort={true}>Max Available Tickets</TableHeaderColumn>
                             <TableHeaderColumn dataField="totalMoneyInBTC" >Total (BTC)</TableHeaderColumn>

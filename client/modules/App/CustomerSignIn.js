@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import { browserHistory } from 'react-router';
-
+import { toast } from 'react-toastify';
 import callApi from '../../util/apiCaller';
 import { saveToken } from './AuthActions';
 
@@ -24,6 +24,12 @@ class CustomerSignIn extends Component {
         });
     };
 
+    handleKeyDown = name => event => {
+        if(event.keyCode == 13) {
+            this.signIn();
+        }
+    }
+
     navigate = (url) => {
         browserHistory.push(url);
     }
@@ -35,13 +41,14 @@ class CustomerSignIn extends Component {
             let message = 'Successfully signin';
             if  (res.errors) {
                 message = res.errors;
+                toast.warn(message);
             } else {
                 window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
                 this.props.dispatch(saveToken(res.user.token));
                 // browserHistory.goBack();
                 this.navigate('/user/mytickets');
             }
-            self.setState({ ...self.state, isCreate: false, errOnCreate: message });
+            // self.setState({ ...self.state, isCreate: false, errOnCreate: message });
         });
     }
     
@@ -63,6 +70,7 @@ class CustomerSignIn extends Component {
                             name="email"
                             value={this.state.email}
                             onChange={this.handleChange('email')}
+                            onKeyDown={this.handleKeyDown()}
                             autoComplete="email"
                             margin="normal"
                         />
@@ -73,6 +81,7 @@ class CustomerSignIn extends Component {
                             type="password"
                             value={this.state.password}
                             onChange={this.handleChange('password')}
+                            onKeyDown={this.handleKeyDown()}
                             autoComplete="current-password"
                             margin="normal"
                         />

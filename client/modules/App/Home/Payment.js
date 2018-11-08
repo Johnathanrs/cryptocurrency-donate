@@ -85,7 +85,7 @@ class Payment extends React.Component {
                         {this.state.ETH && <a><div id="ethereum-qr-code"><canvas height="205" width="205" style={{ width: '200px' }}></canvas></div></a>}
                     </div>
 
-                    <div className="justify-content-center mt-2 pt-1 pb-4 ticket-background" role="alert" style={{backgroundImage: `url(${TICKET_BACKGROUND})`, height: '70px' }}>
+                    <div className="justify-content-center mt-2 pt-1 pb-4 ticket-background" role="alert" style={{ backgroundImage: `url(${TICKET_BACKGROUND})`, height: '70px' }}>
                         <h5 className="card-title text-center fw-500 text-white fs-125 mb-0 mt-1" style={{  paddingTop: '0.1rem' }}><strong className="fs-11 text-white">{tickets}</strong> tickets</h5>
                         <div className="text-center">
                             <span className="card-text mr-1 fs-1 text-white"> {totalPrice[coinType]}</span><img src={coinTypeArray[coinType]} alt={coinType} width="25" height="25" />

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import Modal from '@material-ui/core/Modal';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import StepZilla from 'react-stepzilla';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
@@ -10,7 +11,95 @@ import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
 import callApi from '../../../util/apiCaller';
 import { toReadableDate } from '../../../util/util';
-import { fetchReferrals } from '../AppActions';
+import { fetchReferrals, fetchProjects, fetchUser } from '../AppActions';
+import moment from 'moment';
+
+class Step1 extends React.Component {
+    isValidated() {
+        return !this.props.emailErr && !this.props.messageErr;
+    }
+
+    render() {
+        const { emailErr, email, handleChange } = this.props;
+        return <div className="d-flex flex-column mx-2 mt-5 mb-2">
+            <TextField
+                required
+                error={emailErr}
+                id="email"
+                className="textField w-20rem"
+                label="Email"
+                type="email"
+                value={email}
+                onChange={handleChange('email')}
+                margin="normal"
+            />
+        </div>
+    }
+}
+
+class Step2 extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: ''
+        };
+    }
+
+    isValidated() {
+        return this.state.id;
+    }
+
+    dateFormatter = (cell, row) => {
+        return cell ? toReadableDate(cell) : cell;
+    }
+
+    durationFormatter = (cell, row) => {
+        const a = moment(cell, 'YYYY-MM-DD');
+        const b = moment().format('YYYY-MM-DD');
+        const days = a.diff(b, 'days');
+        return days;
+    }
+
+    donorsFormatter = (cell, row) => {
+        const actualDonors = cell.map(donor => { return donor._id; });
+        const donors = actualDonors.filter((item, index) => {
+            return actualDonors.indexOf(item) >= index;
+        });
+        return donors.length;
+    }
+
+    onRowSelect = (row, isSelected, e) => {
+        this.props.handleProject(row._id);
+        this.setState({ ...this.state, id: row._id });
+    }
+
+    render() {
+        return (
+            <div className="mt-5 mb-5">
+                {!this.state.id && <div className="warning-color mb-2"><i className="fa fa-warning mr-2"></i>Please select a project</div>}
+                <BootstrapTable 
+                    data={this.props.data}
+                    striped
+                    hover
+                    pagination
+                    selectRow={{ mode: 'radio', clickToSelect: true, onSelect: this.onRowSelect }}
+                    options={{ paginationShowsTotal: true }} >
+                    <TableHeaderColumn dataField="title" dataSort>Title</TableHeaderColumn>
+                    <TableHeaderColumn dataField="maximumAvailableTickets" dataSort>Max Available Tickets</TableHeaderColumn>
+                    <TableHeaderColumn dataField="totalMoneyInBTC" >Total (BTC)</TableHeaderColumn>
+                    <TableHeaderColumn dataField="donors" dataSort width="80" dataFormat={this.donorsFormatter}>Donors</TableHeaderColumn>
+                    <TableHeaderColumn dataField="fundingDuration" width="100" dataFormat={this.durationFormatter}>Duration (Days)</TableHeaderColumn>
+                    <TableHeaderColumn dataField="dateAdded" width="130" dataFormat={this.dateFormatter}>Start Date</TableHeaderColumn>
+                    <TableHeaderColumn dataField="_id" hidden isKey dataAlign="center" dataFormat={this.actionFormatter} export={false} width='120'></TableHeaderColumn>
+                </BootstrapTable>
+            </div>
+        )
+    }
+}
+
+function Step3(props) {
+    return <h5 className="mt-5 mb-5 text-center">Successfully Created And Sent</h5>
+}
 
 class Referral extends React.Component {
     constructor(props) {
@@ -19,6 +108,7 @@ class Referral extends React.Component {
         this.state = {
             loading: true,
             showModal: false,
+            step: 0,
         };
     }
     
@@ -31,23 +121,26 @@ class Referral extends React.Component {
 
     componentDidMount() {
         this.props.dispatch(fetchReferrals());
+        this.props.dispatch(fetchProjects());
+        this.props.dispatch(fetchUser());
     }
 
     componentWillReceiveProps(nextProps) {
         if (this.props.referrals != nextProps.referrals) {
             this.setState({ ...this.state, loading: false });
         }
+
+        if (nextProps.res && this.props.res != nextProps.res) {
+            this.setState({ ...this.state, loading: false, payout: nextProps.res.user.payoutForReferral });
+        }
     }
 
     showModal = () => {
-        this.setState({ ...this.state, showModal: true });
-    }
+        if (!this.state.payout) {
+            this.setState({ ...this.state, payoutErr: true });
+            return;
+        }
 
-    handleChange = name => event => {
-        this.setState({ ...this.state, [name]: event.target.value, [name+'Err']: !event.target.value });
-    }
-
-    handleOK = () => {
         if (!this.state.field1) {
             this.setState({ ...this.state, field1Err: true });
             return;
@@ -56,12 +149,26 @@ class Referral extends React.Component {
             this.setState({ ...this.state, field2Err: true });
             return;
         }
-        this.handleClose();
-        this.addNewReferral();
+        this.setState({ ...this.state, showModal: true });
+    }
+
+    handleChange = name => event => {
+        this.setState({ ...this.state, [name]: event.target.value, [name+'Err']: !event.target.value });
     }
 
     handleClose = () => {
         this.setState({ ...this.state, showModal: false });
+    }
+
+    handleProject = (projectID) => {
+        this.setState({ ...this.state, projectID });
+    }
+
+    handleStep = (step) => {
+        this.setState({ ...this.state, step });
+        if (step === 2) {
+            this.addNewReferral();
+        }
     }
 
     addNewReferral = () => {
@@ -69,6 +176,8 @@ class Referral extends React.Component {
             receiver: this.state.email,
             field1: this.state.field1,
             field2: this.state.field2,
+            payout: this.state.payout,
+            projectID: this.state.projectID,
         };
 
         callApi('addNewReferral', 'POST', body).then(res => {
@@ -76,7 +185,7 @@ class Referral extends React.Component {
                 toast.warn(res.errors);
             } else if (res.status == 'OK') {
                 console.log(res);
-                toast.warn('Successfully Added');
+                toast.warn('Successfully Created');
                 this.props.dispatch(fetchReferrals());
             }
         });
@@ -97,8 +206,16 @@ class Referral extends React.Component {
     }
 
     render() {
-        const { loading, showModal, field1, field2, field1Err, field2Err, email, emailErr } = this.state;
+        const { loading, showModal, field1, field2, field1Err, field2Err, payout, payoutErr, email, emailErr, message, messageErr } = this.state;
         const { referrals } = this.props;
+
+
+        const steps = [
+          { name: 'Input Email', component: <Step1 email={email} emailErr={emailErr} message={message} messageErr={messageErr} handleChange={this.handleChange} /> },
+          { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
+          { name: 'Final', component: <Step3 /> },
+        ];
+
         return(
             <div>
                 <AuthHeader />
@@ -109,16 +226,50 @@ class Referral extends React.Component {
                             <h1 style={{ flexGrow: 1 }}>Referral Page</h1>
                             <button type="button" onClick={this.showModal} className="btn btn-large btn-link"><i className="fa fa-plus"></i>Add New</button>
                         </div>
+                        <div className="row mx-2 mb-2">
+                            <TextField
+                                required
+                                error={payoutErr}
+                                id="payout"
+                                label="Payout(BTC)"
+                                className="textField w-20rem mr-2"
+                                type="text"
+                                value={payout}
+                                onChange={this.handleChange('payout')}
+                            />
+                            <TextField
+                                required
+                                error={field1Err}
+                                id="field1"
+                                label="Field1"
+                                className="textField w-20rem mr-2"
+                                type="text"
+                                value={field1}
+                                onChange={this.handleChange('field1')}
+                            />
+                            <TextField
+                                required
+                                error={field2Err}
+                                id="field2"
+                                label="Field2"
+                                className="textField w-20rem mr-1"
+                                type="text"
+                                value={field2}
+                                onChange={this.handleChange('field2')}
+                            />
+                        </div>
                         <BootstrapTable
                             exportCSV
                             data={referrals}
                             striped
                             hover
                             pagination
-                            options={{ onExportToCSV: this.onExportToCSV }}>
-                            <TableHeaderColumn dataField="_id" isKey={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
-                            <TableHeaderColumn dataField="isReferred" dataSort={true}>Referred</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataSort={true}>Amount Paid</TableHeaderColumn>
+                            options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true }}>
+                            <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
+                            <TableHeaderColumn dataField="isReferred" dataSort >Referred</TableHeaderColumn>
+                            <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
+                            <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataSort >Profit</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} >Create Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} >Referred Date</TableHeaderColumn>
                         </BootstrapTable>
@@ -133,44 +284,15 @@ class Referral extends React.Component {
                                     <Typography variant="h5" id="modal-title">
                                         Create New Referral Link.
                                     </Typography>
-                                    <Typography variant="subtitle1" id="simple-modal-description">
-                                        Please input fields for referral link.
-                                    </Typography>
-                                    <div className="row mx-2 mb-2">
-                                        <TextField
-                                            required
-                                            error={emailErr}
-                                            id="email"
-                                            label="Email"
-                                            type="email"
-                                            value={email}
-                                            onChange={this.handleChange('email')}
-                                            margin="normal"
-                                        />
-                                        <TextField
-                                            required
-                                            error={field1Err}
-                                            id="field1"
-                                            label="Field1"
-                                            type="text"
-                                            value={field1}
-                                            onChange={this.handleChange('field1')}
-                                            margin="normal"
-                                        />
-                                        <TextField
-                                            required
-                                            error={field2Err}
-                                            id="field2"
-                                            label="Field2"
-                                            type="text"
-                                            value={field2}
-                                            onChange={this.handleChange('field2')}
-                                            margin="normal"
-                                        />
-                                    </div>
-                                  
-                                    <button onClick={this.handleOK} className="btn btn-lg bg-dark text-white mr-2" >OK</button>
-                                    <button onClick={this.handleClose} className="btn btn-lg bg-dark text-white" >Cancel</button>
+                                    <StepZilla
+                                        steps={steps}
+                                        showNavigation={true}
+                                        prevBtnOnLastStep={false}
+                                        preventEnterSubmission={true}
+                                        nextTextOnFinalActionStep="Create"
+                                        startAtStep={this.state.step}
+                                        onStepChange={(step) => this.handleStep(step)}
+                                    />
                                 </div>
                             </Modal>}
                 </div>
@@ -183,6 +305,8 @@ class Referral extends React.Component {
 function mapStateToProps(state) {
     return {
         referrals: state.app.referrals,
+        projects: state.app.projects,
+        res: state.app.res,
     };
 }
 

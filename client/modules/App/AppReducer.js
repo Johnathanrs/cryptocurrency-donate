@@ -38,6 +38,7 @@ const AppReducer = (state = initialState, action) => {
       return  {
         ...state,
         users: action.users,
+        refunds: action.refunds,
       };
     case FETCH_USER:
       return  {

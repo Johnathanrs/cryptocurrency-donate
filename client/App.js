@@ -138,6 +138,10 @@ class App extends React.Component {
                 path="/:id"
                 component={Home}
               />
+              <Route
+                path="/referral/:id/:referralID/:field1/:field2/:email"
+                component={Home}
+              />
               {/* <Route
                 path="/admin/signup"
                 component={SignUp}
@@ -247,10 +251,6 @@ class App extends React.Component {
               />
               <Route
                 path="/user/signup"
-                component={CustomerSignUp}
-              />
-              <Route
-                path="/referral/:id/:field1/:field2"
                 component={CustomerSignUp}
               />
               <Route

@@ -27,6 +27,12 @@ class SignUp extends React.Component {
         });
     };
 
+    handleKeyDown = name => event => {
+        if(event.keyCode == 13) {
+            this.signUp();
+        }
+    }
+
     navigate = (url) => {
         browserHistory.push(url);
     }
@@ -85,6 +91,7 @@ class SignUp extends React.Component {
                             value={this.state.password_repeat}
                             onChange={this.handleChange('password_repeat')}
                             autoComplete="current-password"
+                            onKeyDown={this.handleKeyDown()}
                             margin="normal"
                         />
                         <button onClick={() => this.signUp()} className="btn btn-lg bg-warning text-white mt-2 mb-2">Sign Up</button>

@@ -49,9 +49,11 @@ router.route('/registerReferral').post(MainController.registerReferral);
 
 router.use('/user', checkToken, MainController.getUser);
 
-router.use('/orders', checkTokenAdmin, MainController.getOrders);
+router.use('/createRefundRequest', checkToken, MainController.createRefundRequest);
 
-router.use('/deleteOrder', checkTokenAdmin, MainController.deleteOrder);
+router.use('/orders', checkToken, MainController.getOrders);
+
+router.use('/deleteOrder', checkToken, MainController.deleteOrder);
 
 router.route('/updateUser').put(MainController.updateUser);
 
@@ -61,9 +63,9 @@ router.route('/uploadVideo').post(MainController.uploadVideoFile);
 
 router.route('/fxrate').get(MainController.getFxRate);
 
-router.use('/tickets', checkTokenAdmin, MainController.getMyTickets);
+router.use('/tickets', checkToken, MainController.getMyTickets);
 
-router.use('/transferTickets', checkTokenAdmin, MainController.transferTickets);
+router.use('/transferTickets', checkToken, MainController.transferTickets);
 
 router.use('/getSettings', checkTokenAdmin, MainController.getSettings);
 

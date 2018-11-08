@@ -43,10 +43,11 @@ export function addProject(project) {
   };
 }
 
-export function addUsers(users) {
+export function addUsers(users, refunds) {
   return {
     type: FETCH_USERS,
     users,
+    refunds,
   };
 }
 
@@ -118,7 +119,7 @@ export function fetchProjects() {
 export function fetchUsers() {
   return (dispatch) => {
     return callApi('users').then(res => {
-      dispatch(addUsers(res.users));
+      dispatch(addUsers(res.users, res.refunds));
       return res.users;
     });
   };
@@ -160,9 +161,9 @@ export function fetchTickets() {
   };
 }
 
-export function deleteTickets(_id) {
+export function deleteTickets(order) {
   return (dispatch) => {
-    return callApi('deleteOrder', 'POST', { _id }).then((res) => {
+    return callApi('deleteOrder', 'POST', { order }).then((res) => {
       if (res.errors) {
         return res.errors;
       }

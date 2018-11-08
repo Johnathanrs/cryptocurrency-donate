@@ -6,7 +6,7 @@ import TICKET_BACKGROUND from '../../../assets/img/Ticket_Black_Clean.png';
 import '../../../assets/css/cards_gallery.css';
 
 function ProjectItem(props) {
-    console.log(props)
+    // console.log(props)
     const { project, gotoHome } = props;
     let a = moment(project.fundingDuration, 'YYYY-MM-DD');
     let b = moment().format('YYYY-MM-DD');
@@ -16,10 +16,10 @@ function ProjectItem(props) {
         <div className="col-md-6 col-lg-4 black-color mb-2">
             <div className="card border-0 transform-on-hover">
                 <div className="card-img-container">
-                    <a href="#" onClick={() => gotoHome(project._id)}>
+                    <a href="javascript:void(0)" onClick={() => gotoHome(project._id)}>
                         <img className="card-img-top" src={thumbnail} alt={project.title} />
                     </a>
-                    <a href="#" className="btn btn-info btn-link top-left bg-dard" data-toggle="tooltip" title="Location">
+                    <a href="javascript:void(0)" className="btn btn-info btn-link top-left bg-dard" data-toggle="tooltip" title="Location">
                         <span className="align-middle">{project.address && project.address.city}</span>
                         <i className="fa fa-map-marker fa-2x align-middle warning-color" aria-hidden="true"></i>
                     </a>

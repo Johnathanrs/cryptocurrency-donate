@@ -27,6 +27,12 @@ class SignIn extends Component {
         });
     };
 
+    handleKeyDown = name => event => {
+        if(event.keyCode == 13) {
+            this.signIn();
+        }
+    }
+
     navigate = (url) => {
         browserHistory.push(url);
     }
@@ -65,6 +71,7 @@ class SignIn extends Component {
                             name="email"
                             value={this.state.email}
                             onChange={this.handleChange('email')}
+                            onKeyDown={this.handleKeyDown()}
                             autoComplete="email"
                             margin="normal"
                         />
@@ -75,6 +82,7 @@ class SignIn extends Component {
                             type="password"
                             value={this.state.password}
                             onChange={this.handleChange('password')}
+                            onKeyDown={this.handleKeyDown()}
                             autoComplete="current-password"
                             margin="normal"
                         />

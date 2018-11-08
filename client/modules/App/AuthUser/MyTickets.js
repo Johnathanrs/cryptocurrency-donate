@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import { Button } from 'reactstrap';
+import Modal from '@material-ui/core/Modal';
+import Typography from '@material-ui/core/Typography';
 import { toast } from 'react-toastify';
-
 import { getDurationInDays, toReadableDate } from '../../../util/util';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
@@ -22,6 +24,7 @@ class MyTickets extends Component {
             region: '',
             paid: true,
             unPaid: true,
+            modal: false,
         };
 
         this.searchProject = this.searchProject.bind(this);
@@ -60,16 +63,38 @@ class MyTickets extends Component {
         browserHistory.push(`/${id._id}`);
     }
 
-    deleteTickets = (id) => {
-        this.props.dispatch(deleteTickets(id)).then(err => {
+    deleteTickets = (row) => {
+        if (row.status === 'full') {
+            return;
+        }
+
+        this.showModal(row);
+    }
+
+    showModal = (row) => {
+        if (row.status == 'full') {
+            return;
+        }
+        this.setState({ ...this.state, modal: true, order: row });
+    }
+
+    handleOk = () => {
+        this.props.dispatch(deleteTickets(this.state.order)).then(err => {
             if (err) {
                 toast.warn(err);
+                this.handleClose();
             }
+
+            this.props.dispatch(fetchOrders());
         });
     }
 
+    handleClose = () => {
+        this.setState({ ...this.state, modal: false });
+    }
+
     actionFormatter = (cell, row) => {
-        return <div><button type="button" onClick={() => this.deleteTickets(row._id)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button><button className="btn btn-link btn-info" onClick={()=> this.gotoHome(row.projectID)}><i className="fa fa-plus fa-2x"></i></button></div>;
+        return <div><button type="button" onClick={() => this.deleteTickets(row)} className="btn btn-link btn-sm"><i className="fa fa-trash fa-2x"></i></button><button className="btn btn-link btn-info" onClick={()=> this.gotoHome(row.projectID)}><i className="fa fa-plus fa-2x"></i></button></div>;
     }
 
     handlePaidFilter = name => {
@@ -81,7 +106,7 @@ class MyTickets extends Component {
 
     render() {
         const { orders, params } = this.props;
-        const { loading } = this.state;
+        const { loading, modal } = this.state;
         let data = [];
         if (!this.state.loading && orders) {
             for (let i = 0; i < orders.length; i++) {
@@ -103,13 +128,13 @@ class MyTickets extends Component {
                 if (this.state.unPaid && order.status == 'pending') {
                     data.push(order);
                 } 
-                if (this.state.paid && order.status == 'paid') {
+                if (this.state.paid && order.status != 'pending') {
                     data.push(order);
                 }
             }
         }
         return (
-            <div className="container mt-5" style={{ paddingTop: '70px' }}>
+            <div className="container container-option">
                 <AuthHeader token={this.state.token} />
                 {loading && <div>loading...</div>}
                 {!loading && params.sender && <div className="alert alert-success">
@@ -133,19 +158,39 @@ class MyTickets extends Component {
                     </div>
                     <BootstrapTable 
                         data={data}
-                        striped={true}
-                        hover={true}
-                        pagination>
-                        <TableHeaderColumn dataField="_id" isKey={true} hidden={true} dataAlign="center" dataSort={true}>Product ID</TableHeaderColumn>
-                        <TableHeaderColumn dataField="title" dataSort={true}>Title</TableHeaderColumn>
-                        <TableHeaderColumn dataField="selectedTickets" dataSort={true}>Selected Tickets</TableHeaderColumn>
+                        striped
+                        hover
+                        pagination
+                        options={{ paginationShowsTotal: true }} >
+                        <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort>Product ID</TableHeaderColumn>
+                        <TableHeaderColumn dataField="title" dataSort>Title</TableHeaderColumn>
+                        <TableHeaderColumn dataField="selectedTickets" dataSort>Selected Tickets</TableHeaderColumn>
                         <TableHeaderColumn dataField="paidTickets" >Purchased Tickets</TableHeaderColumn>
-                        <TableHeaderColumn dataField="coins" dataSort={true}>Coins(BTC/ETH/LTC)</TableHeaderColumn>
+                        <TableHeaderColumn dataField="coins" dataSort>Coins(BTC/ETH/LTC)</TableHeaderColumn>
                         <TableHeaderColumn dataField="datePaid">Paid Date</TableHeaderColumn>
                         <TableHeaderColumn dataField="projectID" dataFormat={this.actionFormatter} export={false} ></TableHeaderColumn>
                     </BootstrapTable>
                 </div>}
                 <Footer />
+                <Modal
+                    aria-labelledby="transfer-ticket"
+                    aria-describedby="transfer-ticket-description"
+                    open={modal}
+                    onClose={this.handleClose}
+                    >
+                    <div className="myModal" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                        <Typography variant="h5" id="modal-title">
+                            Conformation
+                        </Typography>
+                        <Typography variant="subtitle1" id="simple-modal-description" className="mt-2">
+                            Are you sure?
+                        </Typography>
+                        <div className="row mt-4 justify-content-end">
+                            <Button color="primary" onClick={this.handleOk}>Ok</Button>{' '}
+                            <Button color="secondary" onClick={this.handleClose}>Cancel</Button>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         );
     }
