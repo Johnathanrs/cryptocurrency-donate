@@ -735,7 +735,7 @@ function promiseCheck(order) {
       let paidTickets = 0;
       if (ethTransaction.calcBasicOpportunities(order.ethAmount)) {
         const ethTickets = Math.floor((order.ethAmount) / order.ethTicketPrice);
-        order.ethChangeAmount = order.ethAmount - ethTickets * order.ethTicketPrice;
+        order.ethChangeAmount = (order.ethAmount - ethTickets * order.ethTicketPrice).toFixed(10);
         paidTickets += ethTickets;
         if (!isETHSending) {
           isETHSending = true;

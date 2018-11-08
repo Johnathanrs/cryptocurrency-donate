@@ -346,6 +346,14 @@ input.email {
   background-color: #fff;
 }
 
+.qr-model {
+  width: 300px;
+  padding: 32px;
+  position: absolute;
+  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+}
+
 .videoPreview {
   display: flex;
   justify-content: center;
@@ -444,6 +452,10 @@ div.gallery:hover {
 .login {
   width: 30%;
   margin: 0 auto;
+}
+
+.react-qr {
+  width: 120px;
 }
 
 .mb-20 {

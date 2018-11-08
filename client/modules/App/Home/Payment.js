@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
-const bitcore = require('bitcore-lib');
-const litecore = require('litecore-lib');
-import ReactBTCQR from '../components/React-bitcoin-qr/ReactBTCQR';
-import EthereumQRPlugin from 'ethereum-qr-code';
 import Clipboard from 'react-clipboard.js';
-const web3 = require('web3');
+import { btcQRCode, ltcQRCode, ethQRCode } from '../../../util/util';
 import { toast } from 'react-toastify';
 
 import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
@@ -20,69 +16,21 @@ class Payment extends React.Component {
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (this.props.coinType != nextProps.coinType) {
-            this.drawETHQR(nextProps);
-        }
-    }
-
-    drawETHQR = (props)  => {
-        const { crypto, coinType } = props;
-        const qr = new EthereumQRPlugin();
-        const sendDetails = {
-            to: crypto.ETH.address.publicKey,
-            value: web3.utils.toWei(crypto.ETH.amount, 'ether'),
-        };
-
-        const configDetials = {
-            size: 230,
-            selector: '#ethereum-qr-code',
-            options: {
-                margin: 2,
-            },
-        };
-        
-        if (coinType == 'ETH') {
-            this.setState({ ...this.state, ETH: true }, () => {
-                qr.toCanvas(sendDetails, configDetials);
-            })
-        } else {
-            this.setState({ ...this.state, ETH: false });
-        }
-    }
-
-    componentDidMount() {
-        this.drawETHQR(this.props);
-    }
-
     render() {
         const { email, tickets, coinTypeArray, totalPrice, ticketPrice, coinType, project, handleCoinType, crypto } = this.props;
 
-        let BTC = null;
-        let LTC = null;
-        if (crypto) {
-            BTC = new bitcore.URI({
-                address: crypto.BTC.address.publicKey,
-                amount: crypto.BTC.amount,
-                message: crypto.BTC.message,
-            });
-
-            LTC = new litecore.URI({
-                address: crypto.LTC.address.publicKey,
-                amount: crypto.LTC.amount,
-                message: crypto.LTC.message,
-            });
-        }
-
+        const BTC = crypto && btcQRCode(crypto.BTC.address.publicKey, crypto.BTC.amount, crypto.BTC.message) || '';
+        const LTC = crypto && ltcQRCode(crypto.LTC.address.publicKey, crypto.LTC.amount, crypto.LTC.message) || '';
+        const ETH = crypto && ethQRCode(crypto.ETH.address.publicKey, crypto.ETH.amount) || '';
         return(
             <div className="col-xl-4 col-lg-5 col-md-5 col-sm-12 right-pane">
                 <div className="text-right fb mb-1">{email()}</div>
                 <div className="card px-2 card-bg">
                     <div className="d-flex flex-column align-items-center justify-content-center mt-2 px-1 ">
                         <h5 className="fb">SCAN THE TAG BELOW TO PAY</h5>
-                        {crypto && coinType == 'BTC' && <a href={BTC.toString()} target="_blank"><ReactBTCQR text={BTC.toString()}></ReactBTCQR></a>}
-                        {crypto && coinType == 'LTC' && <a href={LTC.toString()} target="_blank"><ReactBTCQR text={LTC.toString()}></ReactBTCQR></a>}
-                        {this.state.ETH && <a><div id="ethereum-qr-code"><canvas height="205" width="205" style={{ width: '200px' }}></canvas></div></a>}
+                        {crypto && coinType == 'BTC' && BTC}
+                        {crypto && coinType == 'LTC' && LTC}
+                        {crypto && coinType == 'ETH' && ETH}
                     </div>
 
                     <div className="justify-content-center mt-2 pt-1 pb-4 ticket-background" role="alert" style={{ backgroundImage: `url(${TICKET_BACKGROUND})`, height: '70px' }}>

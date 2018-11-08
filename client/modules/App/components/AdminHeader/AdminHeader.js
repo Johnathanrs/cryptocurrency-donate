@@ -234,7 +234,7 @@ class AdminHeader extends React.Component {
             <Divider />
             <List>
               <ListItem button onClick={() => this.navigate('/admin/statistics')}>
-                <ListItemIcon>
+                <ListItemIcon title="Statistics">
                   <BarChartIcon />
                 </ListItemIcon>
                 <ListItemText primary="Statistics" />
@@ -243,19 +243,19 @@ class AdminHeader extends React.Component {
             <Divider />
             <List>
               <ListItem button onClick={() => this.navigate('/admin/dashboard')}>
-                <ListItemIcon>
+                <ListItemIcon title="Browser Projects">
                   <DashboardIcon />
                 </ListItemIcon>
                 <ListItemText primary="Browser Projects" />
               </ListItem>
               <ListItem button onClick={() => this.navigate('/admin/project')}>
-                  <ListItemIcon>
-                    <CreateIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Create Project" />
-                </ListItem>
+                <ListItemIcon title="Create Project" >
+                  <CreateIcon />
+                </ListItemIcon>
+                <ListItemText primary="Create Project" />
+              </ListItem>
               <ListItem button onClick={() => this.navigate('/admin/users')}>
-                <ListItemIcon>
+                <ListItemIcon title="Users">
                   <PeopleIcon />
                 </ListItemIcon>
                 <ListItemText primary="Users" />
@@ -264,7 +264,7 @@ class AdminHeader extends React.Component {
             <Divider />
             <List>
               <ListItem button onClick={() => this.navigate('/admin/referral')}>
-                <ListItemIcon>
+                <ListItemIcon title="Referral">
                   <VerifiedUserIcon />
                 </ListItemIcon>
                 <ListItemText primary="Referral" />

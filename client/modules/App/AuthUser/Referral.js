@@ -278,8 +278,8 @@ class Referral extends React.Component {
                             pagination
                             options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true }}>
                             <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
-                            <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center" width="100">Referred</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.checkFormatter} dataAlign="center" width="100">Paid</TableHeaderColumn>
+                            <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center">Referred</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.checkFormatter} dataAlign="center">Paid</TableHeaderColumn>
                             <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
                             <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
                             <TableHeaderColumn dataField="paidAmount" dataSort >Profit</TableHeaderColumn>
