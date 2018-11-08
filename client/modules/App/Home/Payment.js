@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { btcQRCode, ltcQRCode, ethQRCode } from '../../../util/util';
 import { toast } from 'react-toastify';
-import CircularProgressbar from 'react-circular-progressbar';
+// import CircularProgressbar from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
