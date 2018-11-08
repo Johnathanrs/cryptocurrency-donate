@@ -46,5 +46,5 @@ export function ltcQRCode(address, amount, message) {
 }
 
 export function ethQRCode(address, amount) {
-    return <EtherumQRCode value={web3.utils.toWei(amount.toFixed(10), 'ether')} gas={1300} to={address} />;
+    return <EtherumQRCode value={web3.utils.toWei(parseFloat(amount).toFixed(10), 'ether')} gas={1300} to={address} />;
 }

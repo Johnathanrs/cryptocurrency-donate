@@ -94,6 +94,7 @@
     "react": "^16.4.1",
     "react-bitcoin-qr": "0.0.3",
     "react-bootstrap-table": "^4.3.1",
+    "react-circular-progressbar": "^1.0.0",
     "react-clipboard.js": "^2.0.1",
     "react-country-region-selector": "^1.4.1",
     "react-dom": "^16.4.1",

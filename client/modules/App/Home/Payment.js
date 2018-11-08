@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { btcQRCode, ltcQRCode, ethQRCode } from '../../../util/util';
 import { toast } from 'react-toastify';
+import CircularProgressbar from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
 import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
@@ -28,11 +30,17 @@ class Payment extends React.Component {
                 <div className="card px-2 card-bg">
                     <div className="d-flex flex-column align-items-center justify-content-center mt-2 px-1 ">
                         <h5 className="fb">SCAN THE TAG BELOW TO PAY</h5>
-                        {crypto && coinType == 'BTC' && BTC}
-                        {crypto && coinType == 'LTC' && LTC}
-                        {crypto && coinType == 'ETH' && ETH}
-                    </div>
+                        <div>
+                            {crypto && coinType == 'BTC' && BTC}
+                            {crypto && coinType == 'LTC' && LTC}
+                            {crypto && coinType == 'ETH' && ETH}
 
+                            <div className="mx-2">Confirmation</div>
+                            <div style={{ width: '100px' }}>
+                                <CircularProgressbar percentage={60} text={`${60}%`} />
+                            </div>
+                        </div>
+                    </div>
                     <div className="justify-content-center mt-2 pt-1 pb-4 ticket-background" role="alert" style={{ backgroundImage: `url(${TICKET_BACKGROUND})`, height: '70px' }}>
                         <h5 className="card-title text-center fw-500 text-white fs-125 mb-0 mt-1" style={{  paddingTop: '0.1rem' }}><strong className="fs-11 text-white">{tickets}</strong> tickets</h5>
                         <div className="text-center">
