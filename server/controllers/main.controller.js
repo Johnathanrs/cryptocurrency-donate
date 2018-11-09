@@ -141,7 +141,7 @@ export function addNewReferral(req, res) {
     referral.save()
   ]).then(data => {
     const saved = data[1];
-    const url = `http://smartprojects.tech/referral/${saved.projectID}/${saved._id}/${saved.field1}/${saved.field2}/${saved.receiver}`;
+    const url = `http://smartprojects.tech/referral/${saved.projectID}/${saved._id}/${saved.receiver}`;
     const receiver = saved.receiver;
     const subject = 'Promotion';
     const text = `Congratulation! It is time to donate. Please click below link to get involved. ${url}`;

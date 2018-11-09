@@ -6,6 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import StepZilla from 'react-stepzilla';
 import { browserHistory } from 'react-router';
 import AuthHeader from '../components/AuthHeader/AuthHeader';
+import Clipboard from 'react-clipboard.js';
 import Footer from '../components/Footer/Footer';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
@@ -141,14 +142,6 @@ class Referral extends React.Component {
             return;
         }
 
-        if (!this.state.field1) {
-            this.setState({ ...this.state, field1Err: true });
-            return;
-        }
-        if (!this.state.field2) {
-            this.setState({ ...this.state, field2Err: true });
-            return;
-        }
         this.setState({ ...this.state, showModal: true });
     }
 
@@ -196,7 +189,7 @@ class Referral extends React.Component {
     }
 
     checkFormatter = (cell, row) => {
-        return <input type="checkbox" checked={cell}/>
+        return <input type="checkbox" checked={cell} />;
     }
 
     detailProject = (id) => {
@@ -204,7 +197,15 @@ class Referral extends React.Component {
     }
 
     projectDetailFormatter = (cell, row) => {
-        return <button type="button" onClick={() => this.detailProject(cell)} className="btn btn-link btn-sm"><i className="fa fa-edit fa-2x"></i></button>
+        const referralUrl = `http://smartprojects.tech/referral/${row.projectID}/${row._id}/${row.receiver}`;
+        return (
+            <div>
+                <button type="button" data-toggle="tooltip" title="Go to the Project" onClick={() => this.detailProject(cell)} className="btn btn-link btn-sm"><i className="fa fa-edit fa-2x"></i></button>
+                <Clipboard title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={referralUrl}>
+                    <i className="fa fa-clipboard"></i>
+                </Clipboard>
+            </div>
+        )
     }
 
     onExportToCSV = () => {
@@ -218,7 +219,7 @@ class Referral extends React.Component {
     }
 
     render() {
-        const { loading, showModal, field1, field2, field1Err, field2Err, payout, payoutErr, email, emailErr, message, messageErr } = this.state;
+        const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr } = this.state;
         const { referrals } = this.props;
 
 
@@ -250,8 +251,6 @@ class Referral extends React.Component {
                                 onChange={this.handleChange('payout')}
                             />
                             <TextField
-                                required
-                                error={field1Err}
                                 id="field1"
                                 label="Field1"
                                 className="textField w-20rem mr-2"
@@ -260,8 +259,6 @@ class Referral extends React.Component {
                                 onChange={this.handleChange('field1')}
                             />
                             <TextField
-                                required
-                                error={field2Err}
                                 id="field2"
                                 label="Field2"
                                 className="textField w-20rem mr-1"

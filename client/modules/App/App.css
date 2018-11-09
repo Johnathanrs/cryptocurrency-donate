@@ -347,7 +347,7 @@ input.email {
 }
 
 .qr-model {
-  width: 300px;
+  width: 500px;
   padding: 32px;
   position: absolute;
   box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
@@ -514,6 +514,69 @@ div.gallery:hover {
 .selectErr {
   border: 1px solid red;
 }
+
+/*
+ * react-circular-progressbar styles
+ *
+ * All of the styles in this file are optional and configurable!
+ */
+
+ .CircularProgressbar {
+  /*
+   * This fixes an issue where the CircularProgressbar svg has
+   * 0 width inside a "display: flex" container, and thus not visible.
+   *
+   * If you're not using "display: flex", you can remove this style.
+   */
+  width: 100%;
+}
+
+.CircularProgressbar .CircularProgressbar-path {
+  stroke: #3e98c7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease 0s;
+}
+
+.CircularProgressbar .CircularProgressbar-trail {
+  stroke: #d6d6d6;
+}
+
+.CircularProgressbar .CircularProgressbar-text {
+  fill: #3e98c7;
+  font-size: 20px;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
+.CircularProgressbar .CircularProgressbar-background {
+  fill: #d6d6d6;
+}
+
+/*
+ * Sample background styles. Use these with e.g.:
+ *
+ *   <CircularProgressbar
+ *     className="CircularProgressbar-inverted"
+ *     background
+ *     percentage={50}
+ *   />
+ */
+.CircularProgressbar.CircularProgressbar-inverted .CircularProgressbar-background {
+  fill: #3e98c7;
+}
+
+.CircularProgressbar.CircularProgressbar-inverted .CircularProgressbar-text {
+  fill: #fff;
+}
+
+.CircularProgressbar.CircularProgressbar-inverted .CircularProgressbar-path {
+  stroke: #fff;
+}
+
+.CircularProgressbar.CircularProgressbar-inverted .CircularProgressbar-trail {
+  stroke: transparent;
+}
+
 
 /* Step wizard */
 ol.progtrckr {

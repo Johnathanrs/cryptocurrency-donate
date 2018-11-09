@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import Clipboard from 'react-clipboard.js';
 import { btcQRCode, ltcQRCode, ethQRCode } from '../../../util/util';
 import { toast } from 'react-toastify';
-import CircularProgressbar from 'react-circular-progressbar';
-// import 'react-circular-progressbar/dist/styles.css';
-
+// import CircularProgressbar from 'react-circular-progressbar';
+import Loading from '../components/Loading/Loading';
 import BTC_ROUNDED from '../../../assets/img/BTC_yellow.png';
 import ETH_ROUNDED from '../../../assets/img/ETH_color.png';
 import LTC_ROUNDED from '../../../assets/img/LTC_yellow.png';
@@ -30,14 +29,14 @@ class Payment extends React.Component {
                 <div className="card px-2 card-bg">
                     <div className="d-flex flex-column align-items-center justify-content-center mt-2 px-1 ">
                         <h5 className="fb">SCAN THE TAG BELOW TO PAY</h5>
-                        <div>
+                        <div className="d-flex align-items-center">
                             {crypto && coinType == 'BTC' && BTC}
                             {crypto && coinType == 'LTC' && LTC}
                             {crypto && coinType == 'ETH' && ETH}
 
-                            <div className="mx-2">Confirmation</div>
-                            <div style={{ width: '100px' }}>
-                                <CircularProgressbar percentage={60} text={`${60}%`} />
+                            <div className="d-flex flex-column align-items-center ml-4">
+                                <Loading  />
+                                <div className="mt-2">Waiting for payment</div>
                             </div>
                         </div>
                     </div>
@@ -52,7 +51,7 @@ class Payment extends React.Component {
                         <div className="input-group mb-3">
                             <input type="text" id="clipboard" className="form-control pl-2" value={crypto[coinType].address.publicKey} aria-label="Recipient's username" aria-describedby="basic-addon2"  disabled/>
                             <div className="input-group-append ml-1">
-                                <Clipboard onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={crypto[coinType].address.publicKey}>
+                                <Clipboard data-toggle="tooltip" title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={crypto[coinType].address.publicKey}>
                                     <i className="fa fa-clipboard"></i>
                                 </Clipboard>
                             </div>

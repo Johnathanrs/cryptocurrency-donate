@@ -234,12 +234,17 @@ class User extends Component {
                                 open={showQRCode}
                                 onClose={this.handleQRClose}
                                 >
-                                <div className="qr-model" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                                    <h5 className="text-center">{type}</h5>
+                                <div className="qr-model d-flex flex-column align-items-center" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                                    <h4 className="text-center fb mb-4">{type}</h4>
                                     <p><b>Amount: </b>
                                         {type == 'BTC' && info.orderID.btcChangeAmount}
                                         {type == 'LTC' && info.orderID.ltcChangeAmount}
                                         {type == 'ETH' && info.orderID.ethChangeAmount}
+                                    </p>
+                                    <p><b>Address: </b>
+                                        {type == 'BTC' && info.orderID.btcAddress}
+                                        {type == 'LTC' && info.orderID.ltcAddress}
+                                        {type == 'ETH' && info.orderID.ethAddress}
                                     </p>
                                     {type == 'BTC' && btcQRCode('12mL5h76y53WrAYVywyqxLsaJTHAsbjrH3', '0.0001', 'Refund BTC')}
                                     {type == 'LTC' && ltcQRCode(info.orderID.ltcAddress, info.orderID.ltcChangeAmount, 'Refund LTC')}
