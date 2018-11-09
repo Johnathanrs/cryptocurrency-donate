@@ -80,7 +80,7 @@ export default (
       component={Home}
     />
     <Route
-      path="/referral/:id/:referralID/:field1/:field2/:email"
+      path="/referral/:id/:referralID/:email"
       component={Home}
     />
     {/* <Route
