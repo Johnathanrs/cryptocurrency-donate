@@ -141,19 +141,24 @@ export function addNewReferral(req, res) {
     referral.save()
   ]).then(data => {
     const saved = data[1];
-    const url = `http://smartprojects.tech/referral/${saved.projectID}/${saved._id}/${saved.receiver}`;
-    const receiver = saved.receiver;
-    const subject = 'Promotion';
-    const text = `Congratulation! It is time to donate. Please click below link to get involved. ${url}`;
-    const html = `<div><strong>Congratulation</strong><p>It is time to donate <a href='${url}'>Please click this link to get involved.</a></p></div>`;
-    sendEmail({
-      to: receiver,
-      subject: subject,
-      text: text,
-      html: html,
-    }).then(msg => {
-      return res.send({ status: 'OK' });
-    }).catch(err => { return res.status(404).send({ errors: err.message }); });
+    let url = `http://smartprojects.tech/referral/${saved.projectID}/${saved._id}`;
+
+    if (saved.receiver) {
+      url += `/${saved.receiver}`;
+      const receiver = saved.receiver;
+      const subject = 'Promotion';
+      const text = `Congratulation! It is time to donate. Please click below link to get involved. ${url}`;
+      const html = `<div><strong>Congratulation</strong><p>It is time to donate <a href='${url}'>Please click this link to get involved.</a></p></div>`;
+      sendEmail({
+        to: receiver,
+        subject: subject,
+        text: text,
+        html: html,
+      }).then(msg => {
+        return res.send({ status: 'OK', link: url });
+      }).catch(err => { return res.status(404).send({ errors: err.message }); });
+    }
+    return res.send({ status: 'OK', link: url });
   }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 

@@ -142,6 +142,10 @@ class App extends React.Component {
                 path="/referral/:id/:referralID/:email"
                 component={Home}
               />
+              <Route
+                path="/referral/:id/:referralID"
+                component={Home}
+              />
               {/* <Route
                 path="/admin/signup"
                 component={SignUp}
@@ -217,6 +221,11 @@ class App extends React.Component {
               />
               <Route
                 path="/user/referral"
+                component={Referral}
+                onEnter={this.requireAuth}
+              />
+              <Route
+                path="/user/referral/:invite"
                 component={Referral}
                 onEnter={this.requireAuth}
               />

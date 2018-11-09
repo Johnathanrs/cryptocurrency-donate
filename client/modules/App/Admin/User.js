@@ -234,7 +234,7 @@ class User extends Component {
                                 open={showQRCode}
                                 onClose={this.handleQRClose}
                                 >
-                                <div className="qr-model d-flex flex-column align-items-center" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                                <div className="qr-modal d-flex flex-column align-items-center" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                                     <h4 className="text-center fb mb-4">{type}</h4>
                                     <p><b>Amount: </b>
                                         {type == 'BTC' && info.orderID.btcChangeAmount}

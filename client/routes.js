@@ -83,6 +83,10 @@ export default (
       path="/referral/:id/:referralID/:email"
       component={Home}
     />
+    <Route
+      path="/referral/:id/:referralID"
+      component={Home}
+    />
     {/* <Route
       path="/admin/signup"
       component={SignUp}
@@ -154,6 +158,10 @@ export default (
     />
     <Route
       path="/user/referral"
+      component={Referral}
+    />
+    <Route
+      path="/user/referral/:invite"
       component={Referral}
     />
     <Route

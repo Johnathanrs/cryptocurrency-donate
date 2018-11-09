@@ -97,10 +97,10 @@ class Home extends Component {
         const { params } = this.props;
         if (params.referralID) {
             const url = `${params.id}`;
-            browserHistory.replace(url);
             if (this.props.params.email) {
                 this.signUp(this.props.params.email);
             }
+            browserHistory.replace(url);
         } else {
             const id = this.props.params.id && this.props.params.id || undefined;
             this.props.dispatch(fetchProject(id));

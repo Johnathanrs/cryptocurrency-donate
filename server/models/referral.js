@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const referralSchema = new Schema({
   sender: { type: Schema.ObjectId, ref: 'User' },
   projectID: { type: Schema.ObjectId, ref: 'Project' },
-  receiver: { type: String, required: true },
+  receiver: { type: String, required: false },
   field1: { type: String, required: false },
   field2: { type: String, required: false },
   isReferred: { type: Boolean, default: false, required: false },

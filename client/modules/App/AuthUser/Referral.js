@@ -98,8 +98,14 @@ class Step2 extends React.Component {
     }
 }
 
-function Step3(props) {
-    return <h5 className="mt-5 mb-5 text-center">Successfully Created And Sent</h5>
+function Step3({ referralLink }) {
+    return <div className="mt-4" style={{ maxWidth: '500px' }}>
+        <div style={{ maxWidth: '500px', wordWrap: 'break-word' }}>{referralLink}  
+        {/* <Clipboard data-toggle="tooltip" title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={referralLink}>
+                        <i className="fa fa-clipboard"></i>
+                    </Clipboard> */}
+        </div>
+    </div>
 }
 
 class Referral extends React.Component {
@@ -109,7 +115,10 @@ class Referral extends React.Component {
         this.state = {
             loading: true,
             showModal: false,
+            showReferralLink: false,
             step: 0,
+            link: '',
+            email: '',
         };
     }
     
@@ -127,13 +136,17 @@ class Referral extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        const { invite } = nextProps.params;
+        console.log('------', invite);
         if (this.props.referrals != nextProps.referrals) {
-            this.setState({ ...this.state, loading: false });
+            this.setState({ ...this.state, loading: false, invite });
         }
 
         if (nextProps.res && this.props.res != nextProps.res) {
-            this.setState({ ...this.state, loading: false, payout: nextProps.res.user.payoutForReferral });
+            this.setState({ ...this.state, loading: false, payout: nextProps.res.user.payoutForReferral, invite });
         }
+
+        this.setState({ ...this.state, loading: false, invite });
     }
 
     showModal = () => {
@@ -153,12 +166,19 @@ class Referral extends React.Component {
         this.setState({ ...this.state, showModal: false });
     }
 
+    handleReferralClose = () => {
+        this.setState({ ...this.state, showReferralLink: false });
+    }
+
     handleProject = (projectID) => {
         this.setState({ ...this.state, projectID });
     }
 
     handleStep = (step) => {
         this.setState({ ...this.state, step });
+        if (this.state.invite && step === 1) {
+            this.addNewReferral();
+        }
         if (step === 2) {
             this.addNewReferral();
         }
@@ -179,6 +199,7 @@ class Referral extends React.Component {
             } else if (res.status == 'OK') {
                 console.log(res);
                 toast.warn('Successfully Created');
+                this.setState({ ...this.state, referralLink: res.link });
                 this.props.dispatch(fetchReferrals());
             }
         });
@@ -196,14 +217,19 @@ class Referral extends React.Component {
         browserHistory.push(`${id}`);
     }
 
+    showLink = (referralLink) => {
+        this.setState({ ...this.state, showReferralLink: true, referralLink: referralLink });
+    }
+
     projectDetailFormatter = (cell, row) => {
-        const referralUrl = `http://smartprojects.tech/referral/${row.projectID}/${row._id}/${row.receiver}`;
+        let referralLink = `http://smartprojects.tech/referral/${row.projectID}/${row._id}`;
+        if (row.receiver) {
+            referralLink += `/${row.receiver}`;
+        }
         return (
             <div>
                 <button type="button" data-toggle="tooltip" title="Go to the Project" onClick={() => this.detailProject(cell)} className="btn btn-link btn-sm"><i className="fa fa-edit fa-2x"></i></button>
-                <Clipboard title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={referralUrl}>
-                    <i className="fa fa-clipboard"></i>
-                </Clipboard>
+                <button type="button" data-toggle="tooltip" title="Show Link" onClick={() => this.showLink(referralLink)} className="btn btn-link btn-sm"><i className="fa fa-info-circle fa-2x"></i></button>
             </div>
         )
     }
@@ -219,15 +245,21 @@ class Referral extends React.Component {
     }
 
     render() {
-        const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr } = this.state;
+        const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr, showReferralLink, referralLink, invite } = this.state;
         const { referrals } = this.props;
 
-
-        const steps = [
+        let steps = [
           { name: 'Input Email', component: <Step1 email={email} emailErr={emailErr} message={message} messageErr={messageErr} handleChange={this.handleChange} /> },
           { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
-          { name: 'Final', component: <Step3 /> },
+          { name: 'Final', component: <Step3 referralLink={this.state.referralLink} /> },
         ];
+
+        if (invite) {
+            steps = [
+                { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject} /> },
+                { name: 'Final', component: <Step3 referralLink={this.state.referralLink} /> },
+            ];
+        }
 
         return(
             <div>
@@ -236,20 +268,10 @@ class Referral extends React.Component {
                     {loading && <div>...loading</div>}
                     {!loading && <div>
                         <div className="d-flex">
-                            <h1 style={{ flexGrow: 1 }}>Referral Page</h1>
+                            <h1 style={{ flexGrow: 1 }}> {invite ? 'Invite Page' : 'Referral Page'}</h1>
                             <button type="button" onClick={this.showModal} className="btn btn-large btn-link"><i className="fa fa-plus"></i>Add New</button>
                         </div>
                         <div className="row mx-2 mb-2">
-                            <TextField
-                                required
-                                error={payoutErr}
-                                id="payout"
-                                label="Payout(BTC)"
-                                className="textField w-20rem mr-2"
-                                type="text"
-                                value={payout}
-                                onChange={this.handleChange('payout')}
-                            />
                             <TextField
                                 id="field1"
                                 label="Field1"
@@ -265,6 +287,18 @@ class Referral extends React.Component {
                                 type="text"
                                 value={field2}
                                 onChange={this.handleChange('field2')}
+                            />
+                        </div>
+                        <div className="row mx-2 mb-2">
+                            <TextField
+                                required
+                                error={payoutErr}
+                                id="payout"
+                                label="Payout(BTC)"
+                                className="textField w-20rem mr-2"
+                                type="text"
+                                value={payout}
+                                onChange={this.handleChange('payout')}
                             />
                         </div>
                         <BootstrapTable
@@ -286,8 +320,6 @@ class Referral extends React.Component {
                         </BootstrapTable>
                     </div>}
                     {showModal && <Modal
-                                aria-labelledby="transfer-ticket"
-                                aria-describedby="transfer-ticket-description"
                                 open={showModal}
                                 onClose={this.handleClose}
                                 >
@@ -305,6 +337,13 @@ class Referral extends React.Component {
                                         onStepChange={(step) => this.handleStep(step)}
                                     />
                                 </div>
+                            </Modal>}
+                            {showReferralLink && <Modal 
+                                   open={showReferralLink}
+                                    onClose={this.handleReferralClose} >
+                                    <div className="qr-modal" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                                        <Step3 referralLink={referralLink} />
+                                    </div>
                             </Modal>}
                 </div>
                 <Footer />
