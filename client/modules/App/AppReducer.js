@@ -39,6 +39,9 @@ const AppReducer = (state = initialState, action) => {
         ...state,
         users: action.users,
         refunds: action.refunds,
+        orders: action.orders,
+        settings: action.settings,
+        referrals: action.referrals,
       };
     case FETCH_USER:
       return  {

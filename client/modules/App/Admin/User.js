@@ -39,6 +39,51 @@ class BSTable extends React.Component {
     }
 }
 
+class PayoutForReferral extends Component {
+    dateFormatter = (cell, row) => {
+        return cell ? toReadableDate(cell) : cell;
+    }
+
+    referreduserFormatter = (cell, row) => {
+        return cell.email;
+    }
+
+    referraluserFormatter = (cell, row) => {
+        return cell.sender.email;
+    }
+
+    showQRCode = (row) => {
+        const amount = row.paidTickets * row.btcTicketPrice * this.props.settings.referralPercent / 100;
+        const referral = this.props.referrals.filter(referral => referral._id == row.referralID._id) || [];
+        const user = this.props.users.filter(user => user._id == referral[0].sender) || [];
+        this.props.handleQRCode(user[0].payoutForReferral, amount);
+    }
+
+    btcAddressFormatter = (cell, row) => {
+        return <button data-toggle="tooltip" title="BTC Address" type="button" onClick={() => this.showQRCode(row)} className="btn btn-link btn-sm"><i className="fa fa-qrcode fa-2x" aria-hidden="true"></i></button>;
+    }
+
+    projectFormatter = (cell, row) => {
+        return <button data-toggle="tooltip" title="Project Detail" type="button" onClick={() => browserHistory.push(`admin/projectdetail/${cell._id}`)} className="btn btn-link btn-sm"><i className="fa fa-info-circle fa-2x" aria-hidden="true"></i></button>;
+    }
+
+    render() {
+        if (this.props.data) {
+          return (
+            <BootstrapTable data={this.props.data}>
+              <TableHeaderColumn dataField="_id"  isKey hidden >ID</TableHeaderColumn>
+              <TableHeaderColumn dataField="userID" dataFormat={this.referreduserFormatter} width="70">Referred User</TableHeaderColumn>
+              <TableHeaderColumn dataField="paidTickets" width="70">Paid Tickets</TableHeaderColumn>
+              <TableHeaderColumn dataField="paidTickets" width="70">Amount: <i className="fa fa-bitcoin" aria-hidden="true"></i></TableHeaderColumn>
+              <TableHeaderColumn dataField="btcAddress" dataFormat={this.btcAddressFormatter} dataAlign="center" width="30"><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
+              <TableHeaderColumn dataField="datePaid" dataAlign="center" dataFormat={this.dateFormatter} width="70">Date</TableHeaderColumn>
+              <TableHeaderColumn dataField="projectID" dataFormat={this.projectFormatter} width="50">Project</TableHeaderColumn>
+            </BootstrapTable>);
+        }
+        return (<p>?</p>);
+      }
+}
+
 class RefundRequest extends Component {
     btcAmountFormatter = (cell, row) => {
         return cell.btcChangeAmount;
@@ -52,13 +97,13 @@ class RefundRequest extends Component {
         return cell.ltcChangeAmount;
     }
 
-    showQRCode = (type, row) => {
-        this.props.handleQRInfo(true, type, row);
-    } 
-
     dateFormatter = (cell, row) => {
         return cell ? toReadableDate(cell) : cell;
     }
+
+    showQRCode = (type, row) => {
+        this.props.handleQRInfo(true, type, row);
+    } 
 
     btcAddressFormatter = (cell, row) => {
         return <button type="button" onClick={() => this.showQRCode('BTC', row)} className="btn btn-link btn-sm"><i className="fa fa-qrcode fa-2x" aria-hidden="true"></i></button>;
@@ -76,7 +121,7 @@ class RefundRequest extends Component {
         if (this.props.data) {
           return (
             <BootstrapTable data={this.props.data}>
-              <TableHeaderColumn dataField="_id" row="0" rowSpan="1" isKey hidden >Refund ID</TableHeaderColumn>
+              <TableHeaderColumn dataField="_id" row="0" rowSpan="1" isKey hidden >ID</TableHeaderColumn>
               <TableHeaderColumn row="0" colSpan="3" headerAlign="center">Amount</TableHeaderColumn>
               <TableHeaderColumn row="1" dataField="orderID" dataFormat={this.btcAmountFormatter} width="70"><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
               <TableHeaderColumn row="1" dataField="orderID" dataFormat={this.ethAmountFormatter} width="70"><i className="fa fa-ethereum fa-2x" aria-hidden="true"></i></TableHeaderColumn>
@@ -91,6 +136,33 @@ class RefundRequest extends Component {
         }
         return (<p>?</p>);
       }
+}
+
+function QRModal(props) {
+    const { showQRCode, handleQRClose, type, btcAddress, ltcAddress, ethAddress, btcAmount, ltcAmount, ethAmount } = props
+    return(
+        <Modal
+            open={showQRCode}
+            onClose={handleQRClose}
+            >
+            <div className="qr-modal d-flex flex-column align-items-center" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <h4 className="text-center fb mb-4">{type}</h4>
+                <p><b>Amount: </b>
+                    {type == 'BTC' && btcAmount}
+                    {type == 'LTC' && ltcAmount}
+                    {type == 'ETH' && ethAmount}
+                </p>
+                <p><b>Address: </b>
+                    {type == 'BTC' && btcAddress}
+                    {type == 'LTC' && ltcAddress}
+                    {type == 'ETH' && ethAddress}
+                </p>
+                {type == 'BTC' && btcQRCode(btcAddress, btcAmount, 'BTC')}
+                {type == 'LTC' && ltcQRCode(ltcAddress, ltcAmount, 'LTC')}
+                {type == 'ETH' && ethQRCode(ethAddress, ethAmount)}
+            </div>
+    </Modal>
+    );
 }
 
 class User extends Component {
@@ -115,6 +187,7 @@ class User extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
         if (this.props.users !== nextProps.users) {
             this.setState({ ...this.state, loading: false });
         }
@@ -139,6 +212,16 @@ class User extends Component {
         return isExisting ? <button type="button" onClick={() => this.showRefund(cell)} className="btn btn-link btn-sm" data-toggle="tooltip" title="A list of Refund Requests"><i className="fa fa-money fa-2x" aria-hidden="true"></i></button> : <p></p>;
     }
 
+    showReferral = (userID) => {
+        const filteredReferrals = this.props.orders.filter(order => order.referralID && order.referralID.sender == userID);
+        this.setState({ ...this.state, showReferral: true, userID, filteredReferrals });
+    }
+
+    referralFormatter = (cell, row) => {
+        let isExisting = this.props.orders.find(order => order.referralID && order.referralID.sender == cell);
+        return isExisting ? <button type="button" onClick={() => this.showReferral(cell)} className="btn btn-link btn-sm" data-toggle="tooltip" title="A list of paid referrals"><i className="fa fa-money fa-2x" aria-hidden="true"></i></button> : <p></p>;
+    }
+
     isExpandableRow(row) {
         return true;
     }
@@ -159,20 +242,24 @@ class User extends Component {
     }
 
     handleClose = () => {
-        this.setState({ ...this.state, showRefund: false });
+        this.setState({ ...this.state, showRefund: false, showReferral: false });
     }
 
     handleQRClose = () => {
-        this.setState({ ...this.state, showQRCode: false });
+        this.setState({ ...this.state, showQRCode: false, showReferralQRCode: false });
     }
 
     handleQRInfo = (showQRCode, type, info) => {
         this.setState({ ...this.state, showQRCode, type, info });
     }
+
+    handleReferralQRCode = (address, amount) => {
+        this.setState({ ...this.state, showReferralQRCode: true, referralBTCAddress: address, referralBTCAmount: amount });
+    }
     
     render() {
         const { users } = this.props;
-        const { loading, showRefund, showQRCode, type, info } = this.state;
+        const { loading, showRefund, showQRCode, type, info, showReferral, showReferralQRCode, referralBTCAmount, referralBTCAddress } = this.state;
         if (!loading) {
             users.map(user => {
                 user.dateAdded = toReadableDate(user.dateAdded);
@@ -214,6 +301,7 @@ class User extends Component {
                             <TableHeaderColumn dataField="role" dataSort={true}>Role</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateAdded">Registered Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="_id" expandable={false} dataFormat={this.refundFormatter} width="100" dataAlign="center">Refunds</TableHeaderColumn>
+                            <TableHeaderColumn dataField="_id" expandable={false} dataFormat={this.referralFormatter} width="100" dataAlign="center">Referrals</TableHeaderColumn>     
                         </BootstrapTable>
                         {showRefund && <Modal
                                 aria-labelledby="transfer-ticket"
@@ -230,27 +318,40 @@ class User extends Component {
                                         handleQRInfo={this.handleQRInfo} />
                                 </div>
                             </Modal>}
-                        {<Modal
-                                open={showQRCode}
-                                onClose={this.handleQRClose}
+                        {showReferral && <Modal
+                                open={showReferral}
+                                onClose={this.handleClose}
                                 >
-                                <div className="qr-modal d-flex flex-column align-items-center" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                                    <h4 className="text-center fb mb-4">{type}</h4>
-                                    <p><b>Amount: </b>
-                                        {type == 'BTC' && info.orderID.btcChangeAmount}
-                                        {type == 'LTC' && info.orderID.ltcChangeAmount}
-                                        {type == 'ETH' && info.orderID.ethChangeAmount}
-                                    </p>
-                                    <p><b>Address: </b>
-                                        {type == 'BTC' && info.orderID.btcAddress}
-                                        {type == 'LTC' && info.orderID.ltcAddress}
-                                        {type == 'ETH' && info.orderID.ethAddress}
-                                    </p>
-                                    {type == 'BTC' && btcQRCode('12mL5h76y53WrAYVywyqxLsaJTHAsbjrH3', '0.0001', 'Refund BTC')}
-                                    {type == 'LTC' && ltcQRCode(info.orderID.ltcAddress, info.orderID.ltcChangeAmount, 'Refund LTC')}
-                                    {type == 'ETH' && ethQRCode(info.orderID.ethAddress, info.orderID.ethChangeAmount)}
+                                <div className="myModal" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                                    <h3 className="mb-3">
+                                        Available Referral Payment Requests.
+                                    </h3>
+                                    <PayoutForReferral
+                                        users={this.props.users}
+                                        referrals={this.props.referrals}
+                                        settings={this.props.settings}
+                                        data={this.state.filteredReferrals}
+                                        handleQRCode={this.handleReferralQRCode} />
                                 </div>
-                        </Modal>}        
+                            </Modal>}
+                        {showQRCode && <QRModal
+                            showQRCode={showQRCode}
+                            handleQRClose={this.handleQRClose}
+                            type={type}
+                            btcAmount={info.orderID.btcChangeAmount}
+                            ltcAmount={info.orderID.ltcChangeAmount}
+                            ethAmount={info.orderID.ethChangeAmount}
+                            btcAddress={info.orderID.btcAddress}
+                            ltcAddress={info.orderID.ltcAddress}
+                            ethAddress={info.orderID.ethAddress}
+                         />}   
+                         {showReferralQRCode && <QRModal
+                            showQRCode={showReferralQRCode}
+                            handleQRClose={this.handleQRClose}
+                            type="BTC"
+                            btcAmount={referralBTCAmount}
+                            btcAddress={referralBTCAddress}
+                         />}        
                     </div>}
                 </div>
                 <Footer />
@@ -269,6 +370,9 @@ function mapStateToProps(state) {
   return {
     users: state.app.users,
     refunds: state.app.refunds,
+    orders: state.app.orders,
+    settings: state.app.settings,
+    referrals: state.app.referrals,
   };
 }
 

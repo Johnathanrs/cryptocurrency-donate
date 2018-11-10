@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema({
   userID: { type: Schema.ObjectId, ref: 'User' },
   projectID: { type: Schema.ObjectId, ref: 'Project' },
+  referralID: { type: Schema.ObjectId, ref: 'Referral', default: null },
   selectedTickets: { type: Number, default: 0, required: false },
   btcAddress: { type: String, required: false },
   ethAddress: { type: String, required: false },

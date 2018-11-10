@@ -43,7 +43,17 @@ class CustomerSignIn extends Component {
                 message = res.errors;
                 toast.warn(message);
             } else {
-                window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: true }));
+                const tokenData = window.localStorage.getItem('smartproject');
+                let jsonData = {};
+                try {
+                    jsonData = JSON.parse(tokenData);
+                } catch(err) {
+                    console.log(err);
+                }
+                jsonData.email = res.user.email;
+                jsonData.token = res.user.token;
+                jsonData.isSignIn = true;
+                window.localStorage.setItem('smartproject', JSON.stringify(jsonData));
                 this.props.dispatch(saveToken(res.user.token));
                 // browserHistory.goBack();
                 this.navigate('/user/mytickets');

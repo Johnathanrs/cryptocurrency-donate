@@ -99,8 +99,19 @@ class Home extends Component {
             const url = `${params.id}`;
             if (this.props.params.email) {
                 this.signUp(this.props.params.email);
+            } 
+
+            // Save referral id to be used in gotoNext and getNow.
+            const tokenData = window.localStorage.getItem('smartproject');
+            let jsonData = {};
+            try {
+                jsonData = tokenData && JSON.parse(tokenData) || {};
+            } catch(err) {
+                console.log(err);
             }
-            browserHistory.replace(url);
+            jsonData.referralID = this.props.params.referralID;
+            window.localStorage.setItem('smartproject', JSON.stringify(jsonData));
+            window.location.href = url;
         } else {
             const id = this.props.params.id && this.props.params.id || undefined;
             this.props.dispatch(fetchProject(id));
@@ -110,6 +121,7 @@ class Home extends Component {
     signUp = (email) => {
         const self = this;
         callApi('users/customersignup', 'POST', { user: { email, referralID: this.props.params.referralID } }).then((res, err) => {
+            console.log('signup from Referral', res);
             // let message = 'Successfully created';
             // if  (res.errors) {
             //     message = res.errors;
@@ -140,6 +152,17 @@ class Home extends Component {
         this.setState({ ...this.state, coinType: type, totalPrice: totalPrice });
     }
 
+    getReferralID = () => {
+        const tokenData = window.localStorage.getItem('smartproject');
+        let referralID = '';
+        try {
+            referralID = JSON.parse(tokenData).referralID;
+        } catch(err) {
+            console.log(err);
+        }
+        return referralID;
+    }
+
     getNow = () => {
         const body = {
             ticket: {
@@ -148,6 +171,7 @@ class Home extends Component {
                 totalPrice: this.state.totalPrice,
                 ticketPrice: this.state.ticketPrice,
             },
+            referralID: this.getReferralID(),
         };
         callApi('users/getNow', 'POST', body).then(res => {
             if (res.errors) {
@@ -204,6 +228,7 @@ class Home extends Component {
                 totalPrice: this.state.totalPrice,
                 ticketPrice: this.state.ticketPrice,
             },
+            referralID: this.getReferralID(),
         };
 
         callApi('users/userSignup', 'POST', body).then((res, err) => {

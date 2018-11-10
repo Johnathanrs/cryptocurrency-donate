@@ -43,11 +43,14 @@ export function addProject(project) {
   };
 }
 
-export function addUsers(users, refunds) {
+export function addUsers(users, refunds, orders, settings, referrals) {
   return {
     type: FETCH_USERS,
     users,
     refunds,
+    orders,
+    settings,
+    referrals,
   };
 }
 
@@ -119,7 +122,7 @@ export function fetchProjects() {
 export function fetchUsers() {
   return (dispatch) => {
     return callApi('users').then(res => {
-      dispatch(addUsers(res.users, res.refunds));
+      dispatch(addUsers(res.users, res.refunds, res.orders, res.settings, res.referrals));
       return res.users;
     });
   };

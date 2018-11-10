@@ -14,6 +14,7 @@ import callApi from '../../../util/apiCaller';
 import { toReadableDate } from '../../../util/util';
 import { fetchReferrals, fetchProjects, fetchUser } from '../AppActions';
 import moment from 'moment';
+import _ from 'lodash';
 
 class Step1 extends React.Component {
     isValidated() {
@@ -100,7 +101,7 @@ class Step2 extends React.Component {
 
 function Step3({ referralLink }) {
     return <div className="mt-4" style={{ maxWidth: '500px' }}>
-        <div style={{ maxWidth: '500px', wordWrap: 'break-word' }}>{referralLink}  
+        <div style={{ maxWidth: '500px', wordWrap: 'break-word' }}>{referralLink}
         {/* <Clipboard data-toggle="tooltip" title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={referralLink}>
                         <i className="fa fa-clipboard"></i>
                     </Clipboard> */}
@@ -137,7 +138,6 @@ class Referral extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const { invite } = nextProps.params;
-        console.log('------', invite);
         if (this.props.referrals != nextProps.referrals) {
             this.setState({ ...this.state, loading: false, invite });
         }
@@ -176,22 +176,25 @@ class Referral extends React.Component {
 
     handleStep = (step) => {
         this.setState({ ...this.state, step });
-        if (this.state.invite && step === 1) {
+        if (this.state.invite && step === 2) {
             this.addNewReferral();
         }
-        if (step === 2) {
+        if (step === 1) {
             this.addNewReferral();
         }
     }
 
     addNewReferral = () => {
         const body = {
-            receiver: this.state.email,
             field1: this.state.field1,
             field2: this.state.field2,
             payout: this.state.payout,
             projectID: this.state.projectID,
         };
+
+        if (this.state.invite) {
+            body.receiver =  this.state.email;
+        }
 
         callApi('addNewReferral', 'POST', body).then(res => {
             if (res.errors) {
@@ -211,6 +214,10 @@ class Referral extends React.Component {
 
     checkFormatter = (cell, row) => {
         return <input type="checkbox" checked={cell} />;
+    }
+
+    amountCheckFormatter = (cell, row) => {
+        return <input type="checkbox" checked={cell > 0} />;
     }
 
     detailProject = (id) => {
@@ -246,19 +253,20 @@ class Referral extends React.Component {
 
     render() {
         const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr, showReferralLink, referralLink, invite } = this.state;
-        const { referrals } = this.props;
+        let { referrals } = this.props;
 
         let steps = [
-          { name: 'Input Email', component: <Step1 email={email} emailErr={emailErr} message={message} messageErr={messageErr} handleChange={this.handleChange} /> },
           { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
           { name: 'Final', component: <Step3 referralLink={this.state.referralLink} /> },
         ];
 
         if (invite) {
             steps = [
+                { name: 'Input Email', component: <Step1 email={email} emailErr={emailErr} message={message} messageErr={messageErr} handleChange={this.handleChange} /> },
                 { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject} /> },
                 { name: 'Final', component: <Step3 referralLink={this.state.referralLink} /> },
             ];
+            referrals = _.filter(referrals, function(o) { return o.receiver; });
         }
 
         return(
@@ -310,10 +318,10 @@ class Referral extends React.Component {
                             options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true }}>
                             <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
                             <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center">Referred</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.checkFormatter} dataAlign="center">Paid</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.amountCheckFormatter} dataAlign="center">Paid</TableHeaderColumn>
                             <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
                             <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataSort >Profit</TableHeaderColumn>
+                            <TableHeaderColumn dataField="paidAmount" dataSort >Profit(<i className="fa fa-bitcoin" aria-hidden="true"></i>)</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} >Create Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} >Referred Date</TableHeaderColumn>
                             <TableHeaderColumn dataField="projectID" dataAlign="center" dataFormat={this.projectDetailFormatter} width="100">Action</TableHeaderColumn>

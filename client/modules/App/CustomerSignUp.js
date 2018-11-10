@@ -59,7 +59,17 @@ class CustomerSignUp extends React.Component {
                 message = res.errors;
                 self.setState({ ...self.state, isCreate: false, errOnCreate: message });
             } else {
-                window.localStorage.setItem('smartproject', JSON.stringify({ email: res.user.email, token: res.user.token, isSignIn: false }));
+                const tokenData = window.localStorage.getItem('smartproject');
+                let jsonData = {};
+                try {
+                    jsonData = JSON.parse(tokenData);
+                } catch(err) {
+                    console.log(err);
+                }
+                jsonData.email = res.user.email;
+                jsonData.token = res.user.token;
+                jsonData.isSignIn = false;
+                window.localStorage.setItem('smartproject', JSON.stringify(jsonData));
                 this.props.dispatch(saveToken(res.user.token));
                 browserHistory.goBack();
             }

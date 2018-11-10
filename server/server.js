@@ -198,4 +198,7 @@ setInterval(() => { MainController.projectCoinBalanceChecker(); }, 200000);
 
 setInterval(() => { MainController.userCoinBalanceChecker(); }, 30000);
 
+// Create settings documentation
+MainController.getSettings();
+
 export default app;

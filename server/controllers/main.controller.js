@@ -62,9 +62,12 @@ export function projectCoinBalanceChecker() {
 export function getUsers(req, res) {
   Promise.all([
     User.find().sort('-dateAdded'),
-    Refund.find().sort('-dateAdded').populate('orderID').populate('userID'),
+    Refund.find().populate('orderID').populate('userID'),
+    Order.find({ status: 'paid', referralID: { $exists: true } }).populate('projectID').populate('userID').populate('referralID'),
+    Setting.findOne(),
+    Referral.find(),
   ]).then(data => {
-    res.json({ users: data[0], refunds: data[1] });
+    res.json({ users: data[0], refunds: data[1], orders: data[2], settings: data[3], referrals: data[4] });
   }).catch(err => { return res.status(500).send({ errors: err.message }); });
 }
 
@@ -98,7 +101,7 @@ export function saveUserGuide(req, res) {
 
 export function getReferrals(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
+    return res.status(405).send({ errors: req.err });
   }
   Referral.find({ sender: req.decoded._id.toString() }).sort('-dateAdded').exec((errors, referrals) => {
     if (errors) {
@@ -126,10 +129,7 @@ export function registerReferral(req, res) {
   });
 }
 
-export function addNewReferral(req, res) {
-  if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
-  }
+function createReferral(req, res) {
   const referral = new Referral();
   referral.sender = req.decoded._id.toString();
   referral.projectID = req.body.projectID;
@@ -162,9 +162,26 @@ export function addNewReferral(req, res) {
   }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 
+export function addNewReferral(req, res) {
+  if (!req.decoded) {
+    return res.status(405).send({ errors: req.err });
+  }
+  if (req.body.receiver) {
+    User.findOne({ email: req.body.receiver })
+      .then(user => {
+        if(user) {
+          return res.status(422).json({ errors: 'User with that email already exists' });
+        }
+        return createReferral(req, res);
+      }).catch( err => { return res.status(500).send({ errors: err.message }); });
+  } else {
+    return createReferral(req, res);
+  }
+}
+
 export function createRefundRequest(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
+    return res.status(405).send({ errors: req.err });
   }
   const refund = new Refund();
   refund.userID = req.decoded.id.toString();
@@ -179,7 +196,7 @@ export function createRefundRequest(req, res) {
 
 export function deleteOrder(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
+    return res.status(405).send({ errors: req.err });
   }
   if (req.body.order.status == 'partial') {
     const refund = new Refund();
@@ -203,7 +220,7 @@ export function deleteOrder(req, res) {
 
 export function getOrders(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
+    return res.status(405).send({ errors: req.err });
   }
   Order.find({ userID: req.decoded._id.toString() }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
@@ -421,7 +438,7 @@ export function authCheckAdmin(req, res) {
   });
 }
 
-function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, ethTicketPrice, ltcTicketPrice, btcTotalPrice, ethTotalPrice, ltcTotalPrice) {
+function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, ethTicketPrice, ltcTicketPrice, btcTotalPrice, ethTotalPrice, ltcTotalPrice, referralID) {
   if (!user.subProjects) {
     user.subProjects = [];
   }
@@ -439,7 +456,6 @@ function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, 
     user.subProjects.push(_newSubProject);
     subProject = _newSubProject;
   }
- 
   user.save((err, savedUser) => {
     if (err) {
       return res.send({ errors: err.message });
@@ -447,6 +463,9 @@ function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, 
     const order = new Order();
     order.userID = user._id;
     order.projectID = subProject.projectID;
+    if (referralID) {
+      order.referralID = referralID;
+    }
     order.selectedTickets = totalTickets;
     order.btcAddress = subProject.btcAddress.publicKey;
     order.ethAddress = subProject.ethAddress.publicKey;
@@ -500,7 +519,7 @@ export function getNow(req, res) {
   User.findOne({ _id: req.decoded._id.toString() })
   .then((user) => {
     if (user) { // User exists
-      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
+      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC, req.body.referralID);
     }
     return res.send({ status: 'unauthorized' });
   });
@@ -539,7 +558,7 @@ export function userSignup(req, res) {
   User.findOne({ email: req.body.user.email })
   .then((user) => {
     if (user) {
-      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC);
+      return updateUserAndOrder(res, user, req.body.ticket.projectID, req.body.ticket.totalTickets, req.body.ticket.ticketPrice.BTC, req.body.ticket.ticketPrice.ETH, req.body.ticket.ticketPrice.LTC, req.body.ticket.totalPrice.BTC, req.body.ticket.totalPrice.ETH, req.body.ticket.totalPrice.LTC, req.body.referralID);
     }
     const newPassword = generator.generate({
       length: 10,
@@ -668,9 +687,6 @@ function createTicketsBasedUponOrder(paidTickets, order) {
 function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
   if (paidTickets > 0) {
     // If the user is referred user, update the referral document realted to that user.
-    if (order.userID.referralID) {
-      
-    }
     order.paidTickets = paidTickets;
     console.log(order.ltcAmount, '--', order.btcAmount, ' ---', order.ethAmount);
     order.datePaid = new Date();
@@ -686,7 +702,7 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
     const html = `<div><strong>Congratulation</strong><p>Your payment has confirmed. ${order.btcAmount} in Bitcoin, ${order.ethAmount} in Ethereum and ${order.ltcAmount} in Litecoin. Puchased tickets ${order.paidTickets}</p></div>`;
 
     return Promise.all([
-      Referral.findOneAndUpdate({ _id: order.userID.referralID }, { isReferred: true, dateReferred: new Date() }),
+      Referral.findOneAndUpdate({ _id: order.referralID }, { isReferred: true, dateReferred: new Date() }),
       order.save(),
       project.save(),
       sendEmail({
@@ -716,7 +732,7 @@ function promiseCheck(order) {
     const utxos = data[2];
     for (let i = 0; i < utxos.length; i++) {
       if (utxos[i].confirmations > 0) {
-        ltcAmount += utxos[i]['satoshis'];
+        ltcAmount += utxos[i].satoshis;
       }
     }
     order.ltcAmount = parseFloat(ltcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
@@ -726,7 +742,7 @@ function promiseCheck(order) {
     const btcUtxos = data[0];
     for (let i = 0; i < btcUtxos.length; i++) {
       if (btcUtxos[i].confirmations > 0) {
-        btcAmount += btcUtxos[i]['satoshis'];
+        btcAmount += btcUtxos[i].satoshis;
         ninputs++;
       }
     }
@@ -849,7 +865,7 @@ export function userCoinBalanceChecker(req, res) {
 
 export function createProject(req, res) {
   if (!req.body.project.title) {
-    res.status(403).send({ errors: 'something wrong happened' });
+    res.status(405).send({ errors: 'something wrong happened' });
     return;
   }
   try {
@@ -908,7 +924,7 @@ export function createProject(req, res) {
 
 export function updateProject(req, res) {
   if (!req.body.project._id) {
-    res.status(403).end();
+    res.status(405).end();
   } else {
     Project.findOne({ _id: req.body.project._id }).exec((errors, newObject) => {
       if (errors) {
@@ -969,7 +985,7 @@ export function getProjects(req, res) {
 
 export function deleteProject(req, res) {
   if (!req.body._id) {
-    res.status(403).send({ errors: 'something wrong happened'});
+    res.status(405).send({ errors: 'something wrong happened'});
   } else {
     Project.deleteOne({ _id: req.body._id }).exec((err, obj) => {
       if (err) {
@@ -982,7 +998,7 @@ export function deleteProject(req, res) {
 
 export function setFeaturedProject(req, res) {
   if (!req.body._id) {
-    res.status(403).send({errors: 'something wrong happened'});
+    res.status(405).send({errors: 'something wrong happened'});
   } else {
     Project.findOneAndUpdate({ _id: req.body._id }, { $set: { isFeatured: req.body.set } }, { upsert: true }, (err, model) => {
       if (err) {
@@ -1109,9 +1125,6 @@ export function getFxRate(req, res) {
 */
 
 export function getSettings(req, res) {
-  if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
-  }
   Setting.findOne().then(settings => {
     if (!settings) {
       settings = new Setting();
@@ -1128,7 +1141,7 @@ export function getSettings(req, res) {
 
 export function updateSettings(req, res) {
   if (!req.decoded) {
-    return res.status(403).send({ errors: req.err });
+    return res.status(405).send({ errors: req.err });
   }
   Setting.findOneAndUpdate({}, { $set: { referralPercent: req.body.settings.referralPercent } }, { upsert: true }, (err, model) => {
     if (err) {
