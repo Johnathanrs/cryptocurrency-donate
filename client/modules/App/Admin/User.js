@@ -284,7 +284,6 @@ class User extends Component {
                     {!loading && <div>
                         <BootstrapTable 
                             data={users}
-                          
                             expandableRow={this.isExpandableRow}
                             expandComponent={this.expandComponent}
                             expandColumnOptions={{

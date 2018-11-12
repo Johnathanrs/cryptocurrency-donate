@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
+import { browserHistory } from 'react-router';
 
 import AuthHeader from '../components/AuthHeader/AuthHeader';
 import Footer from '../components/Footer/Footer';
@@ -113,7 +114,8 @@ class Account extends React.Component {
                                     <button onClick={() => this.save()} className="btn btn-lg bg-warning text-white mt-2 mb-2 float-right">Update</button>
                                 </div>
                             </div> 
-                        </div>     
+                        </div>
+                        <button onClick={() => browserHistory.push('user/referral')} className="btn btn-lg bg-success text-white mt-4 mb-2">Referral</button>     
                     </div>}
                 </div>
                 <Footer />

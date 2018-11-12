@@ -146,6 +146,15 @@ export function fetchOrders() {
   };
 }
 
+export function fetchOrdersForReferral() {
+  return (dispatch) => {
+    return callApi('ordersForReferral').then(res => {
+      dispatch(addOrders(res.orders));
+      return res;
+    });
+  };
+}
+
 export function fetchSettings() {
   return (dispatch) => {
     return callApi('getSettings').then(res => {

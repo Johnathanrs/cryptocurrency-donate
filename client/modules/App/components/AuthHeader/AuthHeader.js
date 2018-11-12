@@ -69,12 +69,6 @@ class AuthHeader extends React.Component {
               </li>
               <li className="nav-item">
                 <NavButton
-                  onClick={() => this.navigate('/user/referral')}
-                  label="Referral"
-                />
-              </li>
-              <li className="nav-item">
-                <NavButton
                   onClick={() => this.navigate('/user/referral/invite')}
                   label="Invite Friends"
                 />

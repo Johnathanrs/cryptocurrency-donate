@@ -5,15 +5,17 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import StepZilla from 'react-stepzilla';
 import { browserHistory } from 'react-router';
-import AuthHeader from '../components/AuthHeader/AuthHeader';
-import Clipboard from 'react-clipboard.js';
-import Footer from '../components/Footer/Footer';
+import moment from 'moment';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { toast } from 'react-toastify';
+
+import AuthHeader from '../components/AuthHeader/AuthHeader';
+import Footer from '../components/Footer/Footer';
+
 import callApi from '../../../util/apiCaller';
 import { toReadableDate } from '../../../util/util';
-import { fetchReferrals, fetchProjects, fetchUser } from '../AppActions';
-import moment from 'moment';
+import { fetchReferrals, fetchProjects, fetchUser, fetchOrdersForReferral } from '../AppActions';
 import _ from 'lodash';
 
 class Step1 extends React.Component {
@@ -43,12 +45,12 @@ class Step2 extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: ''
+            ids: []
         };
     }
 
     isValidated() {
-        return this.state.id;
+        return this.state.ids.length;
     }
 
     dateFormatter = (cell, row) => {
@@ -71,24 +73,42 @@ class Step2 extends React.Component {
     }
 
     onRowSelect = (row, isSelected, e) => {
-        this.props.handleProject(row._id);
-        this.setState({ ...this.state, id: row._id });
+        const ids = this.state.ids;
+        const id = row._id;
+        if (_.find(ids, id)) {
+            _.remove(ids, id);
+        } else {
+            ids.push(id);
+        }
+        this.setState({ ...this.state, ids });
+        this.props.handleProject(ids);
+    }
+
+    onSelectAll = (isSelected, rows) => {
+        const ids = [];
+        if (isSelected) {
+            for (let i = 0; i < rows.length; i++) {
+                ids.push(rows[i]._id);
+            }
+        } 
+        this.setState({ ...this.state, ids });
+        this.props.handleProject(ids);
     }
 
     render() {
         return (
             <div className="mt-5 mb-5">
-                {!this.state.id && <div className="warning-color mb-2"><i className="fa fa-warning mr-2"></i>Please select a project</div>}
+                {!this.state.ids.length && <div className="warning-color mb-2"><i className="fa fa-warning mr-2"></i>Please select your preferred projects</div>}
                 <BootstrapTable 
                     data={this.props.data}
                     striped
                     hover
                     pagination
-                    selectRow={{ mode: 'radio', clickToSelect: true, onSelect: this.onRowSelect }}
+                    selectRow={{ mode: 'checkbox', clickToSelect: true, onSelect: this.onRowSelect, onSelectAll: this.onSelectAll }}
                     options={{ paginationShowsTotal: true }} >
                     <TableHeaderColumn dataField="title" dataSort>Title</TableHeaderColumn>
                     <TableHeaderColumn dataField="maximumAvailableTickets" dataSort>Max Available Tickets</TableHeaderColumn>
-                    <TableHeaderColumn dataField="totalMoneyInBTC" >Total (BTC)</TableHeaderColumn>
+                    <TableHeaderColumn dataField="totalMoneyInBTC" >Total:<i className="fa fa-bitcoin"></i></TableHeaderColumn>
                     <TableHeaderColumn dataField="donors" dataSort width="80" dataFormat={this.donorsFormatter}>Donors</TableHeaderColumn>
                     <TableHeaderColumn dataField="fundingDuration" width="100" dataFormat={this.durationFormatter}>Duration (Days)</TableHeaderColumn>
                     <TableHeaderColumn dataField="dateAdded" width="130" dataFormat={this.dateFormatter}>Start Date</TableHeaderColumn>
@@ -100,13 +120,42 @@ class Step2 extends React.Component {
 }
 
 function Step3({ referralLink }) {
-    return <div className="mt-4" style={{ maxWidth: '500px' }}>
-        <div style={{ maxWidth: '500px', wordWrap: 'break-word' }}>{referralLink}
-        {/* <Clipboard data-toggle="tooltip" title="Copy to Clipboard" onClick={() => toast.warn('Copy to Clipboard')} data-clipboard-text={referralLink}>
-                        <i className="fa fa-clipboard"></i>
-                    </Clipboard> */}
-        </div>
-    </div>
+    debugger
+    return  <div className="mt-4" style={{ maxWidth: '500px' }}>
+                <h4>Copy your link and spread the word by sharing it.</h4>
+                { referralLink.map(link => {
+                    return (<div>
+                        <div style={{ maxWidth: '500px', wordWrap: 'break-word', display: 'inline-block' }}>
+                            {link}
+                        </div>
+                        <CopyToClipboard text={link}
+                            onCopy={() => toast.warn('Copy to Clipboard')}>
+                                <button data-toggle="tooltip" title="Copy to Clipboard"><i className="fa fa-clipboard"></i></button>
+                        </CopyToClipboard>
+                    </div>)
+                })}
+            </div>
+}
+
+class BSTable extends React.Component {
+    dateFormatter = (cell, row) => {
+        return cell ? toReadableDate(cell) : cell;
+    }
+
+    render() {
+      if (this.props.data) {
+        return (
+          <BootstrapTable data={ this.props.data }>
+            <TableHeaderColumn dataField="title" isKey={ true } >Title</TableHeaderColumn>
+            <TableHeaderColumn dataField="referralID" width="230">ID</TableHeaderColumn>
+            <TableHeaderColumn dataField="referrals" dataSort>Referrals</TableHeaderColumn>
+            <TableHeaderColumn dataField="paidAmount" dataSort><i className="fa fa-bitcoin"></i></TableHeaderColumn>
+          </BootstrapTable>
+          );
+      } else {
+        return (<p>?</p>);
+      }
+    }
 }
 
 class Referral extends React.Component {
@@ -134,6 +183,7 @@ class Referral extends React.Component {
         this.props.dispatch(fetchReferrals());
         this.props.dispatch(fetchProjects());
         this.props.dispatch(fetchUser());
+        this.props.dispatch(fetchOrdersForReferral());
     }
 
     componentWillReceiveProps(nextProps) {
@@ -170,8 +220,8 @@ class Referral extends React.Component {
         this.setState({ ...this.state, showReferralLink: false });
     }
 
-    handleProject = (projectID) => {
-        this.setState({ ...this.state, projectID });
+    handleProject = (ids) => {
+        this.setState({ ...this.state, ids });
     }
 
     handleStep = (step) => {
@@ -189,7 +239,7 @@ class Referral extends React.Component {
             field1: this.state.field1,
             field2: this.state.field2,
             payout: this.state.payout,
-            projectID: this.state.projectID,
+            ids: this.state.ids,
         };
 
         if (this.state.invite) {
@@ -202,7 +252,7 @@ class Referral extends React.Component {
             } else if (res.status == 'OK') {
                 console.log(res);
                 toast.warn('Successfully Created');
-                this.setState({ ...this.state, referralLink: res.link });
+                this.setState({ ...this.state, referralLink: res.links });
                 this.props.dispatch(fetchReferrals());
             }
         });
@@ -225,7 +275,7 @@ class Referral extends React.Component {
     }
 
     showLink = (referralLink) => {
-        this.setState({ ...this.state, showReferralLink: true, referralLink: referralLink });
+        this.setState({ ...this.state, showReferralLink: true, referralLink: [referralLink] });
     }
 
     projectDetailFormatter = (cell, row) => {
@@ -251,9 +301,52 @@ class Referral extends React.Component {
         return exportData;
     }
 
+    remakeOrders = () => {
+        const newOrders = [];
+        const { orders } = this.props;
+        if (orders) {
+            orders.map(order => {
+                const newOrder = {
+                    title: order.projectID.title,
+                    referralID: order.referralID._id,
+                    referrals: 1,
+                    paidAmount: order.referralID.paidAmount,
+                }
+                const oldOrder = orders.filter(each => each.referralID === newOrder.referralID);
+                if (oldOrder) {
+                    newOrder.referrals++;
+                    newOrder.btcAmount += oldOrder.btcAmount;
+                    newOrder.ethAmount += oldOrder.ethAmount;
+                    newOrder.ltcAmount += oldOrder.ltcAmount;
+                } 
+                newOrders.push(newOrder);
+            });
+        }
+        return newOrders;
+    }
+    
+    isExpandableRow(row) {
+        return true;
+    }
+
+    expandComponent(row) {
+        return (
+          <BSTable data={ row.expand } />
+        );
+      }
+    
+    expandColumnComponent({ isExpanded }) {
+        let content = '';
+    
+        content = (isExpanded ? '(-)' : '(+)');
+        return (
+          <div> { content } </div>
+        );
+    }
+
     render() {
         const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr, showReferralLink, referralLink, invite } = this.state;
-        let { referrals } = this.props;
+        let { referrals, orders } = this.props;
 
         let steps = [
           { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
@@ -269,63 +362,102 @@ class Referral extends React.Component {
             referrals = _.filter(referrals, function(o) { return o.receiver; });
         }
 
+        if (referrals && orders) {
+            const newOrders = this.remakeOrders();
+            referrals.map(referral => {
+                const expand = newOrders.find(order => order.referralID == referral._id) || [];
+                referral.expand = [
+                    expand
+                ];
+            });
+        }
+
         return(
             <div>
                 <AuthHeader />
                 <div className="container container-option">
                     {loading && <div>...loading</div>}
-                    {!loading && <div>
-                        <div className="d-flex">
-                            <h1 style={{ flexGrow: 1 }}> {invite ? 'Invite Page' : 'Referral Page'}</h1>
-                            <button type="button" onClick={this.showModal} className="btn btn-large btn-link"><i className="fa fa-plus"></i>Add New</button>
+                    {!loading && orders && referrals && <div>
+                        <div className="mb-5">
+                            <h1> {invite && 'Invite Page'}</h1>
+                            {!invite && <h2>Become our partner and join a referral program where attractive commissions can easily be earned.</h2>}
                         </div>
-                        <div className="row mx-2 mb-2">
-                            <TextField
-                                id="field1"
-                                label="Field1"
-                                className="textField w-20rem mr-2"
-                                type="text"
-                                value={field1}
-                                onChange={this.handleChange('field1')}
-                            />
-                            <TextField
-                                id="field2"
-                                label="Field2"
-                                className="textField w-20rem mr-1"
-                                type="text"
-                                value={field2}
-                                onChange={this.handleChange('field2')}
-                            />
+                        <div className="card card-body mb-4">
+                            <h5>Set a BTC payout address and start by adding a referral link:</h5>
+                            <div className="mx-2 mb-2">
+                                <div className="form-group ">
+                                    <div className="row input-group mb-3">
+                                        <div className="input-group-prepend">
+                                            <span className="input-group-text" id="basic-addon3">Payout ( BTC )* </span>
+                                        </div>
+                                        <div className="col-7">
+                                            <input type="text" value={payout} onChange={this.handleChange('payout')} className="form-control" aria-describedby="basic-addon3" />
+                                        {payoutErr && <div className="invalid-feedback d-block">Payout cannot be blank.</div>} 
+                                        </div>
+                                        <button type="button" onClick={this.showModal} className="col-3 btn btn-large btn-link"><i className="fa fa-plus"></i>Add Referral Link</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button className="btn btn-link text-warning " type="button" data-toggle="collapse" data-target="#advanced" aria-expanded="false" aria-controls="advanced">
+                                Advanced >>
+                            </button>
+                            <div className="collapse" id="advanced">
+                                <div className="row mx-2 mb-2">
+                                    <TextField
+                                        id="field1"
+                                        label="Field1"
+                                        className="textField w-20rem mr-2"
+                                        type="text"
+                                        value={field1}
+                                        onChange={this.handleChange('field1')}
+                                    />
+                                    <TextField
+                                        id="field2"
+                                        label="Field2"
+                                        className="textField w-20rem mr-1"
+                                        type="text"
+                                        value={field2}
+                                        onChange={this.handleChange('field2')}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div className="row mx-2 mb-2">
-                            <TextField
-                                required
-                                error={payoutErr}
-                                id="payout"
-                                label="Payout(BTC)"
-                                className="textField w-20rem mr-2"
-                                type="text"
-                                value={payout}
-                                onChange={this.handleChange('payout')}
-                            />
+                        
+                        <div className="card card-body">
+                            <p>
+                                You will round-up your earnings each time a referral buys a ticket by using your affiliate link. Use each of your created links by copying it from the info button below.
+                            </p>
+                            <p>
+                                For each sold ticket you will earn 5% of the ticket price in BTC for free.
+                            </p>
+                            <p>
+                                Enjoy fast lane payouts within two business days.
+                            </p>
+                            <BootstrapTable
+                                exportCSV
+                                data={referrals}
+                                expandableRow={this.isExpandableRow}
+                                expandComponent={this.expandComponent}
+                                expandColumnOptions={{
+                                    expandColumnVisible: true,
+                                    expandColumnComponent: this.expandColumnComponent,
+                                    columnWidth: 50
+                                }}
+                                striped
+                                hover
+                                pagination
+                                options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true, expandBy: 'column' }}>
+                                <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
+                                <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center">Referred</TableHeaderColumn>
+                                <TableHeaderColumn dataField="paidAmount" dataFormat={this.amountCheckFormatter} dataAlign="center">Paid</TableHeaderColumn>
+                                <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
+                                <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
+                                <TableHeaderColumn dataField="paidAmount" dataSort >Profit(<i className="fa fa-bitcoin" aria-hidden="true"></i>)</TableHeaderColumn>
+                                <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} dataSort>Create Date</TableHeaderColumn>
+                                <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} dataSort>Referred Date</TableHeaderColumn>
+                                <TableHeaderColumn dataField="projectID" dataAlign="center" dataFormat={this.projectDetailFormatter} width="150">Action</TableHeaderColumn>
+                            </BootstrapTable>
                         </div>
-                        <BootstrapTable
-                            exportCSV
-                            data={referrals}
-                            striped
-                            hover
-                            pagination
-                            options={{ onExportToCSV: this.onExportToCSV, paginationShowsTotal: true }}>
-                            <TableHeaderColumn dataField="_id" isKey hidden dataAlign="center" dataSort >Referral ID</TableHeaderColumn>
-                            <TableHeaderColumn dataField="isReferred" dataFormat={this.checkFormatter} dataAlign="center">Referred</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataFormat={this.amountCheckFormatter} dataAlign="center">Paid</TableHeaderColumn>
-                            <TableHeaderColumn dataField="field1" dataSort >Field 1</TableHeaderColumn>
-                            <TableHeaderColumn dataField="field2" dataSort >Field 2</TableHeaderColumn>
-                            <TableHeaderColumn dataField="paidAmount" dataSort >Profit(<i className="fa fa-bitcoin" aria-hidden="true"></i>)</TableHeaderColumn>
-                            <TableHeaderColumn dataField="dateAdded" dataAlign="center" dataFormat={this.dateFormatter} >Create Date</TableHeaderColumn>
-                            <TableHeaderColumn dataField="dateReferred" dataAlign="center" dataFormat={this.dateFormatter} >Referred Date</TableHeaderColumn>
-                            <TableHeaderColumn dataField="projectID" dataAlign="center" dataFormat={this.projectDetailFormatter} width="100">Action</TableHeaderColumn>
-                        </BootstrapTable>
                     </div>}
                     {showModal && <Modal
                                 open={showModal}
@@ -333,7 +465,7 @@ class Referral extends React.Component {
                                 >
                                 <div className="myModal" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                                     <Typography variant="h5" id="modal-title">
-                                        Create New Referral Link.
+                                        Create Referral Link.
                                     </Typography>
                                     <StepZilla
                                         steps={steps}
@@ -365,6 +497,7 @@ function mapStateToProps(state) {
         referrals: state.app.referrals,
         projects: state.app.projects,
         res: state.app.res,
+        orders: state.app.orders,
     };
 }
 

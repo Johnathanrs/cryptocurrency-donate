@@ -130,21 +130,30 @@ export function registerReferral(req, res) {
 }
 
 function createReferral(req, res) {
-  const referral = new Referral();
-  referral.sender = req.decoded._id.toString();
-  referral.projectID = req.body.projectID;
-  referral.receiver = req.body.receiver;
-  referral.field1 = req.body.field1;
-  referral.field2 = req.body.field2;
+  const referrals = [];
+  req.body.ids.map(id => {
+    const referral = new Referral();
+    referral.sender = req.decoded._id.toString();
+    referral.projectID = id;
+    referral.receiver = req.body.receiver;
+    referral.field1 = req.body.field1;
+    referral.field2 = req.body.field2;
+    referrals.push(referral);
+  });
+
   Promise.all([
-    User.findOneAndUpdate({ _id: referral.sender }, { payoutForReferral: req.body.payout }),
-    referral.save()
+    User.findOneAndUpdate({ _id: req.decoded._id.toString() }, { payoutForReferral: req.body.payout }),
+    Referral.insertMany(referrals),
   ]).then(data => {
     const saved = data[1];
-    let url = `http://smartprojects.tech/referral/${saved.projectID}/${saved._id}`;
+    let urls = [];
+    for (let i = 0; i < saved.length; i++) {
+      let url = `http://smartprojects.tech/referral/${saved[i].projectID}/${saved[i]._id}`;
+      urls.push(url);
+    }
 
     if (saved.receiver) {
-      url += `/${saved.receiver}`;
+      let url =`${urls[0]}/${saved.receiver}`;
       const receiver = saved.receiver;
       const subject = 'Promotion';
       const text = `Congratulation! It is time to donate. Please click below link to get involved. ${url}`;
@@ -155,10 +164,11 @@ function createReferral(req, res) {
         text: text,
         html: html,
       }).then(msg => {
-        return res.send({ status: 'OK', link: url });
+        return res.send({ status: 'OK', links: [url] });
       }).catch(err => { return res.status(404).send({ errors: err.message }); });
+    } else {
+      return res.send({ status: 'OK', links: urls });
     }
-    return res.send({ status: 'OK', link: url });
   }).catch(err => { return res.status(404).send({ errors: err.message }); });
 }
 
@@ -219,14 +229,20 @@ export function deleteOrder(req, res) {
 }
 
 export function getOrders(req, res) {
-  if (!req.decoded) {
-    return res.status(405).send({ errors: req.err });
-  }
   Order.find({ userID: req.decoded._id.toString() }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
     }
     res.json({ orders });
+  });
+}
+
+export function getPaidOrdersWithReferral(req, res) {
+  Order.$where('this.status !== "pending" && this.referralID').sort('-dateAdded').populate('projectID').populate('referralID').exec((errors, orders) => {
+    if (errors) {
+      return res.status(500).send({ errors });
+    }
+    return res.json({ orders });
   });
 }
 
