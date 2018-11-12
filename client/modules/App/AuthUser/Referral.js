@@ -197,6 +197,8 @@ class Referral extends React.Component {
         }
 
         this.setState({ ...this.state, loading: false, invite });
+
+        console.log('referral', nextProps.orders);
     }
 
     showModal = () => {

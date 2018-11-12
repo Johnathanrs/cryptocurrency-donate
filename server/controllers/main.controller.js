@@ -232,7 +232,7 @@ export function getOrders(req, res) {
   if (!req.decoded) {
     return res.status(405).send({ errors: req.err });
   }
-  
+
   Order.find({ userID: req.decoded._id.toString() }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
@@ -877,6 +877,10 @@ export function userCoinBalanceChecker(req, res) {
       setTimeout(() => { promiseCheck(order); }, 3000);
     });
   });
+}
+
+export function userPaymentBalanceChecker() {
+  
 }
 
 /**
