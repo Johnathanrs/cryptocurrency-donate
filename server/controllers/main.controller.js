@@ -229,6 +229,10 @@ export function deleteOrder(req, res) {
 }
 
 export function getOrders(req, res) {
+  if (!req.decoded) {
+    return res.status(405).send({ errors: req.err });
+  }
+  
   Order.find({ userID: req.decoded._id.toString() }).sort('-dateAdded').populate('projectID').populate('userID').exec((errors, orders) => {
     if (errors) {
       res.status(500).send({ errors });
@@ -854,7 +858,7 @@ export function checkBalanceFromFront(req, res) {
     if (err) {
       return res.status(500).send(err);
     }
-    if (order && order.status == 'paid') {
+    if (order && order.status != 'pending') {
       if (order.totalTickets > order.paidTickets) {
         return res.send({ status: 'less', paidTickets: order.paidTickets, maximumAvailableTickets: order.projectID.maximumAvailableTickets, btcAmount: order.btcAmount, ethAmount: order.ethAmount, ltcAmount: order.ltcAmount, paidCoin: order.paidCoin });
       }

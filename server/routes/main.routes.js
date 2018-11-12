@@ -51,7 +51,7 @@ router.use('/user', checkToken, MainController.getUser);
 
 router.use('/createRefundRequest', checkToken, MainController.createRefundRequest);
 
-router.route('/orders').get(MainController.getOrders);
+router.use('/orders', checkToken, MainController.getOrders);
 
 router.route('/ordersForReferral').get(MainController.getPaidOrdersWithReferral);
 
