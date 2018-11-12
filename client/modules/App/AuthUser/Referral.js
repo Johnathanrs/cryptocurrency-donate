@@ -15,7 +15,7 @@ import Footer from '../components/Footer/Footer';
 
 import callApi from '../../../util/apiCaller';
 import { toReadableDate } from '../../../util/util';
-import { fetchReferrals, fetchProjects, fetchUser, fetchOrdersForReferral } from '../AppActions';
+import { fetchReferrals, fetchProjects, fetchUser, fetchOrdersForReferral, fetchSettings } from '../AppActions';
 import _ from 'lodash';
 
 class Step1 extends React.Component {
@@ -120,7 +120,6 @@ class Step2 extends React.Component {
 }
 
 function Step3({ referralLink }) {
-    debugger
     return  <div className="mt-4" style={{ maxWidth: '500px' }}>
                 <h4>Copy your link and spread the word by sharing it.</h4>
                 { referralLink && referralLink.map(link => {
@@ -184,6 +183,7 @@ class Referral extends React.Component {
         this.props.dispatch(fetchProjects());
         this.props.dispatch(fetchUser());
         this.props.dispatch(fetchOrdersForReferral());
+        this.props.dispatch(fetchSettings());
     }
 
     componentWillReceiveProps(nextProps) {
@@ -308,19 +308,18 @@ class Referral extends React.Component {
         const { orders } = this.props;
         if (orders) {
             orders.map(order => {
+                const amount = order.paidTickets * order.btcTicketPrice * this.props.settings.referralPercent / 100;
                 const newOrder = {
                     title: order.projectID.title,
                     referralID: order.referralID._id,
                     referrals: 1,
-                    paidAmount: order.referralID.paidAmount,
+                    paidAmount: amount,
                 }
                 const oldOrder = orders.filter(each => each.referralID === newOrder.referralID);
-                if (oldOrder) {
+                if (oldOrder.length) {
                     newOrder.referrals++;
-                    newOrder.btcAmount += oldOrder.btcAmount;
-                    newOrder.ethAmount += oldOrder.ethAmount;
-                    newOrder.ltcAmount += oldOrder.ltcAmount;
-                } 
+                    newOrder.paidAmount += oldOrder[0].paidAmount;
+                }
                 newOrders.push(newOrder);
             });
         }
@@ -348,7 +347,7 @@ class Referral extends React.Component {
 
     render() {
         const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr, showReferralLink, referralLink, invite } = this.state;
-        let { referrals, orders } = this.props;
+        let { referrals, orders, settings } = this.props;
 
         let steps = [
           { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
@@ -364,13 +363,19 @@ class Referral extends React.Component {
             referrals = _.filter(referrals, function(o) { return o.receiver; });
         }
 
-        if (referrals && orders) {
+        if (referrals && orders && settings) {
             const newOrders = this.remakeOrders();
             referrals.map(referral => {
-                const expand = newOrders.find(order => order.referralID == referral._id) || [];
+                const expands = newOrders.find(order => order.referralID == referral._id) || [];
+                // const _expands = expands[0] && expands[0] || [];
                 referral.expand = [
-                    expand
+                    expands
                 ];
+                let amount = 0;
+                // expands.map(expand => {
+                //     amount += expand.paidAmount;
+                // });
+                referral.paidAmount = amount;
             });
         }
 
@@ -379,7 +384,7 @@ class Referral extends React.Component {
                 <AuthHeader />
                 <div className="container container-option">
                     {loading && <div>...loading</div>}
-                    {!loading && orders && referrals && <div>
+                    {!loading && orders && referrals && settings && <div>
                         <div className="mb-5">
                             <h1> {invite && 'Invite Page'}</h1>
                             {!invite && <h2>Become our partner and join a referral program where attractive commissions can easily be earned.</h2>}
@@ -500,6 +505,7 @@ function mapStateToProps(state) {
         projects: state.app.projects,
         res: state.app.res,
         orders: state.app.orders,
+        settings: state.app.settings,
     };
 }
 

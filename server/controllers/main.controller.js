@@ -738,6 +738,8 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
         const request = new ReferralPaymentRequest();
         request.sender = order.referralID.sender;
         request.referred = order.userID;
+        request.paidTickets = order.paidTickets;
+        request.ticketPrice = order.btcTicketPrice;
         request.projectID = order.projectID;
         request.referralID = order.referralID._id;
         request.save((err, saved) => {
