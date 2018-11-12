@@ -6,6 +6,7 @@ import Ticket from '../models/ticket';
 import Referral from '../models/referral';
 import Setting from '../models/setting';
 import Refund from '../models/refund';
+import ReferralPaymentRequest from '../models/referralrequest';
 import { verifyToken } from '../routes/auth';
 const _ = require('lodash');
 
@@ -733,6 +734,18 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
       }),
     ]).then((err, data) => {
       console.log(err, data);
+      if (order.referralID) {
+        const request = new ReferralPaymentRequest();
+        request.sender = order.referralID.sender;
+        request.referred = order.userID;
+        request.projectID = order.projectID;
+        request.referralID = order.referralID._id;
+        request.save((err, saved) => {
+          if (err) {
+            console.logg('save referral payment request', err);
+          }
+        });
+      }
     });
   }
 }

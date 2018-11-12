@@ -295,7 +295,7 @@ class Referral extends React.Component {
 
     onExportToCSV = () => {
         const exportData = [];
-        this.props.referrals.map(referral => {
+        this.props.referrals && this.props.referrals.map(referral => {
             referral.dateAdded = toReadableDate(referral.dateAdded);
             referral.dateReferred = referral.dateReferred ? toReadableDate(referral.dateReferred) : '';
             exportData.push(referral);

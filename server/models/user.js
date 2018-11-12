@@ -37,7 +37,7 @@ const userSchema = new Schema({
   hash: String,
   salt: String,
   role: String,
-  referralID: { type: Schema.ObjectId, ref: 'Referral' },
+  referralIDs: { type: Schema.ObjectId, ref: 'Referral' },
   dateExpired: { type: Date, required: false },
   dateAdded: { type: Date, default: Date.now, required: true },
 });
