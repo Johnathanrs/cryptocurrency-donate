@@ -123,7 +123,7 @@ function Step3({ referralLink }) {
     debugger
     return  <div className="mt-4" style={{ maxWidth: '500px' }}>
                 <h4>Copy your link and spread the word by sharing it.</h4>
-                { referralLink.map(link => {
+                { referralLink && referralLink.map(link => {
                     return (<div>
                         <div style={{ maxWidth: '500px', wordWrap: 'break-word', display: 'inline-block' }}>
                             {link}

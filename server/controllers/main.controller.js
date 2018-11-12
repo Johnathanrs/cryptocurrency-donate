@@ -741,6 +741,20 @@ let isLTCSending = false;
 let isETHSending = false;
 let isBTCSending = false;
 
+function userPaymentCheck(user) {
+  bitcoinTransaction.getBTCUTxos(user.payoutForReferral).then(utxos => {
+    let btcAmount = 0;
+    let ninputs = 0;
+    for (let i = 0; i < utxos.length; i++) {
+      if (utxos[i].confirmations > 0) {
+        btcAmount += utxos[i].satoshis;
+        ninputs++;
+      }
+    }
+    btcAmount = parseFloat(btcAmount) / bitcoinTransaction.BITCOIN_SAT_MULT;
+  }).catch(err => { console.log(' checking user balance for referral ', err); });
+}
+
 function promiseCheck(order) {
   return Promise.all([
     bitcoinTransaction.getBTCUTxos(order.btcAddress),
@@ -880,7 +894,15 @@ export function userCoinBalanceChecker(req, res) {
 }
 
 export function userPaymentBalanceChecker() {
-  
+  User.$where('this.payoutForReferral !== ""').exec((err, users) => {
+    if (err) {
+      console.log('user payment balance checking', err);
+    } else {
+      users.map(user=> {
+        setTimeout(() => { userPaymentCheck(user); }, 3000);
+      });
+    }
+  });
 }
 
 /**
