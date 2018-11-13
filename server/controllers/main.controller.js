@@ -64,7 +64,7 @@ export function getUsers(req, res) {
   Promise.all([
     User.find().sort('-dateAdded'),
     Refund.find().populate('orderID').populate('userID'),
-    Order.find({ status: 'paid', referralID: { $exists: true } }).populate('projectID').populate('userID').populate('referralID'),
+    Order.$where('this.status == "paid" && this.referralID').populate('projectID').populate('userID').populate('referralID'),
     Setting.findOne(),
     Referral.find(),
   ]).then(data => {
