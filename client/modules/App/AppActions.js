@@ -43,14 +43,13 @@ export function addProject(project) {
   };
 }
 
-export function addUsers(users, refunds, orders, settings, referrals) {
+export function addUsers(users, refunds, settings, referralRequests) {
   return {
     type: FETCH_USERS,
     users,
     refunds,
-    orders,
     settings,
-    referrals,
+    referralRequests,
   };
 }
 
@@ -68,10 +67,12 @@ export function addGuide(guide) {
   };
 }
 
-export function addReferral(referrals) {
+export function addReferral(referrals, settings, referralRequests) {
   return {
     type: ADD_REFERRAL,
     referrals,
+    settings,
+    referralRequests,
   };
 }
 
@@ -122,7 +123,7 @@ export function fetchProjects() {
 export function fetchUsers() {
   return (dispatch) => {
     return callApi('users').then(res => {
-      dispatch(addUsers(res.users, res.refunds, res.orders, res.settings, res.referrals));
+      dispatch(addUsers(res.users, res.refunds, res.settings, res.referralRequests));
       return res.users;
     });
   };
@@ -238,7 +239,7 @@ export function fetchUserGuide() {
 export function fetchReferrals() {
   return (dispatch) => {
     return callApi('getReferrals').then(res => {
-      dispatch(addReferral(res.referrals));
+      dispatch(addReferral(res.referrals, res.settings, res.referralRequests));
     });
   };
 }

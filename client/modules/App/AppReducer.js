@@ -35,16 +35,15 @@ const AppReducer = (state = initialState, action) => {
         projects: action.projects,
       };
     case FETCH_USERS:
-      return  {
+      return {
         ...state,
         users: action.users,
         refunds: action.refunds,
-        orders: action.orders,
         settings: action.settings,
-        referrals: action.referrals,
+        referralRequests: action.referralRequests,
       };
     case FETCH_USER:
-      return  {
+      return {
         ...state,
         res: action.res,
       };
@@ -77,6 +76,8 @@ const AppReducer = (state = initialState, action) => {
       return {
         ...state,
         referrals: action.referrals,
+        settings: action.settings,
+        referralRequests: action.referralRequests,
       };
     case ADD_SETTINGS:
       return {

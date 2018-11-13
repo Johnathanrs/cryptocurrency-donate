@@ -237,7 +237,17 @@ class Home extends Component {
                 
                 toast.warn(res.errors);
             } else {
-                localStorage.setItem('smartproject', JSON.stringify({ email: res.email, token: res.token, isSignIn: false }));
+                const tokenData = window.localStorage.getItem('smartproject');
+                let jsonData = {};
+                try {
+                    jsonData = tokenData && JSON.parse(tokenData) || {};
+                } catch(err) {
+                    console.log(err);
+                }
+                jsonData.email = res.email;
+                jsonData.token = res.token;
+                jsonData.isignIn = false;
+                localStorage.setItem('smartproject', JSON.stringify(jsonData));
                 if (res.isNewUser && res.isMsgSent) {
                     message = 'Successfully sent your personal credential!';
                 } else {

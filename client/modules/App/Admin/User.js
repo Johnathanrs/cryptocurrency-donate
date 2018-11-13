@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
-import { fetchUsers } from '../AppActions';
+import { fetchUsers, fetchReferrals } from '../AppActions';
 import Modal from '@material-ui/core/Modal';
 import Typography from '@material-ui/core/Typography';
 import AdminHeader from '../components/AdminHeader/AdminHeader';
@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { btcQRCode, ltcQRCode, ethQRCode } from '../../../util/util';
 import { toReadableDate } from '../../../util/util';
 import LTC_ROUNDED from '../../../assets/img/Litecoin.png';
+import callApi from '../../../util/apiCaller';
 
 class BSTable extends React.Component {
     IDFormatter = (cell, row) => {
@@ -40,23 +41,45 @@ class BSTable extends React.Component {
 }
 
 class PayoutForReferral extends Component {
+    constructor(props) {
+        super(props);
+        const selected = [];
+        props.data.map(row =>{
+            if (row.status != 'referred') {
+                selected.push(row._id);
+            }
+        });
+        this.state = {
+            selected
+        };
+        this.proceedPayment = this.proceedPayment.bind(this);
+        this.onRowSelect = this.onRowSelect.bind(this);
+        this.onSelectAll = this.onSelectAll.bind(this);
+    }
+  
     dateFormatter = (cell, row) => {
         return cell ? toReadableDate(cell) : cell;
     }
 
-    referreduserFormatter = (cell, row) => {
+    referredUserFormatter = (cell, row) => {
         return cell.email;
     }
 
-    referraluserFormatter = (cell, row) => {
-        return cell.sender.email;
+    amountFormatter = (cell, row) => {
+        return row.paidTickets * row.btcTicketPrice * this.props.settings.referralPercent / 100;
+    }
+
+    proceedPayment = (row) => {
+       
+    }
+
+    actionFormat = (cell, row) => {
+        return <input type="checkbox" onChange={this.proceedPayment(row)} checked={cell !== 'referred'} />
     }
 
     showQRCode = (row) => {
         const amount = row.paidTickets * row.btcTicketPrice * this.props.settings.referralPercent / 100;
-        const referral = this.props.referrals.filter(referral => referral._id == row.referralID._id) || [];
-        const user = this.props.users.filter(user => user._id == referral[0].sender) || [];
-        this.props.handleQRCode(user[0].payoutForReferral, amount);
+        this.props.handleQRCode(this.props.sender.payoutForReferral, amount);
     }
 
     btcAddressFormatter = (cell, row) => {
@@ -64,19 +87,45 @@ class PayoutForReferral extends Component {
     }
 
     projectFormatter = (cell, row) => {
-        return <button data-toggle="tooltip" title="Project Detail" type="button" onClick={() => browserHistory.push(`admin/projectdetail/${cell._id}`)} className="btn btn-link btn-sm"><i className="fa fa-info-circle fa-2x" aria-hidden="true"></i></button>;
+        return <button data-toggle="tooltip" title="Project Detail" type="button" onClick={() => browserHistory.push(`admin/projectdetail/${cell}`)} className="btn btn-link btn-sm"><i className="fa fa-info-circle fa-2x" aria-hidden="true"></i></button>;
     }
 
+    onRowSelect(row, isSelected) {
+        
+        if (row.status === 'referred') {
+            this.props.updateReferralRequest(row._id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+      onSelectAll(isSelected) {
+        if (!isSelected) {
+          this.setState({ selected: [] });
+        }
+        return false;
+      }
+
     render() {
+        const selectRowProp = {
+            mode: 'checkbox',
+            clickToSelect: true,
+            onSelect: this.onRowSelect,
+            onSelectAll: this.onSelectAll,
+            selected: this.state.selected
+          };
         if (this.props.data) {
           return (
-            <BootstrapTable data={this.props.data}>
-              <TableHeaderColumn dataField="_id"  isKey hidden >ID</TableHeaderColumn>
-              <TableHeaderColumn dataField="userID" dataFormat={this.referreduserFormatter} width="70">Referred User</TableHeaderColumn>
+            <BootstrapTable 
+                data={this.props.data}
+                selectRow={selectRowProp}>
+              <TableHeaderColumn dataField="_id" isKey hidden >ID</TableHeaderColumn>
+              <TableHeaderColumn dataField="referred" dataFormat={this.referredUserFormatter} width="70">Referred User</TableHeaderColumn>
               <TableHeaderColumn dataField="paidTickets" width="70">Paid Tickets</TableHeaderColumn>
-              <TableHeaderColumn dataField="paidTickets" width="70">Amount: <i className="fa fa-bitcoin" aria-hidden="true"></i></TableHeaderColumn>
-              <TableHeaderColumn dataField="btcAddress" dataFormat={this.btcAddressFormatter} dataAlign="center" width="30"><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
-              <TableHeaderColumn dataField="datePaid" dataAlign="center" dataFormat={this.dateFormatter} width="70">Date</TableHeaderColumn>
+              <TableHeaderColumn dataField="paidTickets" dataFormat={this.amountFormatter} width="70">Amount: <i className="fa fa-bitcoin" aria-hidden="true"></i></TableHeaderColumn>
+              <TableHeaderColumn dataFormat={this.btcAddressFormatter} dataAlign="center" width="30"><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
+              <TableHeaderColumn dataField="datePaid" dataAlign="center" dataFormat={this.dateFormatter} width="70">Referred Date</TableHeaderColumn>
               <TableHeaderColumn dataField="projectID" dataFormat={this.projectFormatter} width="50">Project</TableHeaderColumn>
             </BootstrapTable>);
         }
@@ -171,6 +220,8 @@ class User extends Component {
         this.state = {
             loading: true,
         }
+
+        this.updateReferralRequest = this.updateReferralRequest.bind(this);
     }
 
     componentWillMount(){
@@ -204,7 +255,7 @@ class User extends Component {
 
     showRefund = (userID) => {
         const filteredRefunds = this.props.refunds.filter(refund => refund.userID._id == userID);
-        this.setState({ ...this.state, showRefund: true, userID, filteredRefunds });
+        this.setState({ ...this.state, showRefund: true, filteredRefunds });
     }
 
     refundFormatter = (cell, row) => {
@@ -213,12 +264,13 @@ class User extends Component {
     }
 
     showReferral = (userID) => {
-        const filteredReferrals = this.props.orders.filter(order => order.referralID && order.referralID.sender == userID);
-        this.setState({ ...this.state, showReferral: true, userID, filteredReferrals });
+        const filteredReferrals = this.props.referralRequests.filter(referralRequest => referralRequest.referralID.sender == userID);
+        const sender = this.props.users.find(user => user._id === userID);
+        this.setState({ ...this.state, showReferral: true, sender, filteredReferrals });
     }
 
     referralFormatter = (cell, row) => {
-        let isExisting = this.props.orders.find(order => order.referralID && order.referralID.sender == cell);
+        let isExisting = this.props.referralRequests.find(referralRequest => referralRequest.referralID.sender === cell);
         return isExisting ? <button type="button" onClick={() => this.showReferral(cell)} className="btn btn-link btn-sm" data-toggle="tooltip" title="A list of paid referrals"><i className="fa fa-money fa-2x" aria-hidden="true"></i></button> : <p></p>;
     }
 
@@ -242,7 +294,12 @@ class User extends Component {
     }
 
     handleClose = () => {
-        this.setState({ ...this.state, showRefund: false, showReferral: false });
+        this.setState({ ...this.state, showRefund: false });
+    }
+
+    handleReferralClose = () => {
+        this.setState({ ...this.state, showReferral: false });
+        this.props.dispatch(fetchUsers());
     }
 
     handleQRClose = () => {
@@ -255,6 +312,19 @@ class User extends Component {
 
     handleReferralQRCode = (address, amount) => {
         this.setState({ ...this.state, showReferralQRCode: true, referralBTCAddress: address, referralBTCAmount: amount });
+    }
+
+    updateReferralRequest(id) {
+        const body = {
+            id
+        };
+        callApi('paymentForReferral', 'POST', body).then(res => {
+            if (res.errors) {
+                console.log(res.errors);
+            } else {
+              
+            }
+        });
     }
     
     render() {
@@ -319,17 +389,18 @@ class User extends Component {
                             </Modal>}
                         {showReferral && <Modal
                                 open={showReferral}
-                                onClose={this.handleClose}
+                                onClose={this.handleReferralClose}
                                 >
                                 <div className="myModal" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                                     <h3 className="mb-3">
                                         Available Referral Payment Requests.
                                     </h3>
                                     <PayoutForReferral
-                                        users={this.props.users}
+                                        sender={this.state.sender}
                                         referrals={this.props.referrals}
                                         settings={this.props.settings}
                                         data={this.state.filteredReferrals}
+                                        updateReferralRequest={this.updateReferralRequest}
                                         handleQRCode={this.handleReferralQRCode} />
                                 </div>
                             </Modal>}
@@ -369,9 +440,8 @@ function mapStateToProps(state) {
   return {
     users: state.app.users,
     refunds: state.app.refunds,
-    orders: state.app.orders,
     settings: state.app.settings,
-    referrals: state.app.referrals,
+    referralRequests: state.app.referralRequests,
   };
 }
 

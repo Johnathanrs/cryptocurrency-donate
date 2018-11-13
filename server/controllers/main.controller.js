@@ -64,11 +64,10 @@ export function getUsers(req, res) {
   Promise.all([
     User.find().sort('-dateAdded'),
     Refund.find().populate('orderID').populate('userID'),
-    Order.$where('this.status == "paid" && this.referralID').populate('projectID').populate('userID').populate('referralID'),
     Setting.findOne(),
-    Referral.find(),
+    ReferralPaymentRequest.find().populate('referred').populate('referralID'),
   ]).then(data => {
-    res.json({ users: data[0], refunds: data[1], orders: data[2], settings: data[3], referrals: data[4] });
+    res.json({ users: data[0], refunds: data[1], settings: data[2], referralRequests: data[3] });
   }).catch(err => { return res.status(500).send({ errors: err.message }); });
 }
 
@@ -104,12 +103,13 @@ export function getReferrals(req, res) {
   if (!req.decoded) {
     return res.status(405).send({ errors: req.err });
   }
-  Referral.find({ sender: req.decoded._id.toString() }).sort('-dateAdded').exec((errors, referrals) => {
-    if (errors) {
-      res.status(500).send({ errors });
-    }
-    res.json({ referrals });
-  });
+  Promise.all([
+    Setting.findOne(),
+    ReferralPaymentRequest.find().populate('referred').populate('referralID').populate('projectID'),
+    Referral.find({ sender: req.decoded._id.toString() }).sort('-dateAdded'),
+  ]).then(data => {
+    res.json({ referrals: data[2], settings: data[0], referralRequests: data[1] });
+  }).catch(err => { res.status(500).send({ errors: err.message }); });
 }
 
 export function registerReferral(req, res) {
@@ -243,12 +243,23 @@ export function getOrders(req, res) {
 }
 
 export function getPaidOrdersWithReferral(req, res) {
-  Order.$where('this.status !== "pending" && this.referralID').sort('-dateAdded').populate('projectID').populate('referralID').exec((errors, orders) => {
+  Order.$where('this.status !== "pending" && this.referralID != null').sort('-dateAdded').populate('projectID').populate('referralID').exec((errors, orders) => {
     if (errors) {
       return res.status(500).send({ errors });
     }
     return res.json({ orders });
   });
+}
+
+export function proceedPaymentForReferral(req, res) {
+  if (!req.decoded) {
+    return res.status(405).send({ errors: req.err });
+  }
+  ReferralPaymentRequest.findOneAndUpdate({ _id: req.body.id }, { status: 'checked' }).then(saved => {
+    if (saved) {
+      res.json({ saved });
+    }
+  }).catch(err => { res.status(500).json({ errors: err.message }); });
 }
 
 export function getUser(req, res) {
@@ -736,12 +747,11 @@ function updateOrderAndProject(paidTickets, order, project, txid, paidCoin) {
       console.log(err, data);
       if (order.referralID) {
         const request = new ReferralPaymentRequest();
-        request.sender = order.referralID.sender;
         request.referred = order.userID;
         request.paidTickets = order.paidTickets;
-        request.ticketPrice = order.btcTicketPrice;
+        request.btcTicketPrice = order.btcTicketPrice;
         request.projectID = order.projectID;
-        request.referralID = order.referralID._id;
+        request.referralID = order.referralID;
         request.save((err, saved) => {
           if (err) {
             console.logg('save referral payment request', err);

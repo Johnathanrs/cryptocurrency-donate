@@ -57,6 +57,8 @@ router.route('/ordersForReferral').get(MainController.getPaidOrdersWithReferral)
 
 router.use('/deleteOrder', checkToken, MainController.deleteOrder);
 
+router.use('/paymentForReferral', checkTokenAdmin, MainController.proceedPaymentForReferral);
+
 router.route('/updateUser').put(MainController.updateUser);
 
 router.route('/upload').post(MainController.uploadFile);

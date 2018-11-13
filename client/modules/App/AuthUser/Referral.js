@@ -120,11 +120,11 @@ class Step2 extends React.Component {
 }
 
 function Step3({ referralLink }) {
-    return  <div className="mt-4" style={{ maxWidth: '500px' }}>
+    return  <div className="mt-4">
                 <h4>Copy your link and spread the word by sharing it.</h4>
                 { referralLink && referralLink.map(link => {
                     return (<div>
-                        <div style={{ maxWidth: '500px', wordWrap: 'break-word', display: 'inline-block' }}>
+                        <div style={{ maxWidth: '100%', wordWrap: 'break-word', display: 'inline-block' }}>
                             {link}
                         </div>
                         <CopyToClipboard text={link}
@@ -182,8 +182,6 @@ class Referral extends React.Component {
         this.props.dispatch(fetchReferrals());
         this.props.dispatch(fetchProjects());
         this.props.dispatch(fetchUser());
-        this.props.dispatch(fetchOrdersForReferral());
-        this.props.dispatch(fetchSettings());
     }
 
     componentWillReceiveProps(nextProps) {
@@ -198,7 +196,6 @@ class Referral extends React.Component {
 
         this.setState({ ...this.state, loading: false, invite });
 
-        console.log('referral', nextProps.orders);
     }
 
     showModal = () => {
@@ -303,27 +300,30 @@ class Referral extends React.Component {
         return exportData;
     }
 
-    remakeOrders = () => {
-        const newOrders = [];
-        const { orders } = this.props;
-        if (orders) {
-            orders.map(order => {
-                const amount = order.paidTickets * order.btcTicketPrice * this.props.settings.referralPercent / 100;
-                const newOrder = {
-                    title: order.projectID.title,
-                    referralID: order.referralID._id,
+    remakeReferralRequests = () => {
+        const newReferralRequests = [];
+        const { referralRequests } = this.props;
+        if (referralRequests) {
+            referralRequests.map(referralRequest => {
+                const amount = referralRequest.paidTickets * referralRequest.btcTicketPrice * this.props.settings.referralPercent / 100;
+                const newRequest = referralRequest.referralID && {
+                    title: referralRequest.projectID.title,
+                    referred: referralRequest.referred,
+                    referralID: referralRequest.referralID._id,
                     referrals: 1,
                     paidAmount: amount,
+                } || { paidAmount: 0, referrals: 0 };
+                const oldOrder = newReferralRequests.find(each => each.referralID === referralRequest.referralID._id);
+                if (oldOrder) {
+                    if (oldOrder.referred !== newRequest.referred) {
+                        newRequest.referrals++;
+                    }
+                    newRequest.paidAmount += oldOrder.paidAmount;
                 }
-                const oldOrder = orders.filter(each => each.referralID === newOrder.referralID);
-                if (oldOrder.length) {
-                    newOrder.referrals++;
-                    newOrder.paidAmount += oldOrder[0].paidAmount;
-                }
-                newOrders.push(newOrder);
+                newReferralRequests.push(newRequest);
             });
         }
-        return newOrders;
+        return newReferralRequests;
     }
     
     isExpandableRow(row) {
@@ -347,7 +347,7 @@ class Referral extends React.Component {
 
     render() {
         const { loading, showModal, field1, field2, payout, payoutErr, email, emailErr, message, messageErr, showReferralLink, referralLink, invite } = this.state;
-        let { referrals, orders, settings } = this.props;
+        let { referrals } = this.props;
 
         let steps = [
           { name: 'Select Project', component: <Step2 data={this.props.projects} handleProject={this.handleProject}/> },
@@ -363,10 +363,10 @@ class Referral extends React.Component {
             referrals = _.filter(referrals, function(o) { return o.receiver; });
         }
 
-        if (referrals && orders && settings) {
-            const newOrders = this.remakeOrders();
+        if (referrals) {
+            const newReferralRequests= this.remakeReferralRequests();
             referrals.map(referral => {
-                const expands = newOrders.find(order => order.referralID == referral._id) || [];
+                const expands = newReferralRequests.find(request => request.referralID == referral._id) || [];
                 // const _expands = expands[0] && expands[0] || [];
                 referral.expand = [
                     expands
@@ -384,7 +384,7 @@ class Referral extends React.Component {
                 <AuthHeader />
                 <div className="container container-option">
                     {loading && <div>...loading</div>}
-                    {!loading && orders && referrals && settings && <div>
+                    {!loading && referrals && <div>
                         <div className="mb-5">
                             <h1> {invite && 'Invite Page'}</h1>
                             {!invite && <h2>Become our partner and join a referral program where attractive commissions can easily be earned.</h2>}
@@ -504,7 +504,7 @@ function mapStateToProps(state) {
         referrals: state.app.referrals,
         projects: state.app.projects,
         res: state.app.res,
-        orders: state.app.orders,
+        referralRequests: state.app.referralRequests,
         settings: state.app.settings,
     };
 }
