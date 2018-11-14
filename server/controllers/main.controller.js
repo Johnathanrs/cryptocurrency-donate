@@ -714,8 +714,8 @@ export function transferTickets(req, res) {
       ticket.orderID = data[0]._id.toString();
       ticket.save((err, saved) => {
         return res.send({ status: 'OK' });
-      }).catch(err => { return res.end({ errors: err.message }); });
-    }).catch(err => { return res.end({ errors: err.message }); });
+      }).catch(err => { console.log(err.message); });
+    }).catch(err => { console.log(err.message); });
   });
 }
 
