@@ -137,7 +137,7 @@ class CheckTickets extends React.Component {
                         hover
                         pagination
                         options={{ paginationShowsTotal: true }}>
-                        <TableHeaderColumn dataField="_id" isKey hidden  dataSort>Product ID</TableHeaderColumn>
+                        <TableHeaderColumn dataField="_id" isKey hidden dataSort>Product ID</TableHeaderColumn>
                         <TableHeaderColumn dataField="title" dataSort>Title</TableHeaderColumn>
                         <TableHeaderColumn dataField="btcTicketPrice" dataSort><i className="fa fa-bitcoin fa-2x" aria-hidden="true"></i></TableHeaderColumn>
                         <TableHeaderColumn dataField="ethTicketPrice" dataSort><i className="fa fa-ethereum fa-2x" aria-hidden="true"></i></TableHeaderColumn>

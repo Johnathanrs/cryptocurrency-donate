@@ -266,6 +266,11 @@ class Referral extends React.Component {
     }
 
     amountCheckFormatter = (cell, row) => {
+        const { referralRequests } = this.props;
+        const filtered = referralRequests.filter(request => request.referralID == row._id);
+        // filtered.map(each => {
+
+        // });
         return <input type="checkbox" checked={cell > 0} />;
     }
 

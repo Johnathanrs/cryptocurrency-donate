@@ -328,6 +328,19 @@ export function signin(req, res, next) {
   });
 }
 
+function createUserAddress(totalTickets, projectID) {
+  const btcAddress = bitcoinTransaction.createUserBitcoinAddress();
+  const ltcAddress = ltcTransaction.createUserLitecoinAddress();
+  const ethAddress = ethTransaction.createUserEthereumAddress();
+  const _newSubProject = new SubProject();
+  _newSubProject.projectID = projectID;
+  _newSubProject.btcAddress = btcAddress;
+  _newSubProject.ethAddress = ethAddress;
+  _newSubProject.ltcAddress = ltcAddress;
+  _newSubProject.totalTickets = totalTickets;
+  return _newSubProject;
+}
+
 export function signup(req, res) {
   User.findOne({ email: req.body.user.email })
   .then(user => {
@@ -339,6 +352,7 @@ export function signup(req, res) {
       newUser.email = req.body.user.email;
       newUser.role = 'Owner';
       newUser.setPassword(req.body.user.password);
+  
       return newUser.save((err, saved) => {
         return res.json({ user: newUser.toAuthJSON() });
       });
@@ -476,15 +490,7 @@ function updateUserAndOrder(res, user, projectID, totalTickets, btcTicketPrice, 
   }
   let subProject = user.subProjects.find(sub => sub.projectID == projectID);
   if (!subProject) {
-    const btcAddress = bitcoinTransaction.createUserBitcoinAddress();
-    const ltcAddress = ltcTransaction.createUserLitecoinAddress();
-    const ethAddress = ethTransaction.createUserEthereumAddress();
-    const _newSubProject = new SubProject();
-    _newSubProject.projectID = projectID;
-    _newSubProject.btcAddress = btcAddress;
-    _newSubProject.ethAddress = ethAddress;
-    _newSubProject.ltcAddress = ltcAddress;
-    _newSubProject.totalTickets = totalTickets;
+    const _newSubProject = createUserAddress(totalTickets, projectID);
     user.subProjects.push(_newSubProject);
     subProject = _newSubProject;
   }
@@ -672,8 +678,23 @@ export function transferTickets(req, res) {
     let html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard</a></p><p>${req.body.message}</p></div>`;
 
     if (!user) {
-      text += 'Please verify your email address to claim your tickets';
-      html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard.</a></p><p>${req.body.message}</p><p> Please verify your email address to claim your tickets <a href='http://smartprojects.tech/user/signup'>here</a></p></div>`;
+      user = new User();
+      user.email = req.body.transferredEmail;
+      user.role = 'Customer';
+      const newPassword = generator.generate({
+        length: 10,
+        numbers: true,
+      });
+      user.setPassword(newPassword);
+      const _newSubProject = createUserAddress(1, req.body.projectID);
+      user.subProjects = [_newSubProject];
+      text += 'You are automatically signed up. Please verify your email address to claim your tickets';
+      html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard.</a></p><p>${req.body.message}</p><p> You are automatically signed up. You password is ${newPassword}</p></div>`;
+    }
+
+    const subProject = user.subProjects.find(sub => sub.projectID == req.body.projectID);
+    if (!subProject) {
+      user.subProjects.push(createUserAddress(1, req.body.projectID));
     }
 
     return Promise.all([
@@ -685,11 +706,12 @@ export function transferTickets(req, res) {
         html: html,
       }),
       Ticket.findOneAndUpdate({ _id: req.body.ticketID }, { status: 'transferred' }),
+      user.save(),
     ]).then((data) => {
       const ticket = new Ticket();
       ticket.userID = user._id;
       ticket.projectID = data[0].projectID;
-      ticket.orderID = data[0]._id.toString();
+      ticket.orderID = data[0]._id;
       ticket.save((err, saved) => {
         return res.send({ status: 'OK' });
       }).catch(err => { return res.end({ errors: err.message }); });
