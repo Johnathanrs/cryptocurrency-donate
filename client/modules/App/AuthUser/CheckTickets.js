@@ -107,7 +107,7 @@ class CheckTickets extends React.Component {
             message: message,
             owner: getEmail(),
         };
-        callApi('transferTickets', 'POST', body).then(res => {
+        callApi('transferTickets', 'POST', body).then((res, err) => {
             if (res.errors) {
                 toast.warn(res.errors);
             } else if (res.status == 'OK') {

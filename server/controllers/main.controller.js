@@ -697,7 +697,7 @@ export function transferTickets(req, res) {
       user.subProjects.push(createUserAddress(1, req.body.projectID));
     }
 
-    return Promise.all([
+    Promise.all([
       order.save(),
       sendEmail({
         to: toEmail,
@@ -709,9 +709,9 @@ export function transferTickets(req, res) {
       user.save(),
     ]).then((data) => {
       const ticket = new Ticket();
-      ticket.userID = user._id;
-      ticket.projectID = data[0].projectID;
-      ticket.orderID = data[0]._id;
+      ticket.userID = user._id.toString();
+      ticket.projectID = data[0].projectID.toString();
+      ticket.orderID = data[0]._id.toString();
       ticket.save((err, saved) => {
         return res.send({ status: 'OK' });
       }).catch(err => { return res.end({ errors: err.message }); });
