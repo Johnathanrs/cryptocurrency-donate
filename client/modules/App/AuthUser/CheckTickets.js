@@ -42,18 +42,22 @@ class CheckTickets extends React.Component {
             nextProps.tickets.map(each => {
                 const ticket = {};
                 ticket._id = each._id;
-                ticket.btcTicketPrice = each.projectID.ticketPriceInBTC;
-                ticket.ethTicketPrice = each.projectID.ticketPriceInETH;
-                ticket.ltcTicketPrice = each.projectID.ticketPriceInLTC;
-                ticket.projectID = each.projectID._id;
-                ticket.title = each.projectID.title;
-                const subProjectInUser = each.userID.subProjects.filter(sub => sub.projectID == each.projectID._id)[0];
-                ticket.btcAddress = subProjectInUser.btcAddress;
-                ticket.ethAddress = subProjectInUser.ethAddress;
-                ticket.ltcAddress = subProjectInUser.ltcAddress;
-                ticket.fundingDuration = getDurationInDays(each.projectID.fundingDuration);
-                ticket.datePaid = toReadableDate(each.dateAdded);
-                tickets.push(ticket);
+                if (each.projectID) {
+                    ticket.btcTicketPrice = each.projectID.ticketPriceInBTC;
+                    ticket.ethTicketPrice = each.projectID.ticketPriceInETH;
+                    ticket.ltcTicketPrice = each.projectID.ticketPriceInLTC;
+                    ticket.projectID = each.projectID._id;
+                    ticket.title = each.projectID.title;
+                    const subProjectInUser = each.userID.subProjects.filter(sub => sub.projectID == each.projectID._id)[0];
+                    if (subProjectInUser) {
+                        ticket.btcAddress = subProjectInUser.btcAddress;
+                        ticket.ethAddress = subProjectInUser.ethAddress;
+                        ticket.ltcAddress = subProjectInUser.ltcAddress;
+                        ticket.fundingDuration = getDurationInDays(each.projectID.fundingDuration);
+                        ticket.datePaid = toReadableDate(each.dateAdded);
+                        tickets.push(ticket);
+                    }
+                }
             });
        
             this.setState({ loading: false, tickets: tickets });

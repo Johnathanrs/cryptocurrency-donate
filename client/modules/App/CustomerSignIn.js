@@ -58,7 +58,7 @@ class CustomerSignIn extends Component {
                 // browserHistory.goBack();
                 this.navigate('/user/mytickets');
             }
-            // self.setState({ ...self.state, isCreate: false, errOnCreate: message });
+            self.setState({ ...self.state, isCreate: false, errOnCreate: message });
         });
     }
     
@@ -69,7 +69,6 @@ class CustomerSignIn extends Component {
                     <div className="card-head mt-5 text-center">
                         <h2 className="text-center text-uppercase">Sign In</h2>
                         {this.state.isCreate && <i className="fa fa-spinner fa-spin fa-3x text-red"></i>}
-                        {!this.state.isCreate && <div className="warning-color text-center">{this.state.errOnCreate}</div>}
                     </div>
                     <div className="d-flex justify-content-center align-items-center flex-column card-body">
                         <TextField
