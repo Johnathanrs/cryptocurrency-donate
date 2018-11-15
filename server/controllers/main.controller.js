@@ -675,7 +675,7 @@ export function transferTickets(req, res) {
     const toEmail = req.body.transferredEmail;
     const subject = 'Ticket Transfer';
     let text = `Congratulation! You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on your dashboard. ${req.body.message}`;
-    let html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard</a></p><p>${req.body.message}</p></div>`;
+    let html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartprojects.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard</a></p><p>${req.body.message}</p></div>`;
 
     if (!user) {
       user = new User();
@@ -689,7 +689,7 @@ export function transferTickets(req, res) {
       const _newSubProject = createUserAddress(1, req.body.projectID);
       user.subProjects = [_newSubProject];
       text += 'You are automatically signed up. Please verify your email address to claim your tickets';
-      html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartproject.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard.</a></p><p>${req.body.message}</p><p> You are automatically signed up. You password is ${newPassword}</p></div>`;
+      html = `<div><strong>Congratulation</strong><p>You got ${req.body.tickets} tickets from ${req.body.owner}. You can check it out on <a href='http://smartprojects.tech/user/mytickets/transferred/${req.body.owner}'>your dashboard.</a></p><p>${req.body.message}</p><p> You are automatically signed up. You password is ${newPassword}</p></div>`;
     }
 
     const subProject = user.subProjects.find(sub => sub.projectID == req.body.projectID);
